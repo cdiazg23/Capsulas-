@@ -124,8 +124,8 @@ const App: React.FC = () => {
     }
     setCurrentView(view);
     if (concept) setSelectedConcept(concept);
-    if (category) setSelectedCategory(category);
-    if (subcategory !== undefined) setSelectedSubcategory(subcategory);
+    setSelectedCategory(category);
+    setSelectedSubcategory(subcategory);
     window.scrollTo(0, 0);
   };
 

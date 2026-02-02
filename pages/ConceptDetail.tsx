@@ -87,34 +87,48 @@ const ConceptDetail: React.FC<ConceptDetailProps> = ({ concept, onBack, stats, o
         </div>
 
         <div className="lg:col-span-4 space-y-6">
-          <div className="aspect-video bg-black rounded-[2rem] overflow-hidden shadow-2xl relative group ring-8 ring-white">
-            {isPlaying ? (
-              <iframe
-                src={getEmbedUrl(concept.videoUrl)}
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            ) : (
-              <>
-                <img
-                  src={`https://picsum.photos/seed/${concept.id}/600/400`}
-                  className="w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-110"
-                  alt="Video Thumbnail"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button
-                    onClick={() => setIsPlaying(true)}
-                    className="size-16 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-4xl fill-1">play_arrow</span>
-                  </button>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
-                  <p className="text-white text-xs font-bold uppercase tracking-widest">Video Explicativo</p>
-                </div>
-              </>
-            )}
+          <div className="space-y-3">
+            <div className="aspect-video bg-black rounded-[2rem] overflow-hidden shadow-2xl relative group ring-8 ring-white">
+              {isPlaying ? (
+                <iframe
+                  src={getEmbedUrl(concept.videoUrl)}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <>
+                  <img
+                    src={`https://picsum.photos/seed/${concept.id}/600/400`}
+                    className="w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-110"
+                    alt="Video Thumbnail"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <button
+                      onClick={() => setIsPlaying(true)}
+                      className="size-16 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-4xl fill-1">play_arrow</span>
+                    </button>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                    <p className="text-white text-xs font-bold uppercase tracking-widest">Video Explicativo</p>
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="flex items-center justify-between px-4">
+              <a
+                href={concept.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-wider"
+              >
+                <span className="material-symbols-outlined text-xs">link</span>
+                Ver fuente en YouTube
+              </a>
+              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Uso Académico</span>
+            </div>
           </div>
 
           <div className="bg-accent-gold/5 border border-accent-gold/20 rounded-[2rem] p-8">

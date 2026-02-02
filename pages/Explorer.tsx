@@ -11,6 +11,7 @@ interface ExplorerProps {
 const Explorer: React.FC<ExplorerProps> = ({ onSelectConcept, concepts, initialCategory, initialSubcategory }) => {
   const categories = Array.from(new Set(concepts.map(c => c.category)));
   const [activeCategory, setActiveCategory] = useState(initialCategory || categories[0] || '');
+  const [searchTerm, setSearchTerm] = useState(initialSubcategory || '');
 
   React.useEffect(() => {
     if (initialCategory) {
@@ -18,18 +19,32 @@ const Explorer: React.FC<ExplorerProps> = ({ onSelectConcept, concepts, initialC
     }
     if (initialSubcategory) {
       setSearchTerm(initialSubcategory);
+    } else {
+      setSearchTerm(''); // Limpiar búsqueda si solo se cambia categoría
     }
   }, [initialCategory, initialSubcategory]);
-  const [searchTerm, setSearchTerm] = useState(initialSubcategory || '');
 
-  const filteredConcepts = concepts.filter(c =>
-    c.category === activeCategory &&
-    (
-      c.concept.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.subcategory.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const filteredConcepts = concepts.filter(c => {
+    const conceptCat = (c.category || '').trim();
+    const activeCat = activeCategory.trim();
+    const subCat = (c.subcategory || '').trim().toLowerCase();
+    const term = searchTerm.trim().toLowerCase();
+    const name = (c.concept || '').trim().toLowerCase();
+
+    const matchesSearch = term === '' ||
+      name.includes(term) ||
+      subCat.includes(term) ||
+      c.id.toLowerCase().includes(term);
+
+    // Si navegamos específicamente a una subcategoría desde el sidebar, 
+    // priorizamos que se encuentre ese término ignorando la categoría si es necesario.
+    if (term !== '' && initialSubcategory && term === initialSubcategory.trim().toLowerCase()) {
+      return matchesSearch;
+    }
+
+    // Comportamiento estándar: filtrar por categoría + búsqueda
+    return conceptCat === activeCat && matchesSearch;
+  });
 
   return (
     <div className="animate-in fade-in duration-500">
@@ -51,7 +66,10 @@ const Explorer: React.FC<ExplorerProps> = ({ onSelectConcept, concepts, initialC
         {categories.map(cat => (
           <button
             key={cat}
-            onClick={() => setActiveCategory(cat)}
+            onClick={() => {
+              setActiveCategory(cat);
+              setSearchTerm('');
+            }}
             className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeCategory === cat
               ? 'bg-primary text-white shadow-lg shadow-primary/20'
               : 'bg-white text-gray-500 border border-gray-200 hover:border-primary/50'

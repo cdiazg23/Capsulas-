@@ -4,7 +4,7 @@ import { UserStats, LegalConcept, ViewType } from '../types';
 
 interface DashboardProps {
   onSelectConcept: (c: LegalConcept) => void;
-  navigateTo: (view: ViewType) => void;
+  navigateTo: (view: ViewType, concept?: any, category?: string, subcategory?: string) => void;
   stats: UserStats;
   concepts: LegalConcept[];
 }
@@ -180,7 +180,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
               <div
                 key={cat.name}
                 className="group flex items-center p-5 bg-white rounded-2xl border border-transparent hover:border-primary/30 shadow-sm hover:shadow-xl transition-all cursor-pointer"
-                onClick={() => navigateTo('explorer')}
+                onClick={() => navigateTo('explorer', undefined, cat.name)}
               >
                 <div className={`size-14 rounded-2xl bg-${cat.color}-50 flex items-center justify-center text-${cat.color}-600 mr-4 group-hover:scale-110 transition-transform`}>
                   <span className="material-symbols-outlined text-2xl">{cat.icon}</span>
