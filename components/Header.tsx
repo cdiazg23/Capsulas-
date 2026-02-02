@@ -8,12 +8,13 @@ interface HeaderProps {
   onLogoClick: () => void;
   onLibraryClick: () => void;
   onAdminClick: () => void;
+  onPricingClick: () => void;
   onSelectConcept: (c: LegalConcept) => void;
   onLogout: () => void;
   concepts: LegalConcept[];
 }
 
-const Header: React.FC<HeaderProps> = ({ user, stats, onProfileClick, onLogoClick, onLibraryClick, onAdminClick, onSelectConcept, onLogout, concepts }) => {
+const Header: React.FC<HeaderProps> = ({ user, stats, onProfileClick, onLogoClick, onLibraryClick, onAdminClick, onPricingClick, onSelectConcept, onLogout, concepts }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -75,6 +76,10 @@ const Header: React.FC<HeaderProps> = ({ user, stats, onProfileClick, onLogoClic
           <nav className="hidden lg:flex items-center gap-8">
             <button onClick={onLogoClick} className="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Dashboard</button>
             <button onClick={onLibraryClick} className="text-gray-500 text-sm font-medium hover:text-primary transition-colors">Biblioteca</button>
+            <button onClick={onPricingClick} className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-gold/10 text-accent-gold rounded-lg text-sm font-bold hover:bg-accent-gold/20 transition-all">
+              <span className="material-symbols-outlined text-[18px]">favorite</span>
+              Apoyar proyecto
+            </button>
             {user?.role === 'admin' && (
               <button onClick={onAdminClick} className="text-gray-500 text-sm font-medium hover:text-primary transition-colors">Gestión</button>
             )}

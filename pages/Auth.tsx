@@ -26,12 +26,10 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
 
-        // If Supabase returns a user but no session, it likely needs confirmation
         if (data.user && !data.session) {
           setSuccessMsg('¡Registro exitoso! Por favor, revisa tu correo para confirmar tu cuenta.');
           setLoading(false);
         }
-        // If there's a session, the listener in App.tsx will take over
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -46,22 +44,40 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
         setError(err.message || 'Error en la autenticación');
       }
       setLoading(false);
-    } finally {
-      // If we are logging in, or if there was an error, we must stop loading
-      // For signups that need confirmation, we stop loading inside the try block
     }
   };
 
-
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-      <div className="relative hidden lg:flex items-center justify-center overflow-hidden bg-primary p-20">
-        <div className="absolute inset-0 z-0 bg-cover bg-center opacity-40 mix-blend-overlay" style={{ backgroundImage: 'url("https://picsum.photos/seed/legalauth/1200/1200")' }}></div>
+      <div className="relative hidden lg:flex items-center justify-center overflow-hidden bg-slate-900 p-20">
+        <div className="absolute inset-0 z-0 bg-cover bg-center opacity-30 mix-blend-overlay" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1200")' }}></div>
+
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px] -mr-32 -mt-32"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-gold/10 rounded-full blur-[100px] -ml-32 -mb-32"></div>
+
         <div className="relative z-10 max-w-lg">
-          <h1 className="text-white text-6xl font-black leading-tight mb-8">Tu camino a la excelencia jurídica comienza aquí</h1>
-          <p className="text-white/80 text-lg font-medium leading-relaxed border-l-4 border-accent-gold pl-6">
-            La plataforma definitiva diseñada para transformar el futuro de los abogados. Explora casos, compite y domina la ley.
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-8">
+            <span className="material-symbols-outlined text-sm text-accent-gold">volunteer_activism</span>
+            <span className="text-[12px] font-bold text-white uppercase tracking-wider">Unidos por la educación legal</span>
+          </div>
+          <h1 className="text-white text-6xl font-black leading-tight mb-8">
+            Tu estudio, <br />
+            <span className="text-primary italic">nuestra comunidad</span>
+          </h1>
+          <p className="text-white/70 text-lg font-medium leading-relaxed border-l-4 border-primary pl-6">
+            IurisAcademy es un proyecto independiente mantenido por estudiantes y abogados. Únete para potenciar tu estudio y ayudar a que la educación legal llegue a todos.
           </p>
+
+          <div className="mt-12 flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-sm">
+            <div className="size-12 bg-primary/20 rounded-xl flex items-center justify-center overflow-hidden">
+              <span className="material-symbols-outlined text-primary text-2xl">brand_awareness</span>
+            </div>
+            <div>
+              <p className="text-white font-bold text-sm">@capsulasdederecho</p>
+              <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest leading-none">Creador del Proyecto</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -69,45 +85,50 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
         <div className="w-full max-w-md space-y-10">
           <div className="space-y-2">
             <h2 className="text-slate-900 text-4xl font-black tracking-tight">
-              {isSignUp ? 'Crear cuenta' : 'Iniciar Sesión'}
+              {isSignUp ? 'Únete a la comunidad' : 'Bienvenido de vuelta'}
             </h2>
-            <p className="text-slate-400 font-medium">
-              {isSignUp ? 'Regístrate para comenzar tu viaje.' : 'Ingresa tus credenciales para acceder a tu panel.'}
+            <p className="text-slate-500 font-medium leading-relaxed">
+              {isSignUp
+                ? 'Crea tu cuenta gratuita y empieza a dominar el código hoy mismo.'
+                : 'Ingresa tus credenciales para continuar con tu progreso de aprendizaje.'}
             </p>
           </div>
 
           <form className="space-y-6" onSubmit={handleAuth}>
             {error && (
               <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm font-bold border border-red-100 animate-in fade-in slide-in-from-top-2">
-                {error}
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm">error</span>
+                  {error}
+                </div>
               </div>
             )}
 
             {successMsg && (
-              <div className="p-5 bg-green-50 text-green-700 rounded-2xl text-sm font-bold border border-green-100 animate-in zoom-in duration-300">
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="material-symbols-outlined">mark_email_read</span>
+              <div className="p-5 bg-emerald-50 text-emerald-700 rounded-2xl text-sm font-bold border border-emerald-100 animate-in zoom-in duration-300">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-xl">mark_email_read</span>
                   <p>{successMsg}</p>
                 </div>
               </div>
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-900 uppercase tracking-widest">Email</label>
+              <label className="text-sm font-bold text-slate-800 uppercase tracking-widest ml-1">Email</label>
               <input
                 type="email"
-                placeholder="email@example.com"
+                placeholder="tu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-14 bg-gray-50 border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all p-4"
+                className="w-full h-14 bg-slate-50 border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all p-4 text-slate-900"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between">
-                <label className="text-sm font-bold text-slate-900 uppercase tracking-widest">Contraseña</label>
-                {!isSignUp && <a href="#" className="text-xs font-bold text-primary hover:underline">¿Olvidaste tu contraseña?</a>}
+              <div className="flex justify-between items-center ml-1">
+                <label className="text-sm font-bold text-slate-800 uppercase tracking-widest">Contraseña</label>
+                {!isSignUp && <a href="#" className="text-[10px] font-black text-primary uppercase tracking-wider hover:underline">¿Olvidaste tu clave?</a>}
               </div>
               <div className="relative">
                 <input
@@ -115,7 +136,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-14 bg-gray-50 border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all p-4 pr-12"
+                  className="w-full h-14 bg-slate-50 border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all p-4 text-slate-900"
                   required
                 />
               </div>
@@ -124,28 +145,36 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full h-14 bg-primary text-white rounded-2xl font-black text-lg shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`w-full h-14 bg-primary text-white rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              {loading ? 'Cargando...' : isSignUp ? 'Registrarse' : 'Ingresar al Dashboard'}
+              {loading ? 'Preparando ganchos...' : isSignUp ? 'Unirse Ahora' : 'Ingresar al Dashboard'}
             </button>
           </form>
 
-          <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-            <p className="text-xs text-blue-800 font-medium">
-              <strong>Admin:</strong> Usa <code>carlos.sith@gmail.com</code> con clave <code>123456</code>.
-            </p>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
+            <div className="relative flex justify-center text-xs uppercase tracking-[0.2em] font-black"><span className="bg-white px-4 text-slate-300">Comunidad</span></div>
           </div>
 
-          <p className="text-center text-sm font-medium text-gray-500">
-            {isSignUp ? '¿Ya tienes una cuenta?' : '¿No tienes una cuenta?'} {' '}
+          <p className="text-center text-sm font-semibold text-slate-400">
+            {isSignUp ? '¿Ya eres parte de nosotros?' : '¿Aún no tienes cuenta?'} {' '}
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary font-bold hover:underline"
+              className="text-primary font-black hover:underline"
             >
               {isSignUp ? 'Inicia sesión' : 'Crear cuenta gratis'}
             </button>
           </p>
+
+          {!isSignUp && (
+            <div className="p-6 rounded-2xl bg-amber-50/50 border border-amber-100/50 text-center">
+              <p className="text-xs text-amber-800 font-medium">
+                IurisAcademy es libre gracias a sus aportantes.
+                <button onClick={() => window.location.reload()} className="ml-2 underline font-bold">Ver cómo apoyar</button>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
