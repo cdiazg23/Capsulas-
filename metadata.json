@@ -1,0 +1,8 @@
+{
+  "name": "IurisAcademy - Legal Concept Explorer",
+  "description": "A comprehensive educational platform for law students to explore and master legal concepts through gamification, structured taxonomy, and AI-powered insights.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
