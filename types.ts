@@ -22,7 +22,7 @@ export interface LegalConcept {
   videoUrl: string;
 }
 
-export type ViewType = 'landing' | 'dashboard' | 'explorer' | 'detail' | 'admin' | 'profile' | 'login' | 'library' | 'pricing';
+export type ViewType = 'landing' | 'dashboard' | 'explorer' | 'detail' | 'admin' | 'profile' | 'login' | 'library' | 'pricing' | 'flashcards';
 
 export interface UserStats {
   level: number;

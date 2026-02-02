@@ -195,6 +195,26 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
         </div>
 
         <div className="space-y-6">
+          <div className="bg-gradient-to-br from-indigo-600 to-primary text-white rounded-3xl p-8 shadow-xl relative overflow-hidden group cursor-pointer" onClick={() => navigateTo('flashcards')}>
+            <div className="absolute top-[-10%] right-[-10%] opacity-10 group-hover:scale-110 transition-transform duration-700 rotate-12">
+              <span className="material-symbols-outlined text-[150px]">style</span>
+            </div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-4 text-white/60">
+                <span className="material-symbols-outlined text-sm">memory</span>
+                <span className="text-xs font-bold uppercase tracking-widest">Estudio Activo</span>
+              </div>
+              <h3 className="text-2xl font-black mb-3">Modo Flashcards</h3>
+              <p className="text-white/60 text-sm leading-relaxed mb-6">
+                Memoriza conceptos clave con tarjetas interactivas. Ideal para el repaso diario.
+              </p>
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <span>Comenzar</span>
+                <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-[#1e293b] text-white rounded-3xl p-8 shadow-xl relative overflow-hidden group">
             <div className="absolute top-[-10%] right-[-10%] opacity-10 group-hover:scale-110 transition-transform duration-700">
               <span className="material-symbols-outlined text-[150px]">auto_awesome</span>

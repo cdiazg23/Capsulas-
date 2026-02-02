@@ -13,6 +13,8 @@ import Auth from './pages/Auth';
 import Profile from './pages/Profile';
 import Library from './pages/Library';
 import Pricing from './pages/Pricing';
+import Flashcards from './pages/Flashcards';
+import IurisBot from './components/IurisBot';
 import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
@@ -161,6 +163,8 @@ const App: React.FC = () => {
         return <Library />;
       case 'pricing':
         return <Pricing onBack={() => navigateTo(user ? 'dashboard' : 'landing')} onSelectFree={() => navigateTo(user ? 'dashboard' : 'login')} />;
+      case 'flashcards':
+        return <Flashcards concepts={concepts} onBack={() => navigateTo('dashboard')} />;
       default:
         return <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} />;
     }
@@ -177,7 +181,7 @@ const App: React.FC = () => {
     );
   }
 
-  const showLayout = !['landing', 'login'].includes(currentView) && (currentView !== 'pricing' || user);
+  const showLayout = !['landing', 'login', 'flashcards'].includes(currentView) && (currentView !== 'pricing' || user);
 
   return (
     <div className={`min-h-screen overflow-x-hidden transition-colors ${showLayout ? 'bg-[#f6f6f8]' : 'bg-white'}`}>
@@ -236,6 +240,8 @@ const App: React.FC = () => {
           </div>
         </footer>
       )}
+
+      {user && currentView !== 'flashcards' && <IurisBot concepts={concepts} />}
     </div>
   );
 };
