@@ -31,91 +31,227 @@ const App: React.FC = () => {
     learnedConcepts: 0,
     completedQuizzes: 0
   });
+  const [masteredConceptIds, setMasteredConceptIds] = useState<string[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [concepts, setConcepts] = useState<LegalConcept[]>([]);
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('iuris-theme');
+    return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
+
+  // Efecto para aplicar el tema
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('iuris-theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('iuris-theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+
+  // Función para registrar actividad
+  const logActivity = async (type: string, description: string) => {
+    if (!user) return;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from('activity_logs')
+        .insert({
+          user_id: session.user.id,
+          type,
+          description
+        });
+
+      if (!error) {
+        // Actualizar localmente para feedback inmediato
+        setActivityLogs(prev => [{ type, description, created_at: new Date().toISOString() }, ...prev].slice(0, 10));
+      }
+    } catch (e) {
+      console.error('Error logging activity:', e);
+    }
+  };
 
   useEffect(() => {
-    const fetchUserRole = async (session: any) => {
+    const fetchUserData = async (session: any) => {
       try {
         if (!session?.user) return null;
-        console.log('Fetching role for:', session.user.id);
-        const { data, error } = await supabase
+
+        // 1. Fetch Profile and Stats
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('role, full_name')
+          .select('*')
           .eq('id', session.user.id)
           .single();
 
-        if (error) {
-          console.warn('Profile fetch error, defaulting to user:', error);
+        if (profileError) console.warn('Profile fetch error:', profileError);
+
+        if (profile) {
+          setStats({
+            level: profile.level || 1,
+            xp: profile.xp || 0,
+            nextLevelXp: profile.next_level_xp || 100,
+            points: profile.points || 0,
+            streak: profile.streak || 0,
+            learnedConcepts: profile.learned_concepts || 0,
+            completedQuizzes: profile.completed_quizzes || 0
+          });
         }
+
+        // 2. Fetch Mastered Concepts
+        const { data: mastery } = await supabase
+          .from('user_mastery')
+          .select('concept_id')
+          .eq('user_id', session.user.id);
+
+        if (mastery) {
+          setMasteredConceptIds(mastery.map(m => m.concept_id));
+        }
+
+        // 3. Fetch Activity Logs
+        const { data: logs } = await supabase
+          .from('activity_logs')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (logs) setActivityLogs(logs);
 
         return {
           username: session.user.email?.split('@')[0] || 'User',
-          role: (data?.role as any) || 'user',
-          name: data?.full_name || session.user.email?.split('@')[0] || 'User',
+          role: (profile?.role as any) || 'user',
+          name: profile?.full_name || session.user.email?.split('@')[0] || 'User',
+          avatarUrl: profile?.avatar_url
         };
       } catch (e) {
-        console.error('Critical error in fetchUserRole:', e);
-        return {
-          username: session?.user?.email?.split('@')[0] || 'User',
-          role: 'user' as any,
-          name: session?.user?.email?.split('@')[0] || 'User',
-        };
+        console.error('Critical error in fetchUserData:', e);
+        return null;
       }
     };
 
-    // Check active session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session) {
-        const userData = await fetchUserRole(session);
-        if (userData) {
-          setUser(userData);
-          setCurrentView('dashboard');
+    const initApp = async () => {
+      try {
+        // Check active session
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session) {
+          const userData = await fetchUserData(session);
+          if (userData) {
+            setUser(userData);
+            setCurrentView('dashboard');
+          }
         }
+
+        // Fetch concepts in parallel if possible, or just wait for it
+        const fetchedConcepts = await fetchLegalConcepts();
+        setConcepts(fetchedConcepts);
+
+      } catch (error) {
+        console.error('Error during app initialization:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
 
-    // Fetch concepts
-    fetchLegalConcepts().then(setConcepts);
+    initApp();
 
-    // Listen for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth Event:', event, !!session);
-
-      if (session) {
-        // 1. Navegación inmediata
-        setCurrentView(current => {
-          if (['login', 'landing'].includes(current)) return 'dashboard';
-          return current;
-        });
-
-        // 2. Carga de datos de usuario (sin bloquear la navegación)
-        fetchUserRole(session).then(userData => {
-          if (userData) setUser(userData);
-        });
-      } else {
-        setUser(null);
-        setCurrentView('landing');
+      try {
+        if (session) {
+          if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+            const userData = await fetchUserData(session);
+            if (userData) setUser(userData);
+            setCurrentView('dashboard');
+          }
+        } else {
+          setUser(null);
+          setCurrentView('landing');
+        }
+      } catch (error) {
+        console.error('Error in onAuthStateChange:', error);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  // Sync stats to Supabase when they change
+  useEffect(() => {
+    const syncStats = async () => {
+      if (!user) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      await supabase.from('profiles').update({
+        xp: stats.xp,
+        level: stats.level,
+        points: stats.points,
+        streak: stats.streak,
+        learned_concepts: stats.learnedConcepts,
+        completed_quizzes: stats.completedQuizzes,
+        next_level_xp: stats.nextLevelXp
+      }).eq('id', session.user.id);
+    };
+
+    const timeoutId = setTimeout(syncStats, 2000); // Debounce to avoid too many writes
+    return () => clearTimeout(timeoutId);
+  }, [stats, user]);
 
   const handleUpdateStats = (update: Partial<UserStats>) => {
     setStats(prev => {
-      const newStats = { ...prev, ...update };
-      // Basic leveling logic
-      if (newStats.xp >= newStats.nextLevelXp) {
-        newStats.level += 1;
-        newStats.xp -= newStats.nextLevelXp;
-        newStats.nextLevelXp = Math.round(newStats.nextLevelXp * 1.5);
+      let newXp = prev.xp + (update.xp || 0);
+      let newLevel = prev.level;
+      let newNextLevelXp = prev.nextLevelXp;
+
+      // Leveling logic
+      while (newXp >= newNextLevelXp) {
+        newLevel += 1;
+        newXp -= newNextLevelXp;
+        newNextLevelXp = Math.round(newNextLevelXp * 1.5);
+        logActivity('level_up', `¡Felicidades! Has alcanzado el Nivel ${newLevel}`);
       }
-      return newStats;
+
+      return {
+        ...prev,
+        xp: newXp,
+        level: newLevel,
+        nextLevelXp: newNextLevelXp,
+        points: prev.points + (update.points || 0),
+        learnedConcepts: prev.learnedConcepts + (update.learnedConcepts || 0),
+        completedQuizzes: prev.completedQuizzes + (update.completedQuizzes || 0),
+        streak: update.streak !== undefined ? update.streak : prev.streak
+      };
     });
+  };
+
+  const toggleMastery = async (conceptId: string) => {
+    if (!user) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const isCurrentlyMastered = masteredConceptIds.includes(conceptId);
+
+    if (isCurrentlyMastered) {
+      await supabase.from('user_mastery').delete().eq('user_id', session.user.id).eq('concept_id', conceptId);
+      setMasteredConceptIds(prev => prev.filter(id => id !== conceptId));
+    } else {
+      await supabase.from('user_mastery').insert({ user_id: session.user.id, concept_id: conceptId });
+      setMasteredConceptIds(prev => [...prev, conceptId]);
+      handleUpdateStats({ xp: 20, points: 20, learnedConcepts: 1 });
+      const concept = concepts.find(c => c.id === conceptId);
+      logActivity('concept', `Has dominado el concepto: ${concept?.concept || conceptId}`);
+    }
   };
 
   const navigateTo = (view: ViewType, concept: LegalConcept | null = null, category?: string, subcategory?: string) => {
@@ -143,7 +279,7 @@ const App: React.FC = () => {
       case 'login':
         return <Auth onAuthSuccess={() => setCurrentView('dashboard')} />;
       case 'dashboard':
-        return <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} />;
+        return <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} activityLogs={activityLogs} />;
       case 'explorer':
         return <Explorer onSelectConcept={(c) => navigateTo('detail', c)} concepts={concepts} initialCategory={selectedCategory} initialSubcategory={selectedSubcategory} />;
       case 'detail':
@@ -153,10 +289,12 @@ const App: React.FC = () => {
             onBack={() => navigateTo('explorer')}
             stats={stats}
             onUpdateStats={handleUpdateStats}
+            isMastered={masteredConceptIds.includes(selectedConcept.id)}
+            onToggleMastery={() => toggleMastery(selectedConcept.id)}
           />
         ) : null;
       case 'admin':
-        return user?.role === 'admin' ? <AdminPanel /> : <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} />;
+        return user?.role === 'admin' ? <AdminPanel /> : <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} activityLogs={activityLogs} />;
       case 'profile':
         return <Profile stats={stats} user={user} onUpdateUser={setUser} />;
       case 'library':
@@ -164,9 +302,9 @@ const App: React.FC = () => {
       case 'pricing':
         return <Pricing onBack={() => navigateTo(user ? 'dashboard' : 'landing')} onSelectFree={() => navigateTo(user ? 'dashboard' : 'login')} />;
       case 'flashcards':
-        return <Flashcards concepts={concepts} onBack={() => navigateTo('dashboard')} />;
+        return <Flashcards concepts={concepts} onBack={() => navigateTo('dashboard')} onUpdateStats={handleUpdateStats} onLogActivity={logActivity} />;
       default:
-        return <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} />;
+        return <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} activityLogs={activityLogs} />;
     }
   };
 
@@ -184,18 +322,21 @@ const App: React.FC = () => {
   const showLayout = !['landing', 'login', 'flashcards'].includes(currentView) && (currentView !== 'pricing' || user);
 
   return (
-    <div className={`min-h-screen overflow-x-hidden transition-colors ${showLayout ? 'bg-[#f6f6f8]' : 'bg-white'}`}>
+    <div className={`min-h-screen overflow-x-hidden transition-colors duration-300 ${showLayout ? 'bg-[#f6f6f8] dark:bg-slate-950' : 'bg-white dark:bg-slate-950'}`}>
       {showLayout && (
         <Header
           user={user}
           stats={stats}
           concepts={concepts}
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={toggleDarkMode}
           onProfileClick={() => navigateTo('profile')}
           onLogoClick={() => navigateTo('dashboard')}
           onLibraryClick={() => navigateTo('library')}
           onPricingClick={() => navigateTo('pricing')}
           onSelectConcept={(c) => navigateTo('detail', c)}
           onAdminClick={() => navigateTo('admin')}
+          currentView={currentView}
           onLogout={async () => {
             await supabase.auth.signOut();
             setUser(null);

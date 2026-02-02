@@ -51,16 +51,18 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCate
   ];
 
   return (
-    <aside className="w-72 border-r border-[#e7ebf3] bg-white p-6 hidden lg:flex flex-col h-[calc(100vh-64px)] sticky top-16">
+    <aside className="w-72 border-r border-[#e7ebf3] dark:border-slate-800 bg-white dark:bg-slate-900 p-6 hidden lg:flex flex-col h-[calc(100vh-64px)] sticky top-16 transition-colors duration-300">
       <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
-        <h1 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Taxonomía Jurídica</h1>
+        <h1 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-4">Taxonomía Jurídica</h1>
 
         <div className="flex flex-col gap-1">
           {navItems.map((cat) => (
             <div key={cat.name} className="flex flex-col">
               <button
                 onClick={() => toggleExpand(cat.name)}
-                className={`flex items-center justify-between p-2 rounded-lg transition-all ${expanded.includes(cat.name) ? 'bg-primary/5 text-primary' : 'text-gray-700 hover:bg-gray-50'
+                className={`flex items-center justify-between p-2 rounded-lg transition-all ${expanded.includes(cat.name)
+                  ? 'bg-primary/5 dark:bg-primary/10 text-primary'
+                  : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'
                   }`}
               >
                 <div className="flex items-center gap-3">
@@ -73,14 +75,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCate
               </button>
 
               {expanded.includes(cat.name) && cat.items.length > 0 && (
-                <div className="ml-4 mt-1 border-l-2 border-primary/20 flex flex-col gap-0.5">
+                <div className="ml-4 mt-1 border-l-2 border-primary/20 dark:border-primary/40 flex flex-col gap-0.5">
                   {cat.items.map(item => (
                     <button
                       key={item}
                       onClick={() => onNavigate('explorer', cat.name, item)}
                       className={`text-left py-2 px-4 text-sm transition-colors ${selectedCategory === cat.name && selectedSubcategory === item && currentView === 'explorer'
-                        ? 'font-semibold text-primary bg-primary/5 rounded-r-lg border-l-2 border-primary -ml-[2px]'
-                        : 'text-gray-500 hover:text-primary'
+                        ? 'font-semibold text-primary bg-primary/5 dark:bg-primary/10 rounded-r-lg border-l-2 border-primary -ml-[2px]'
+                        : 'text-gray-500 dark:text-slate-500 hover:text-primary'
                         }`}
                     >
                       {item}
@@ -93,13 +95,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCate
         </div>
       </div>
 
-      <div className="mt-auto space-y-4 pt-4 border-t border-gray-50">
-        <div className="bg-orange-50 p-4 rounded-xl border border-orange-100">
-          <div className="flex items-center gap-3 text-orange-600 mb-1">
+      <div className="mt-auto space-y-4 pt-4 border-t border-gray-50 dark:border-slate-800">
+        <div className="bg-orange-50 dark:bg-orange-950/20 p-4 rounded-xl border border-orange-100 dark:border-orange-900/30">
+          <div className="flex items-center gap-3 text-orange-600 dark:text-orange-400 mb-1">
             <span className="material-symbols-outlined fill-1">local_fire_department</span>
             <p className="text-xs font-bold uppercase">Racha de {stats.streak} días</p>
           </div>
-          <p className="text-[10px] text-orange-700 italic">¡Tu examen de grado está más cerca, no pares!</p>
+          <p className="text-[10px] text-orange-700 dark:text-orange-300 italic">¡Tu examen de grado está más cerca, no pares!</p>
         </div>
 
         <button

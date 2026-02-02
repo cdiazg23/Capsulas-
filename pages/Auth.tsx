@@ -10,6 +10,9 @@ interface AuthProps {
 const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,6 +22,12 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
+
+    if (isSignUp && password !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -49,7 +58,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-      <div className="relative hidden lg:flex items-center justify-center overflow-hidden bg-slate-900 p-20">
+      <div className="relative hidden lg:flex items-center justify-center overflow-hidden bg-slate-900 dark:bg-slate-950 p-20 transition-colors duration-300">
         <div className="absolute inset-0 z-0 bg-cover bg-center opacity-30 mix-blend-overlay" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1200")' }}></div>
 
         {/* Decorative elements */}
@@ -81,13 +90,13 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-center p-8 md:p-16 bg-white">
+      <div className="flex items-center justify-center p-8 md:p-16 bg-white dark:bg-slate-900 transition-colors duration-300">
         <div className="w-full max-w-md space-y-10">
           <div className="space-y-2">
-            <h2 className="text-slate-900 text-4xl font-black tracking-tight">
+            <h2 className="text-slate-900 dark:text-white text-4xl font-black tracking-tight">
               {isSignUp ? 'Únete a la comunidad' : 'Bienvenido de vuelta'}
             </h2>
-            <p className="text-slate-500 font-medium leading-relaxed">
+            <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
               {isSignUp
                 ? 'Crea tu cuenta gratuita y empieza a dominar el código hoy mismo.'
                 : 'Ingresa tus credenciales para continuar con tu progreso de aprendizaje.'}
@@ -96,7 +105,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
 
           <form className="space-y-6" onSubmit={handleAuth}>
             {error && (
-              <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm font-bold border border-red-100 animate-in fade-in slide-in-from-top-2">
+              <div className="p-4 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold border border-red-100 dark:border-red-900/20 animate-in fade-in slide-in-from-top-2">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-sm">error</span>
                   {error}
@@ -105,7 +114,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
             )}
 
             {successMsg && (
-              <div className="p-5 bg-emerald-50 text-emerald-700 rounded-2xl text-sm font-bold border border-emerald-100 animate-in zoom-in duration-300">
+              <div className="p-5 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 rounded-2xl text-sm font-bold border border-emerald-100 dark:border-emerald-900/20 animate-in zoom-in duration-300">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-xl">mark_email_read</span>
                   <p>{successMsg}</p>
@@ -114,33 +123,63 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-800 uppercase tracking-widest ml-1">Email</label>
+              <label className="text-sm font-bold text-slate-800 dark:text-slate-300 uppercase tracking-widest ml-1">Email</label>
               <input
                 type="email"
                 placeholder="tu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-14 bg-slate-50 border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all p-4 text-slate-900"
+                className="w-full h-14 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all p-4 text-slate-900 dark:text-white"
                 required
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
-                <label className="text-sm font-bold text-slate-800 uppercase tracking-widest">Contraseña</label>
+                <label className="text-sm font-bold text-slate-800 dark:text-slate-300 uppercase tracking-widest">Contraseña</label>
                 {!isSignUp && <a href="#" className="text-[10px] font-black text-primary uppercase tracking-wider hover:underline">¿Olvidaste tu clave?</a>}
               </div>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-14 bg-slate-50 border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all p-4 text-slate-900"
+                  className="w-full h-14 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all p-4 text-slate-900 dark:text-white pr-12"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
+                >
+                  <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                </button>
               </div>
             </div>
+
+            {isSignUp && (
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                <label className="text-sm font-bold text-slate-800 dark:text-slate-300 uppercase tracking-widest ml-1">Repetir Contraseña</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full h-14 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all p-4 text-slate-900 dark:text-white pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
+                  >
+                    <span className="material-symbols-outlined">{showConfirmPassword ? 'visibility_off' : 'visibility'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"
@@ -151,12 +190,13 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
             </button>
           </form>
 
+
           <div className="relative">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
-            <div className="relative flex justify-center text-xs uppercase tracking-[0.2em] font-black"><span className="bg-white px-4 text-slate-300">Comunidad</span></div>
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100 dark:border-slate-800"></div></div>
+            <div className="relative flex justify-center text-xs uppercase tracking-[0.2em] font-black"><span className="bg-white dark:bg-slate-900 px-4 text-slate-300 dark:text-slate-600 transition-colors">Comunidad</span></div>
           </div>
 
-          <p className="text-center text-sm font-semibold text-slate-400">
+          <p className="text-center text-sm font-semibold text-slate-400 dark:text-slate-500">
             {isSignUp ? '¿Ya eres parte de nosotros?' : '¿Aún no tienes cuenta?'} {' '}
             <button
               type="button"
@@ -168,8 +208,8 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
           </p>
 
           {!isSignUp && (
-            <div className="p-6 rounded-2xl bg-amber-50/50 border border-amber-100/50 text-center">
-              <p className="text-xs text-amber-800 font-medium">
+            <div className="p-6 rounded-2xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/50 dark:border-amber-900/20 text-center">
+              <p className="text-xs text-amber-800 dark:text-amber-200 font-medium">
                 IurisAcademy es libre gracias a sus aportantes.
                 <button onClick={() => window.location.reload()} className="ml-2 underline font-bold">Ver cómo apoyar</button>
               </p>

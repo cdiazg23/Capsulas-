@@ -2,28 +2,41 @@ import { LegalConcept } from './types';
 import { supabase } from './lib/supabase';
 
 // Data from Supabase
+// Data from Supabase with safety timeout
 export const fetchLegalConcepts = async (): Promise<LegalConcept[]> => {
-  const { data, error } = await supabase
-    .from('legal_concepts')
-    .select('*')
-    .order('created_at', { ascending: true });
+  try {
+    const fetchPromise = supabase
+      .from('legal_concepts')
+      .select('*')
+      .order('created_at', { ascending: true });
 
-  if (error) {
-    console.error('Error fetching legal concepts:', error);
+    // Timeout after 10 seconds
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Fetch timeout')), 10000)
+    );
+
+    const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
+    if (error) {
+      console.error('Error fetching legal concepts:', error);
+      return [];
+    }
+
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      concept: row.concept,
+      category: row.category,
+      subcategory: row.subcategory,
+      definitionSimple: row.definition_simple,
+      realExample: row.real_example,
+      regulation: row.regulation,
+      jurisprudence: row.jurisprudence,
+      videoUrl: row.video_url
+    }));
+  } catch (err) {
+    console.error('Fetch legal concepts failed:', err);
     return [];
   }
-
-  return (data || []).map(row => ({
-    id: row.id,
-    concept: row.concept,
-    category: row.category,
-    subcategory: row.subcategory,
-    definitionSimple: row.definition_simple,
-    realExample: row.real_example,
-    regulation: row.regulation,
-    jurisprudence: row.jurisprudence,
-    videoUrl: row.video_url
-  }));
 };
 
 // Fallback / legacy data (keeping it for reference or initial build)

@@ -82,7 +82,7 @@ const Pricing: React.FC<PricingPageProps> = ({ onBack, onSelectFree }) => {
 
                             <ul className="space-y-4 mb-10 flex-1">
                                 {[
-                                    { icon: 'star', text: 'Consultas de IA ilimitadas' },
+                                    { icon: 'star', text: 'Consultas de IA (Uso Justo)' },
                                     { icon: 'bolt', text: 'Respuesta prioritaria' },
                                     { icon: 'workspace_premium', text: 'Insignia de Socio Fundador' },
                                     { icon: 'rocket_launch', text: 'Acceso anticipado a funciones' },
@@ -94,6 +94,10 @@ const Pricing: React.FC<PricingPageProps> = ({ onBack, onSelectFree }) => {
                                     </li>
                                 ))}
                             </ul>
+
+                            <p className="text-[10px] text-slate-500 mb-6 italic leading-relaxed">
+                                * El uso justo asegura que todos los socios tengan acceso a la IA sin interrupciones. Límite sugerido de 500 consultas/mes.
+                            </p>
 
                             <a
                                 href={kofiUrl}

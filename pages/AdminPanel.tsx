@@ -54,17 +54,26 @@ const AdminPanel: React.FC = () => {
   }, []);
 
   const loadData = async () => {
-    setLoading(true);
-    const data = await fetchLegalConcepts();
-    setConcepts(data);
+    try {
+      setLoading(true);
+      const data = await fetchLegalConcepts();
+      setConcepts(data || []);
 
-    const { data: userData, error: userError } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('username', { ascending: true });
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('username', { ascending: true });
 
-    if (!userError) setProfiles(userData || []);
-    setLoading(false);
+      if (userError) {
+        console.error('Error fetching profiles:', userError);
+      } else {
+        setProfiles(userData || []);
+      }
+    } catch (error) {
+      console.error('Unexpected error in loadData:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenModal = (concept?: LegalConcept) => {
@@ -157,8 +166,7 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const toggleUserRole = async (userId: string, currentRole: string) => {
-    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+  const updateUserRole = async (userId: string, newRole: 'admin' | 'founder' | 'user') => {
     const { error } = await supabase
       .from('profiles')
       .update({ role: newRole })
@@ -200,7 +208,7 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  if (loading && concepts.length === 0) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -366,34 +374,63 @@ const AdminPanel: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {profiles.map((u) => (
-                  <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-bold text-slate-700">{u.username}</td>
+                  <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${u.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-                        {u.role === 'admin' ? 'Administrador' : 'Estudiante'}
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{u.username}</span>
+                        <span className="text-[10px] text-gray-400">{u.full_name || 'Sin nombre'}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${u.role === 'admin'
+                        ? 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
+                        : u.role === 'founder'
+                          ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light border border-primary/20'
+                          : 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400'
+                        }`}>
+                        {u.role === 'admin' ? 'Administrador' : u.role === 'founder' ? 'Socio Fundador' : 'Estudiante'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => toggleUserRole(u.id, u.role)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${u.role === 'admin' ? 'border-red-100 text-red-600 hover:bg-red-50' : 'border-primary/20 text-primary hover:bg-primary/5'}`}
-                      >
-                        {u.role === 'admin' ? 'Quitar Admin' : 'Hacer Admin'}
-                      </button>
-                      <button
-                        onClick={() => handleResetPassword(u.id)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
-                        title="Resetear Password"
-                      >
-                        <span className="material-symbols-outlined text-[20px]">lock_reset</span>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(u.id)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                        title="Eliminar Cuenta"
-                      >
-                        <span className="material-symbols-outlined text-[20px]">person_remove</span>
-                      </button>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="flex border border-gray-100 dark:border-slate-800 rounded-lg overflow-hidden">
+                          <button
+                            onClick={() => updateUserRole(u.id, 'user')}
+                            className={`px-2 py-1 text-[9px] font-bold uppercase transition-all ${u.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-900 text-gray-400 hover:text-blue-600'}`}
+                            title="Set Estudiante"
+                          >
+                            User
+                          </button>
+                          <button
+                            onClick={() => updateUserRole(u.id, 'founder')}
+                            className={`px-2 py-1 text-[9px] font-bold uppercase border-l border-gray-100 dark:border-slate-800 transition-all ${u.role === 'founder' ? 'bg-primary text-white' : 'bg-white dark:bg-slate-900 text-gray-400 hover:text-primary'}`}
+                            title="Set Socio Fundador"
+                          >
+                            Founder
+                          </button>
+                          <button
+                            onClick={() => updateUserRole(u.id, 'admin')}
+                            className={`px-2 py-1 text-[9px] font-bold uppercase border-l border-gray-100 dark:border-slate-800 transition-all ${u.role === 'admin' ? 'bg-amber-500 text-white' : 'bg-white dark:bg-slate-900 text-gray-400 hover:text-amber-500'}`}
+                            title="Set Admin"
+                          >
+                            Admin
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => handleResetPassword(u.id)}
+                          className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors"
+                          title="Resetear Password"
+                        >
+                          <span className="material-symbols-outlined text-[20px]">lock_reset</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(u.id)}
+                          className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                          title="Eliminar Cuenta"
+                        >
+                          <span className="material-symbols-outlined text-[20px]">person_remove</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
