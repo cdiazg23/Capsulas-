@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ViewType, UserStats } from '../types';
+import { ViewType, UserStats, User } from '../types';
 
 interface SidebarProps {
   onNavigate: (view: ViewType, category?: string, subcategory?: string) => void;
@@ -8,9 +8,10 @@ interface SidebarProps {
   selectedCategory?: string;
   selectedSubcategory?: string;
   stats: UserStats;
+  user: User | null;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCategory, selectedSubcategory, stats }) => {
+const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCategory, selectedSubcategory, stats, user }) => {
   const [expanded, setExpanded] = useState<string[]>(['Derecho Civil']);
 
   const toggleExpand = (cat: string) => {
@@ -103,6 +104,18 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCate
           </div>
           <p className="text-[10px] text-orange-700 dark:text-orange-300 italic">¡Tu examen de grado está más cerca, no pares!</p>
         </div>
+
+        {(user?.role === 'founder' || user?.role === 'admin') && (
+          <button
+            onClick={() => onNavigate('community')}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 ${currentView === 'community'
+              ? 'bg-accent-gold text-white border-accent-gold shadow-lg shadow-accent-gold/20'
+              : 'border-accent-gold/30 text-accent-gold hover:bg-accent-gold/5'}`}
+          >
+            <span className="material-symbols-outlined">groups</span>
+            <span>Espacio Comunidad</span>
+          </button>
+        )}
 
         <button
           onClick={() => onNavigate('explorer')}

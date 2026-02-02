@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 import Library from './pages/Library';
 import Pricing from './pages/Pricing';
 import Flashcards from './pages/Flashcards';
+import CommunitySpace from './pages/CommunitySpace';
 import IurisBot from './components/IurisBot';
 import { supabase } from './lib/supabase';
 
@@ -339,6 +340,8 @@ const App: React.FC = () => {
         return user?.role !== 'user' ? (
           <Flashcards concepts={concepts} onBack={() => navigateTo('dashboard')} onUpdateStats={handleUpdateStats} onLogActivity={logActivity} />
         ) : <Pricing onBack={() => navigateTo('dashboard')} onSelectFree={() => navigateTo('dashboard')} />;
+      case 'community':
+        return user?.role !== 'user' ? <CommunitySpace user={user} /> : <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} activityLogs={activityLogs} />;
       default:
         return <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} activityLogs={activityLogs} />;
     }
@@ -389,6 +392,7 @@ const App: React.FC = () => {
             selectedCategory={selectedCategory}
             selectedSubcategory={selectedSubcategory}
             stats={stats}
+            user={user}
           />
         )}
 
