@@ -185,10 +185,36 @@ const App: React.FC = () => {
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setCurrentView('landing');
+      // Limpiar datos sensibles locales
+      localStorage.removeItem('sb-toiwgvywcdccjcssngla-auth-token');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      setUser(null);
+      setCurrentView('landing');
+    }
+  };
+
+  const fetchProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
+    return data;
+  };
 
   // Sync stats to Supabase when they change
   useEffect(() => {
@@ -376,11 +402,7 @@ const App: React.FC = () => {
           onSelectConcept={(c) => navigateTo('detail', c)}
           onAdminClick={() => navigateTo('admin')}
           currentView={currentView}
-          onLogout={async () => {
-            await supabase.auth.signOut();
-            setUser(null);
-            setCurrentView('landing');
-          }}
+          onLogout={handleLogout}
         />
       )}
 

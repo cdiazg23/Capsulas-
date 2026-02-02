@@ -242,7 +242,13 @@ const Header: React.FC<HeaderProps> = ({
                     Mi Perfil
                   </button>
                   <div className="border-t border-gray-50 dark:border-slate-700 my-1"></div>
-                  <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2 font-bold">
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      onLogout();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2 font-bold transition-colors"
+                  >
                     <span className="material-symbols-outlined text-lg">logout</span>
                     Cerrar Sesión
                   </button>
