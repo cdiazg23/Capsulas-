@@ -15,7 +15,6 @@ import Library from './pages/Library';
 import Pricing from './pages/Pricing';
 import Flashcards from './pages/Flashcards';
 import CommunitySpace from './pages/CommunitySpace';
-import IurisBot from './components/IurisBot';
 import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
@@ -30,7 +29,9 @@ const App: React.FC = () => {
     points: 0,
     streak: 0,
     learnedConcepts: 0,
-    completedQuizzes: 0
+    completedQuizzes: 0,
+    consultationsToday: 0,
+    consultationsMonth: 0
   });
   const [masteredConceptIds, setMasteredConceptIds] = useState<string[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -322,8 +323,8 @@ const App: React.FC = () => {
 
     setCurrentView(view);
     if (concept) setSelectedConcept(concept);
-    setSelectedCategory(category);
-    setSelectedSubcategory(subcategory);
+    if (category) setSelectedCategory(category);
+    if (subcategory) setSelectedSubcategory(subcategory);
     window.scrollTo(0, 0);
   };
 
@@ -444,7 +445,7 @@ const App: React.FC = () => {
         </footer>
       )}
 
-      {user && currentView !== 'flashcards' && <IurisBot concepts={concepts} />}
+      {/* Bot de IA eliminado */}
     </div>
   );
 };

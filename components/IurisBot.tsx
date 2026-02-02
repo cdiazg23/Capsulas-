@@ -1,9 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { LegalConcept } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface IurisBotProps {
     concepts: LegalConcept[];
+    onSelectConcept: (concept: LegalConcept) => void;
 }
 
 interface Message {
@@ -11,9 +14,10 @@ interface Message {
     text: string;
     sender: 'bot' | 'user';
     timestamp: Date;
+    relatedConcept?: LegalConcept;
 }
 
-const IurisBot: React.FC<IurisBotProps> = ({ concepts }) => {
+const IurisBot: React.FC<IurisBotProps> = ({ concepts, onSelectConcept }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -35,12 +39,20 @@ const IurisBot: React.FC<IurisBotProps> = ({ concepts }) => {
         scrollToBottom();
     }, [messages, isTyping]);
 
+    const normalizeText = (text: string) => {
+        return text.toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Quitar tildes
+            .trim();
+    };
+
     const handleSend = async () => {
         if (!inputValue.trim()) return;
 
+        const userText = inputValue;
         const userMessage: Message = {
             id: Date.now(),
-            text: inputValue,
+            text: userText,
             sender: 'user',
             timestamp: new Date()
         };
@@ -49,36 +61,65 @@ const IurisBot: React.FC<IurisBotProps> = ({ concepts }) => {
         setInputValue('');
         setIsTyping(true);
 
-        // Lógica de respuesta "IA" simplificada basada en el contexto de los conceptos
-        setTimeout(() => {
-            const term = inputValue.toLowerCase();
-            const foundConcept = concepts.find(c =>
-                term.includes(c.concept.toLowerCase()) ||
-                c.concept.toLowerCase().includes(term)
+        // 1. BUSQUEDA LOCAL (Fallback inmediato)
+        const normalizedTerm = normalizeText(userText);
+        const noise = ['que', 'es', 'son', 'el', 'la', 'los', 'las', 'un', 'una', 'dime', 'explica', 'sobre', 'define', 'significa'];
+        const keywords = normalizedTerm.split(' ').filter(word => !noise.includes(word) && word.length > 2);
+
+        const foundLocal = concepts.find(c => {
+            const normalizedConcept = normalizeText(c.concept);
+            if (normalizedTerm.includes(normalizedConcept)) return true;
+            if (keywords.length > 0 && keywords.every(k => normalizedConcept.includes(k))) return true;
+            return false;
+        });
+
+        // 2. CONSULTA AL TUTOR PRO (IA con Contexto de la Academia)
+        try {
+            // Le enviamos a la IA los conceptos más importantes para que los relacione
+            const contextText = concepts.slice(0, 10).map(c => `- ${c.concept}: ${c.definitionSimple}`).join('\n');
+
+            // Timeout de 30 segundos para una respuesta de calidad superior
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('TIMEOUT')), 30000)
             );
 
-            let responseText = "";
-            if (foundConcept) {
-                responseText = `¡Claro! Relacionado con "${foundConcept.concept}", en derecho chileno se entiende como: ${foundConcept.definitionSimple}. Un ejemplo práctico sería: ${foundConcept.realExample}.`;
-            } else if (term.includes('hola') || term.includes('buenos')) {
-                responseText = "¡Hola! Un gusto saludarte. ¿En qué tema de Derecho Civil o Procesal estás trabajando hoy?";
-            } else if (term.includes('gracias')) {
-                responseText = "¡De nada! Sigue dándole duro al estudio. El examen de grado es un maratón, no un sprint. ⚖️";
+            const fetchPromise = supabase.functions.invoke('iuris-chat', {
+                body: { message: userText, context: contextText }
+            });
+
+            const response = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
+            if (response.data?.reply) {
+                const botMessage: Message = {
+                    id: Date.now() + 1,
+                    text: response.data.reply,
+                    sender: 'bot',
+                    timestamp: new Date(),
+                    relatedConcept: foundLocal // Seguiremos vinculando el botón si coincide
+                };
+                setMessages(prev => [...prev, botMessage]);
             } else {
-                responseText = "Esa es una excelente pregunta. Mi base de datos actual se enfoca en Derecho Civil y Procesal. Si me hablas de algún concepto de esas áreas, podré ayudarte mejor. ¿Te gustaría saber sobre 'Capacidad' o 'Acto Jurídico'?";
+                throw new Error('FALLO_IA');
             }
 
-            const botMessage: Message = {
-                id: Date.now() + 1,
-                text: responseText,
-                sender: 'bot',
-                timestamp: new Date()
-            };
+        } catch (error: any) {
+            console.error('Bot IA Error:', error);
 
+            const botMessage: Message = {
+                id: Date.now() + 2,
+                text: foundLocal
+                    ? `He localizado este concepto en nuestra base de la academia para ti: **${foundLocal.concept}**: ${foundLocal.definitionSimple}`
+                    : "No he podido conectar con mi cerebro legal. Por favor, intenta con una pregunta más específica.",
+                sender: 'bot',
+                timestamp: new Date(),
+                relatedConcept: foundLocal
+            };
             setMessages(prev => [...prev, botMessage]);
+        } finally {
             setIsTyping(false);
-        }, 1200);
+        }
     };
+
 
     return (
         <>
@@ -100,28 +141,40 @@ const IurisBot: React.FC<IurisBotProps> = ({ concepts }) => {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-40 right-6 w-[90vw] sm:w-[400px] h-[500px] bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden z-[100] animate-in slide-in-from-bottom-5 duration-300">
+                <div className="fixed bottom-40 right-6 w-[90vw] sm:w-[400px] h-[500px] bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden z-[100] animate-in slide-in-from-bottom-5 duration-300 dark:bg-slate-900 dark:border-slate-800">
                     {/* Header */}
-                    <div className="p-5 bg-slate-900 text-white flex items-center gap-3">
-                        <div className="size-10 bg-primary/20 rounded-xl flex items-center justify-center">
-                            <span className="material-symbols-outlined text-primary">smart_toy</span>
+                    <div className="p-5 bg-slate-950 text-white flex items-center gap-3">
+                        <div className="size-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary">
+                            <span className="material-symbols-outlined">smart_toy</span>
                         </div>
                         <div>
-                            <h3 className="text-sm font-black tracking-tight">IurisBot <span className="text-[10px] text-primary ml-1 uppercase bg-primary/20 px-1.5 py-0.5 rounded">Beta</span></h3>
-                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Asistente Virtual</p>
+                            <h3 className="text-sm font-black tracking-tight italic">IurisBot <span className="text-[10px] text-primary ml-1 uppercase bg-primary/20 px-1.5 py-0.5 rounded not-italic">PRO</span></h3>
+                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Asistente Legal Inteligente</p>
                         </div>
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar bg-gray-50/50">
+                    <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar bg-gray-50/50 dark:bg-slate-900/50">
                         {messages.map(msg => (
-                            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div key={msg.id} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
                                 <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.sender === 'user'
-                                        ? 'bg-primary text-white rounded-tr-none'
-                                        : 'bg-white text-slate-700 border border-gray-100 rounded-tl-none'
+                                    ? 'bg-primary text-white rounded-tr-none'
+                                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-gray-100 dark:border-slate-700 rounded-tl-none font-medium prose dark:prose-invert prose-sm max-w-none'
                                     }`}>
-                                    {msg.text}
+                                    <ReactMarkdown>{msg.text}</ReactMarkdown>
                                 </div>
+                                {msg.relatedConcept && (
+                                    <button
+                                        onClick={() => {
+                                            onSelectConcept(msg.relatedConcept!);
+                                            setIsOpen(false);
+                                        }}
+                                        className="mt-2 flex items-center gap-2 px-4 py-2 bg-accent-gold text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all shadow-lg shadow-accent-gold/20"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">visibility</span>
+                                        Ver {msg.relatedConcept.concept}
+                                    </button>
+                                )}
                             </div>
                         ))}
                         {isTyping && (

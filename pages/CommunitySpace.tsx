@@ -19,13 +19,20 @@ interface Feedback {
     };
 }
 
+const countries = [
+    'Chile', 'Argentina', 'Perú', 'Colombia', 'México', 'Bolivia', 'Ecuador', 'España',
+    'Uruguay', 'Paraguay', 'Venezuela', 'Costa Rica', 'Panamá', 'Otros'
+];
+
+const forbiddenKeywords = ['insulto1', 'ofensa2', 'basura', 'spam']; // Ejemplos de filtro
+
 const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
     const [messages, setMessages] = useState<Feedback[]>([]);
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [newContent, setNewContent] = useState('');
     const [type, setType] = useState<'query' | 'complaint' | 'suggestion'>('suggestion');
-    const [country, setCountry] = useState('');
+    const [country, setCountry] = useState('Chile');
     const [city, setCity] = useState('');
 
     useEffect(() => {
@@ -38,6 +45,7 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
             const { data, error } = await supabase
                 .from('community_feedback')
                 .select('*, profiles(full_name, username, avatar_url, role)')
+                .eq('status', 'active')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -49,8 +57,35 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
         }
     };
 
+    const handleReport = async (id: string) => {
+        if (!confirm('¿Deseas reportar este mensaje por contenido inadecuado?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('community_feedback')
+                .update({ is_reported: true })
+                .eq('id', id);
+
+            if (error) throw error;
+            alert('Mensaje reportado. Los administradores lo revisarán a la brevedad.');
+        } catch (error) {
+            console.error('Error reporting:', error);
+        }
+    };
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Filtro de contenido básico
+        const hasForbiddenContent = forbiddenKeywords.some(word =>
+            newContent.toLowerCase().includes(word.toLowerCase())
+        );
+
+        if (hasForbiddenContent) {
+            alert('Tu mensaje contiene palabras que no cumplen con nuestras normas de convivencia. Por favor, sé respetuoso.');
+            return;
+        }
+
         if (!newContent.trim() || !country.trim()) return;
 
         try {
@@ -65,7 +100,7 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
                     content: newContent,
                     type,
                     country,
-                    city: city || null
+                    city: city?.trim() || null
                 });
 
             if (error) throw error;
@@ -74,7 +109,6 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
             fetchMessages();
         } catch (error) {
             console.error('Error sending feedback:', error);
-            alert('Error al enviar. Por favor intenta de nuevo.');
         } finally {
             setSending(false);
         }
@@ -100,8 +134,8 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
 
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-            <div className="mb-10">
-                <div className="flex items-center gap-3 mb-4">
+            <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="flex items-center gap-3">
                     <div className="size-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
                         <span className="material-symbols-outlined text-2xl">groups</span>
                     </div>
@@ -109,6 +143,16 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
                         <h1 className="text-3xl font-black dark:text-white tracking-tight">Espacio de la Comunidad</h1>
                         <p className="text-sm text-slate-500 font-medium">Solo para Socios Fundadores y Administradores</p>
                     </div>
+                </div>
+
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 p-4 rounded-2xl max-w-sm">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500 mb-1">
+                        <span className="material-symbols-outlined text-sm font-black">gavel</span>
+                        <p className="text-[10px] font-black uppercase tracking-widest">Normas de Convivencia</p>
+                    </div>
+                    <p className="text-[10px] text-amber-700 dark:text-amber-300 leading-tight">
+                        Mantengamos un ambiente de respeto académico. Los mensajes inadecuados serán eliminados y el usuario sancionado.
+                    </p>
                 </div>
             </div>
 
@@ -129,20 +173,19 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
                     </div>
                     <div>
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">País</label>
-                        <input
-                            type="text"
-                            required
-                            placeholder="Ej: Chile, México..."
+                        <select
                             value={country}
                             onChange={(e) => setCountry(e.target.value)}
                             className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold p-3 focus:ring-primary/20 dark:text-white"
-                        />
+                        >
+                            {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
                     </div>
                     <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">Ciudad (Opcional)</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">Ciudad</label>
                         <input
                             type="text"
-                            placeholder="Ej: Santiago, CDMX..."
+                            placeholder="Ej: Santiago, Lima..."
                             value={city}
                             onChange={(e) => setCity(e.target.value)}
                             className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold p-3 focus:ring-primary/20 dark:text-white"
@@ -154,7 +197,7 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">Tu Mensaje</label>
                     <textarea
                         required
-                        rows={4}
+                        rows={3}
                         placeholder="Comparte tu sugerencia o inquietud con la comunidad..."
                         value={newContent}
                         onChange={(e) => setNewContent(e.target.value)}
@@ -168,7 +211,7 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
                         disabled={sending}
                         className="bg-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
                     >
-                        {sending ? 'Enviando...' : 'Publicar en la Comunidad'}
+                        {sending ? 'Enviando...' : 'Publicar'}
                         <span className="material-symbols-outlined text-sm">send</span>
                     </button>
                 </div>
@@ -183,7 +226,7 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
 
                 {messages.length > 0 ? (
                     messages.map((msg) => (
-                        <div key={msg.id} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
+                        <div key={msg.id} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group relative">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-3">
                                     <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 bg-center bg-cover border border-slate-200 dark:border-slate-700"
@@ -202,9 +245,18 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
                                         </p>
                                     </div>
                                 </div>
-                                <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${getTypeColor(msg.type)}`}>
-                                    {getTypeLabel(msg.type)}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${getTypeColor(msg.type)}`}>
+                                        {getTypeLabel(msg.type)}
+                                    </span>
+                                    <button
+                                        onClick={() => handleReport(msg.id)}
+                                        className="opacity-0 group-hover:opacity-100 size-8 text-slate-300 hover:text-red-500 transition-all flex items-center justify-center"
+                                        title="Reportar contenido"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">flag</span>
+                                    </button>
+                                </div>
                             </div>
                             <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed ml-1">
                                 {msg.content}
