@@ -10,9 +10,10 @@ interface ConceptDetailProps {
   onUpdateStats: (update: Partial<UserStats>) => void;
   isMastered: boolean;
   onToggleMastery: () => void;
+  isFreeUser: boolean;
 }
 
-const ConceptDetail: React.FC<ConceptDetailProps> = ({ concept, onBack, stats, onUpdateStats, isMastered, onToggleMastery }) => {
+const ConceptDetail: React.FC<ConceptDetailProps> = ({ concept, onBack, stats, onUpdateStats, isMastered, onToggleMastery, isFreeUser }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
 
@@ -139,15 +140,26 @@ const ConceptDetail: React.FC<ConceptDetailProps> = ({ concept, onBack, stats, o
               <div className="size-10 rounded-xl bg-accent-gold/20 flex items-center justify-center text-accent-gold">
                 <span className="material-symbols-outlined text-2xl">quiz</span>
               </div>
-              <h3 className="font-black text-slate-900 dark:text-white">¿Listo para el desafío?</h3>
+              <h3 className="font-black text-slate-900 dark:text-white">{isFreeUser ? 'Función Premium' : '¿Listo para el desafío?'}</h3>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">Completa este concepto y gana 50 XP adicionales para subir al siguiente nivel.</p>
-            <button
-              onClick={() => setShowQuiz(true)}
-              className="w-full py-3 bg-white dark:bg-slate-950 border border-accent-gold text-accent-gold font-bold text-sm rounded-xl hover:bg-accent-gold hover:text-white transition-all"
-            >
-              Comenzar Quiz Express
-            </button>
+            {isFreeUser ? (
+              <>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">Los quizzes y flashcards son exclusivos para socios fundadores. ¡Apoya el proyecto para desbloquear todo tu potencial!</p>
+                <div className="p-4 bg-white dark:bg-slate-950 rounded-xl border border-dashed border-accent-gold/50 text-center">
+                  <span className="text-[10px] font-black text-accent-gold uppercase tracking-widest">Contenido Bloqueado</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">Completa este concepto y gana 50 XP adicionales para subir al siguiente nivel.</p>
+                <button
+                  onClick={() => setShowQuiz(true)}
+                  className="w-full py-3 bg-white dark:bg-slate-950 border border-accent-gold text-accent-gold font-bold text-sm rounded-xl hover:bg-accent-gold hover:text-white transition-all"
+                >
+                  Comenzar Quiz Express
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

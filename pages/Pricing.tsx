@@ -43,9 +43,8 @@ const Pricing: React.FC<PricingPageProps> = ({ onBack, onSelectFree }) => {
 
                         <ul className="space-y-4 mb-10 flex-1">
                             {[
-                                { icon: 'check_circle', text: 'Acceso completo al glosario' },
-                                { icon: 'check_circle', text: '10 consultas de IA diarias' },
-                                { icon: 'check_circle', text: 'Quizzes ilimitados' },
+                                { icon: 'check_circle', text: 'Acceso a todo el glosario' },
+                                { icon: 'check_circle', text: 'Límite de 10 consultas diarias' },
                                 { icon: 'check_circle', text: 'Seguimiento de XP básico' },
                             ].map((item, i) => (
                                 <li key={i} className="flex items-center gap-3 text-slate-600">
@@ -83,10 +82,10 @@ const Pricing: React.FC<PricingPageProps> = ({ onBack, onSelectFree }) => {
                             <ul className="space-y-4 mb-10 flex-1">
                                 {[
                                     { icon: 'star', text: 'Consultas de IA (Uso Justo)' },
+                                    { icon: 'quiz', text: 'Quizzes y Flashcards ilimitados' },
                                     { icon: 'bolt', text: 'Respuesta prioritaria' },
                                     { icon: 'workspace_premium', text: 'Insignia de Socio Fundador' },
                                     { icon: 'rocket_launch', text: 'Acceso anticipado a funciones' },
-                                    { icon: 'groups', text: 'Grupo exclusivo en WhatsApp' },
                                 ].map((item, i) => (
                                     <li key={i} className="flex items-center gap-3 text-slate-300">
                                         <span className="material-symbols-outlined text-accent-gold text-xl">{item.icon}</span>
@@ -96,7 +95,7 @@ const Pricing: React.FC<PricingPageProps> = ({ onBack, onSelectFree }) => {
                             </ul>
 
                             <p className="text-[10px] text-slate-500 mb-6 italic leading-relaxed">
-                                * El uso justo asegura que todos los socios tengan acceso a la IA sin interrupciones. Límite sugerido de 500 consultas/mes.
+                                * El uso justo asegura que todos los socios tengan acceso a la IA sin interrupciones. Límite sugerido de 200 consultas/mes.
                             </p>
 
                             <a

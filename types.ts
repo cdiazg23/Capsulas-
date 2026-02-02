@@ -32,4 +32,7 @@ export interface UserStats {
   streak: number;
   learnedConcepts: number;
   completedQuizzes: number;
+  consultationsToday: number;
+  consultationsMonth: number;
+  lastConsultationAt?: string;
 }

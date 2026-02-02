@@ -102,7 +102,10 @@ const App: React.FC = () => {
             points: profile.points || 0,
             streak: profile.streak || 0,
             learnedConcepts: profile.learned_concepts || 0,
-            completedQuizzes: profile.completed_quizzes || 0
+            completedQuizzes: profile.completed_quizzes || 0,
+            consultationsToday: profile.consultations_today || 0,
+            consultationsMonth: profile.consultations_month || 0,
+            lastConsultationAt: profile.last_consultation_at
           });
         }
 
@@ -200,7 +203,10 @@ const App: React.FC = () => {
         streak: stats.streak,
         learned_concepts: stats.learnedConcepts,
         completed_quizzes: stats.completedQuizzes,
-        next_level_xp: stats.nextLevelXp
+        next_level_xp: stats.nextLevelXp,
+        consultations_today: stats.consultationsToday,
+        consultations_month: stats.consultationsMonth,
+        last_consultation_at: stats.lastConsultationAt || new Date().toISOString()
       }).eq('id', session.user.id);
     };
 
@@ -230,7 +236,10 @@ const App: React.FC = () => {
         points: prev.points + (update.points || 0),
         learnedConcepts: prev.learnedConcepts + (update.learnedConcepts || 0),
         completedQuizzes: prev.completedQuizzes + (update.completedQuizzes || 0),
-        streak: update.streak !== undefined ? update.streak : prev.streak
+        streak: update.streak !== undefined ? update.streak : prev.streak,
+        consultationsToday: update.consultationsToday !== undefined ? update.consultationsToday : prev.consultationsToday,
+        consultationsMonth: update.consultationsMonth !== undefined ? update.consultationsMonth : prev.consultationsMonth,
+        lastConsultationAt: update.lastConsultationAt !== undefined ? update.lastConsultationAt : prev.lastConsultationAt
       };
     });
   };
@@ -260,6 +269,30 @@ const App: React.FC = () => {
       setCurrentView('dashboard');
       return;
     }
+
+    // Daily Limit Check for Free Users
+    if (view === 'detail' && user?.role === 'user') {
+      const today = new Date().toDateString();
+      const lastConsultationDate = stats.lastConsultationAt ? new Date(stats.lastConsultationAt).toDateString() : '';
+
+      let currentDaily = stats.consultationsToday;
+      if (today !== lastConsultationDate) {
+        currentDaily = 0;
+      }
+
+      if (currentDaily >= 10) {
+        setCurrentView('pricing');
+        return;
+      }
+
+      // Increment consultation count
+      handleUpdateStats({
+        consultationsToday: currentDaily + 1,
+        consultationsMonth: stats.consultationsMonth + 1,
+        lastConsultationAt: new Date().toISOString()
+      });
+    }
+
     setCurrentView(view);
     if (concept) setSelectedConcept(concept);
     setSelectedCategory(category);
@@ -291,6 +324,7 @@ const App: React.FC = () => {
             onUpdateStats={handleUpdateStats}
             isMastered={masteredConceptIds.includes(selectedConcept.id)}
             onToggleMastery={() => toggleMastery(selectedConcept.id)}
+            isFreeUser={user?.role === 'user'}
           />
         ) : null;
       case 'admin':
@@ -302,7 +336,9 @@ const App: React.FC = () => {
       case 'pricing':
         return <Pricing onBack={() => navigateTo(user ? 'dashboard' : 'landing')} onSelectFree={() => navigateTo(user ? 'dashboard' : 'login')} />;
       case 'flashcards':
-        return <Flashcards concepts={concepts} onBack={() => navigateTo('dashboard')} onUpdateStats={handleUpdateStats} onLogActivity={logActivity} />;
+        return user?.role !== 'user' ? (
+          <Flashcards concepts={concepts} onBack={() => navigateTo('dashboard')} onUpdateStats={handleUpdateStats} onLogActivity={logActivity} />
+        ) : <Pricing onBack={() => navigateTo('dashboard')} onSelectFree={() => navigateTo('dashboard')} />;
       default:
         return <Dashboard onSelectConcept={(c) => navigateTo('detail', c)} navigateTo={navigateTo} stats={stats} concepts={concepts} activityLogs={activityLogs} />;
     }
