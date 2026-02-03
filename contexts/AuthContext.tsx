@@ -16,132 +16,51 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isSyncing, setIsSyncing] = useState(false);
-    const userRef = React.useRef<User | null>(null);
-
-    // Actualizar el ref cada vez que el usuario cambie
-    useEffect(() => {
-        userRef.current = user;
-    }, [user]);
 
     useEffect(() => {
-        // Check active session
-        const initAuth = async () => {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
+        // Un solo responsable para la sesión: onAuthStateChange maneja tanto el inicio como los cambios
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log(`🔐 [Auth] Evento: ${event}`);
 
-                if (session?.user) {
-                    console.log('👤 Usuario autenticado:', session.user.email);
-
-                    let { data: profile, error } = await supabase
+            if (session?.user) {
+                try {
+                    // Intentar obtener el perfil
+                    const { data: profile } = await supabase
                         .from('profiles')
                         .select('*')
                         .eq('id', session.user.id)
-                        .single();
-
-                    // Si el perfil no existe, crearlo
-                    if (!profile || error) {
-                        console.log('📝 Perfil no encontrado, creando...');
-                        const newProfile = {
-                            id: session.user.id,
-                            email: session.user.email,
-                            full_name: session.user.email?.split('@')[0] || 'User',
-                            role: 'user',
-                            created_at: new Date().toISOString()
-                        };
-
-                        const { data: createdProfile, error: createError } = await supabase
-                            .from('profiles')
-                            .insert([newProfile])
-                            .select()
-                            .single();
-
-                        if (createError) {
-                            console.error('Error creando perfil:', createError);
-                        } else {
-                            profile = createdProfile;
-                            console.log('✅ Perfil creado exitosamente');
-                        }
-                    }
+                        .maybeSingle();
 
                     if (profile) {
                         setUser({
                             username: session.user.email?.split('@')[0] || 'User',
-                            role: profile.role || 'user',
-                            name: profile.full_name || session.user.email?.split('@')[0] || 'User',
-                            avatarUrl: profile.avatar_url
-                        });
-                        console.log('✅ Usuario cargado:', profile.full_name);
-                    }
-                }
-            } catch (error) {
-                console.error('❌ Error initializing auth:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        initAuth();
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log(`🔐 Evento de Autenticación: ${event}`);
-
-            if (session?.user) {
-                // Si ya tenemos el perfil y no es un login fresco, evitamos re-fetching
-                if (userRef.current && event !== 'SIGNED_IN' && event !== 'TOKEN_REFRESHED') {
-                    return;
-                }
-
-                setIsSyncing(true);
-                try {
-                    let { data: profile, error } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', session.user.id)
-                        .maybeSingle(); // maybeSingle es más resiliente que single()
-
-                    if (!profile || error) {
-                        console.log('📝 Perfil no detectado, intentando crear uno...');
-                        const newProfile = {
-                            id: session.user.id,
-                            email: session.user.email,
-                            full_name: session.user.email?.split('@')[0] || 'User',
-                            role: 'user',
-                            created_at: new Date().toISOString()
-                        };
-
-                        const { data: createdProfile, error: createError } = await supabase
-                            .from('profiles')
-                            .insert([newProfile])
-                            .select()
-                            .single();
-
-                        if (createError) throw createError;
-                        profile = createdProfile;
-                    }
-
-                    if (profile) {
-                        const newUser: User = {
-                            username: session.user.email?.split('@')[0] || 'User',
                             role: (profile.role as any) || 'user',
                             name: profile.full_name || session.user.email?.split('@')[0] || 'User',
                             avatarUrl: profile.avatar_url
-                        };
-                        setUser(newUser);
-                        console.log('✅ Sesión y perfil sincronizados correctamente');
+                        });
+                    } else {
+                        // Fail-safe: Si no hay perfil aún, permitir entrada con datos de sesión
+                        setUser({
+                            username: session.user.email?.split('@')[0] || 'User',
+                            role: 'user',
+                            name: session.user.email?.split('@')[0] || 'User',
+                        });
                     }
                 } catch (err) {
-                    console.error('❌ Error crítico en sincronización de perfil:', err);
-                    // Si falla el perfil crítico, podemos decidir si dejamos entrar o no
-                    // Por ahora reseteamos para forzar re-login si es necesario
-                } finally {
-                    setIsSyncing(false);
+                    console.error('❌ [Auth] Error sincronizando perfil:', err);
+                    // Entrar de todas formas para no bloquear al usuario
+                    setUser({
+                        username: session.user.email?.split('@')[0] || 'User',
+                        role: 'user',
+                        name: session.user.email?.split('@')[0] || 'User',
+                    });
                 }
-            } else if (event === 'SIGNED_OUT') {
+            } else {
                 setUser(null);
-                setIsSyncing(false);
             }
+
+            // Garantizamos que tras el primer evento exitoso de sesión o fallo, loading sea false
+            setLoading(false);
         });
 
         return () => subscription.unsubscribe();
@@ -162,10 +81,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await supabase.auth.signOut();
             setUser(null);
         } catch (error) {
-            console.error('Error signing out:', error);
-            // Aun si hay error, forzamos la limpieza local
             setUser(null);
-            throw error;
+            console.error('Error signing out:', error);
         }
     };
 
@@ -174,7 +91,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading: loading || isSyncing, signIn, signUp, signOut, updateUser }}>
+        <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
