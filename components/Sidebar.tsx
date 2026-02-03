@@ -1,17 +1,14 @@
-
 import React, { useState } from 'react';
-import { ViewType, UserStats, User } from '../types';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useStats, useAuth } from '../contexts';
 
-interface SidebarProps {
-  onNavigate: (view: ViewType, category?: string, subcategory?: string) => void;
-  currentView: ViewType;
-  selectedCategory?: string;
-  selectedSubcategory?: string;
-  stats: UserStats;
-  user: User | null;
-}
+const Sidebar: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+  const { stats } = useStats();
+  const { user } = useAuth();
 
-const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCategory, selectedSubcategory, stats, user }) => {
   const [expanded, setExpanded] = useState<string[]>(['Derecho Civil']);
 
   const toggleExpand = (cat: string) => {
@@ -51,6 +48,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCate
     }
   ];
 
+  const isExplorerRoute = location.pathname.startsWith('/app/explorer');
+  const selectedCategory = params.category;
+  const selectedSubcategory = params.subcategory;
+
   return (
     <aside className="w-72 border-r border-[#e7ebf3] dark:border-slate-800 bg-white dark:bg-slate-900 p-6 hidden lg:flex flex-col h-[calc(100vh-64px)] sticky top-16 transition-colors duration-300">
       <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
@@ -80,10 +81,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCate
                   {cat.items.map(item => (
                     <button
                       key={item}
-                      onClick={() => onNavigate('explorer', cat.name, item)}
-                      className={`text-left py-2 px-4 text-sm transition-colors ${selectedCategory === cat.name && selectedSubcategory === item && currentView === 'explorer'
-                        ? 'font-semibold text-primary bg-primary/5 dark:bg-primary/10 rounded-r-lg border-l-2 border-primary -ml-[2px]'
-                        : 'text-gray-500 dark:text-slate-500 hover:text-primary'
+                      onClick={() => navigate(`/app/explorer/${encodeURIComponent(cat.name)}/${encodeURIComponent(item)}`)}
+                      className={`text-left py-2 px-4 text-sm transition-colors ${isExplorerRoute &&
+                          selectedCategory === cat.name &&
+                          selectedSubcategory === item
+                          ? 'font-semibold text-primary bg-primary/5 dark:bg-primary/10 rounded-r-lg border-l-2 border-primary -ml-[2px]'
+                          : 'text-gray-500 dark:text-slate-500 hover:text-primary'
                         }`}
                     >
                       {item}
@@ -107,10 +110,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCate
 
         {(user?.role === 'founder' || user?.role === 'admin') && (
           <button
-            onClick={() => onNavigate('community')}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 ${currentView === 'community'
-              ? 'bg-accent-gold text-white border-accent-gold shadow-lg shadow-accent-gold/20'
-              : 'border-accent-gold/30 text-accent-gold hover:bg-accent-gold/5'}`}
+            onClick={() => navigate('/app/community')}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 ${location.pathname === '/app/community'
+                ? 'bg-accent-gold text-white border-accent-gold shadow-lg shadow-accent-gold/20'
+                : 'border-accent-gold/30 text-accent-gold hover:bg-accent-gold/5'}`}
           >
             <span className="material-symbols-outlined">groups</span>
             <span>Espacio Comunidad</span>
@@ -118,7 +121,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, selectedCate
         )}
 
         <button
-          onClick={() => onNavigate('explorer')}
+          onClick={() => navigate('/app/explorer')}
           className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
         >
           <span className="material-symbols-outlined">school</span>

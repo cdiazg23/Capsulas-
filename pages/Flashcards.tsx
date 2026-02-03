@@ -1,114 +1,172 @@
-
 import React, { useState, useMemo } from 'react';
-import { LegalConcept, UserStats } from '../types';
+import { useConcepts } from '../contexts';
 
-interface FlashcardsProps {
-    concepts: LegalConcept[];
-    onBack: () => void;
-    onUpdateStats?: (update: Partial<UserStats>) => void;
-    onLogActivity?: (type: string, description: string) => void;
-}
+const Flashcards: React.FC = () => {
+    const { concepts } = useConcepts();
 
-const Flashcards: React.FC<FlashcardsProps> = ({ concepts, onBack, onUpdateStats, onLogActivity }) => {
+    const safeConcepts = concepts || [];
+    const categories = useMemo(() =>
+        Array.from(new Set(safeConcepts.map(c => c.category))),
+        [safeConcepts]
+    );
+
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [cardLimit, setCardLimit] = useState<number | 'all'>('all');
+    const [isStudying, setIsStudying] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
-    const [performance, setPerformance] = useState({ mal: 0, ok: 0, bien: 0, excelente: 0 });
-    const [isFinished, setIsFinished] = useState(false);
-    const [direction, setDirection] = useState(0); // For slide animations
-    const [earnedXp, setEarnedXp] = useState(0);
 
-    // Mezclar conceptos aleatoriamente al inicio
-    const shuffledConcepts = useMemo(() => {
-        return [...concepts].sort(() => Math.random() - 0.5).slice(0, 15); // Aumentado a 15
-    }, [concepts]);
+    const studySet = useMemo(() => {
+        if (selectedCategories.length === 0) return [];
+        let filtered = safeConcepts.filter(c => selectedCategories.includes(c.category));
 
-    const currentConcept = shuffledConcepts[currentIndex];
+        // Barajar aleatoriamente
+        filtered = [...filtered].sort(() => Math.random() - 0.5);
 
-    const handleNext = (status: 'mal' | 'ok' | 'bien' | 'excelente') => {
-        let xpGain = 0;
-        if (status === 'excelente') xpGain = 20;
-        else if (status === 'bien') xpGain = 10;
-        else if (status === 'ok') xpGain = 5;
-
-        setEarnedXp(prev => prev + xpGain);
-        setPerformance(prev => ({ ...prev, [status]: prev[status] + 1 }));
-
-        // Update stats in parent
-        if (onUpdateStats) {
-            onUpdateStats({ xp: xpGain });
+        // Aplicar límite si no es 'all'
+        if (cardLimit !== 'all' && filtered.length > cardLimit) {
+            return filtered.slice(0, cardLimit);
         }
+        return filtered;
+    }, [safeConcepts, selectedCategories, cardLimit]);
 
-        setDirection(1);
+    const toggleCategory = (category: string) => {
+        setSelectedCategories(prev =>
+            prev.includes(category)
+                ? prev.filter(c => c !== category)
+                : [...prev, category]
+        );
+    };
 
-        if (currentIndex < shuffledConcepts.length - 1) {
+    const startStudying = () => {
+        if (studySet.length > 0) {
+            setIsStudying(true);
+            setCurrentIndex(0);
             setIsFlipped(false);
-            setTimeout(() => {
-                setCurrentIndex(prev => prev + 1);
-                setDirection(0);
-            }, 250);
-        } else {
-            // End of session bonus
-            const bonus = 50;
-            setEarnedXp(prev => prev + bonus);
-            if (onUpdateStats) {
-                onUpdateStats({ xp: bonus, learnedConcepts: 1 });
-            }
-            if (onLogActivity) {
-                onLogActivity('session', `Completó sesión de 15 flashcards (+50 XP Bono)`);
-            }
-            setIsFinished(true);
         }
     };
 
-    if (shuffledConcepts.length === 0) {
+    const nextCard = () => {
+        if (currentIndex < studySet.length - 1) {
+            setCurrentIndex(prev => prev + 1);
+            setIsFlipped(false);
+        }
+    };
+
+    const prevCard = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+            setIsFlipped(false);
+        }
+    };
+
+    const currentCard = studySet[currentIndex];
+
+    if (isStudying && currentCard) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-                <p className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest text-xs">Sin contenido disponible</p>
-                <button onClick={onBack} className="mt-4 text-primary font-bold hover:underline">Regresar al Inicio</button>
-            </div>
-        );
-    }
-
-    if (isFinished) {
-        return (
-            <div className="max-w-2xl mx-auto py-10 text-center animate-in zoom-in duration-500">
-                <div className="bg-white dark:bg-slate-900 p-12 rounded-[3rem] shadow-2xl border border-gray-100 dark:border-slate-800">
-                    <div className="size-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span className="material-symbols-outlined text-5xl font-black">celebration</span>
+            <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-4xl font-black dark:text-white mb-2">Modo Flashcards</h1>
+                        <p className="text-gray-500 dark:text-slate-400">
+                            Tarjeta {currentIndex + 1} de {studySet.length}
+                        </p>
                     </div>
-                    <h2 className="text-4xl font-black mb-2 text-slate-900 dark:text-white">¡Reto Terminado!</h2>
+                    <button
+                        onClick={() => setIsStudying(false)}
+                        className="px-6 py-3 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-slate-700 transition-all font-sans"
+                    >
+                        Salir
+                    </button>
+                </div>
 
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary text-white rounded-full text-sm font-black mb-8 animate-bounce shadow-lg shadow-primary/30">
-                        <span className="material-symbols-outlined text-sm">stars</span>
-                        GANASTE +{earnedXp} XP
+                {/* Progress Bar */}
+                <div className="mb-8">
+                    <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-primary transition-all duration-300"
+                            style={{ width: `${((currentIndex + 1) / studySet.length) * 100}%` }}
+                        />
                     </div>
+                </div>
 
-                    <p className="text-slate-500 dark:text-slate-400 mb-10 font-medium">Has repasado {shuffledConcepts.length} conceptos del examen de grado.</p>
+                {/* Flashcard */}
+                <div
+                    onClick={() => setIsFlipped(!isFlipped)}
+                    className="relative h-96 cursor-pointer mb-8 perspective-1000"
+                >
+                    <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                        {/* Front */}
+                        <div className="absolute w-full h-full backface-hidden">
+                            <div className="h-full bg-white dark:bg-slate-900 rounded-3xl border-2 border-gray-200 dark:border-slate-800 p-12 flex flex-col items-center justify-center shadow-xl">
+                                <span className="px-4 py-2 rounded-lg bg-primary/10 text-primary text-xs font-black uppercase tracking-wider mb-6">
+                                    {currentCard.subcategory}
+                                </span>
+                                <h2 className="text-4xl font-black text-center dark:text-white mb-4 leading-tight">
+                                    {currentCard.concept}
+                                </h2>
+                                <p className="text-sm text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest font-mono">
+                                    {currentCard.id}
+                                </p>
+                                <div className="absolute bottom-8 text-sm text-gray-400 dark:text-slate-500 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-lg">touch_app</span>
+                                    <span>Toca para ver la definición</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div className="grid grid-cols-4 gap-4 mb-12">
-                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/30">
-                            <p className="text-xl font-black text-red-600 dark:text-red-400">{performance.mal}</p>
-                            <p className="text-[9px] font-black uppercase text-red-700/60 dark:text-red-300/60">Mal</p>
+                        {/* Back */}
+                        <div className="absolute w-full h-full backface-hidden rotate-y-180">
+                            <div className="h-full bg-primary text-white rounded-3xl border-2 border-primary p-12 flex flex-col justify-center shadow-xl">
+                                <span className="text-xs font-black uppercase tracking-wider mb-4 opacity-80">
+                                    Definición
+                                </span>
+                                <p className="text-lg leading-relaxed mb-6 font-medium">
+                                    {currentCard.definitionSimple}
+                                </p>
+                                {currentCard.regulation && (
+                                    <div className="mt-auto pt-6 border-t border-white/20">
+                                        <p className="text-xs font-bold uppercase tracking-wider mb-2 opacity-80">
+                                            Regulación
+                                        </p>
+                                        <p className="text-sm opacity-90">
+                                            {currentCard.regulation}
+                                        </p>
+                                    </div>
+                                )}
+                                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-sm opacity-80 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-lg">touch_app</span>
+                                    <span>Toca para volver</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="bg-orange-50 dark:bg-orange-950/20 p-4 rounded-2xl border border-orange-100 dark:border-orange-900/30">
-                            <p className="text-xl font-black text-orange-600 dark:text-orange-400">{performance.ok}</p>
-                            <p className="text-[9px] font-black uppercase text-orange-700/60 dark:text-orange-300/60">Reg.</p>
-                        </div>
-                        <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-2xl border border-green-100 dark:border-green-900/30">
-                            <p className="text-xl font-black text-green-600 dark:text-green-400">{performance.bien}</p>
-                            <p className="text-[9px] font-black uppercase text-green-700/60 dark:text-green-300/60">Bien</p>
-                        </div>
-                        <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/30">
-                            <p className="text-xl font-black text-blue-600 dark:text-blue-400">{performance.excelente}</p>
-                            <p className="text-[9px] font-black uppercase text-blue-700/60 dark:text-blue-300/60">Exc.</p>
-                        </div>
+                    </div>
+                </div>
+
+                {/* Navigation */}
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={prevCard}
+                        disabled={currentIndex === 0}
+                        className="flex items-center gap-2 px-6 py-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary transition-all dark:text-white"
+                    >
+                        <span className="material-symbols-outlined">arrow_back</span>
+                        <span>Anterior</span>
+                    </button>
+
+                    <div className="text-center hidden md:block">
+                        <p className="text-sm text-gray-500 dark:text-slate-400 font-bold">
+                            {selectedCategories.join(', ')}
+                        </p>
                     </div>
 
                     <button
-                        onClick={onBack}
-                        className="w-full py-5 bg-slate-900 dark:bg-primary text-white font-black rounded-2xl shadow-xl hover:bg-slate-800 dark:hover:bg-primary-dark transition-all active:scale-95"
+                        onClick={nextCard}
+                        disabled={currentIndex === studySet.length - 1}
+                        className="flex items-center gap-2 px-6 py-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary transition-all dark:text-white"
                     >
-                        VOLVER AL DASHBOARD
+                        <span>Siguiente</span>
+                        <span className="material-symbols-outlined">arrow_forward</span>
                     </button>
                 </div>
             </div>
@@ -116,137 +174,109 @@ const Flashcards: React.FC<FlashcardsProps> = ({ concepts, onBack, onUpdateStats
     }
 
     return (
-        <div className="max-w-xl mx-auto py-6 md:py-10 px-4">
-            <div className="flex items-center justify-between mb-10">
-                <button onClick={onBack} className="flex items-center gap-2 text-slate-400 dark:text-slate-500 hover:text-primary transition-all">
-                    <span className="material-symbols-outlined text-2xl">arrow_back</span>
-                    <span className="text-xs font-black uppercase tracking-widest hidden sm:inline">Dashboard</span>
-                </button>
-                <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-3 mb-2">
-                        <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Progreso</span>
-                        <div className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-black">
-                            {currentIndex + 1} / {shuffledConcepts.length}
-                        </div>
-                    </div>
-                    <div className="w-40 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-primary transition-all duration-700 ease-out"
-                            style={{ width: `${((currentIndex + 1) / shuffledConcepts.length) * 100}%` }}
-                        ></div>
-                    </div>
-                </div>
-            </div>
-
-            <div
-                className={`w-full aspect-[4/5] sm:aspect-square md:aspect-[4/3] cursor-pointer transition-all duration-300 ${direction !== 0 ? 'opacity-0 scale-95 translate-y-4' : 'opacity-100'}`}
-                style={{ perspective: '2000px' }}
-                onClick={() => setIsFlipped(!isFlipped)}
-            >
-                <div
-                    className="relative w-full h-full transition-transform duration-700"
-                    style={{
-                        transformStyle: 'preserve-3d',
-                        transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-                    }}
-                >
-                    {/* Front: Concept Name */}
-                    <div className="absolute inset-0 bg-white dark:bg-slate-900 rounded-[3rem] p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-none border border-gray-100 dark:border-slate-800 flex flex-col items-center justify-center text-center overflow-hidden" style={{ backfaceVisibility: 'hidden' }}>
-                        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary to-indigo-500"></div>
-
-                        <div className="mb-6 flex flex-col items-center gap-2">
-                            <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] rounded-full mb-2">
-                                {currentConcept.category} • {currentConcept.subcategory}
-                            </span>
-                            <span className="text-[11px] font-black text-primary dark:text-primary-light uppercase tracking-[0.3em] opacity-60">Pregunta:</span>
-                        </div>
-
-                        <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tight mb-4 text-balance">
-                            ¿Qué es {currentConcept.concept.toLowerCase().startsWith('el') || currentConcept.concept.toLowerCase().startsWith('la') ? '' : 'el '}{currentConcept.concept}?
-                        </h2>
-
-                        <div className="absolute bottom-12 px-6 py-2 bg-slate-50 dark:bg-slate-800 rounded-full text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest animate-pulse border border-slate-100 dark:border-slate-700">
-                            Haz click para ver respuesta
-                        </div>
-                    </div>
-
-                    {/* Back: Detailed Definition */}
-                    <div
-                        className="absolute inset-0 bg-[#0f172a] dark:bg-slate-950 text-white rounded-[3rem] p-10 shadow-2xl flex flex-col overflow-hidden border border-white/5"
-                        style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-                    >
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center gap-2">
-                                <div className="size-2 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
-                                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Definición Técnica</span>
-                            </div>
-                            <span className="material-symbols-outlined text-white/20 text-3xl">gavel</span>
-                        </div>
-
-                        <div className="mb-6">
-                            <h3 className="text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-1">Concepto:</h3>
-                            <p className="text-xl font-black text-white tracking-tight">{currentConcept.concept}</p>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto custom-scrollbar-dark pr-4 flex flex-col">
-                            <div className="relative mb-6">
-                                <p className="text-xl md:text-2xl font-bold leading-relaxed tracking-tight text-slate-50 italic">
-                                    "{currentConcept.definitionSimple}"
-                                </p>
-                            </div>
-
-                            <div className="mt-auto pt-6 border-t border-white/10 space-y-4">
-                                <div className="p-5 bg-white/5 rounded-2xl border border-white/5">
-                                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-sm">lightbulb</span>
-                                        Ejemplo Práctico
-                                    </p>
-                                    <p className="text-sm text-slate-400 leading-relaxed font-medium">
-                                        {currentConcept.realExample}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="mt-10 grid grid-cols-4 gap-3 opacity-100">
-                <button
-                    onClick={(e) => { e.stopPropagation(); handleNext('mal'); }}
-                    className="flex flex-col items-center gap-2 p-4 bg-[#4a0e0e] border-2 border-[#631717] rounded-2xl hover:bg-[#5a1313] transition-all active:scale-95 group"
-                >
-                    <span className="material-symbols-outlined text-red-500 text-3xl">sentiment_very_dissatisfied</span>
-                    <span className="text-[10px] font-black text-white uppercase tracking-wider">Mal</span>
-                </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); handleNext('ok'); }}
-                    className="flex flex-col items-center gap-2 p-4 bg-[#4a2f0e] border-2 border-[#633f17] rounded-2xl hover:bg-[#5a3a13] transition-all active:scale-95 group"
-                >
-                    <span className="material-symbols-outlined text-orange-500 text-3xl">sentiment_neutral</span>
-                    <span className="text-[10px] font-black text-white uppercase tracking-wider">OK</span>
-                </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); handleNext('bien'); }}
-                    className="flex flex-col items-center gap-2 p-4 bg-[#0e3a1e] border-2 border-[#17522a] rounded-2xl hover:bg-[#134926] transition-all active:scale-95 group"
-                >
-                    <span className="material-symbols-outlined text-green-500 text-3xl">sentiment_satisfied</span>
-                    <span className="text-[10px] font-black text-white uppercase tracking-wider">Bien</span>
-                </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); handleNext('excelente'); }}
-                    className="flex flex-col items-center gap-2 p-4 bg-[#0e1e4a] border-2 border-[#172a63] rounded-2xl hover:bg-[#13265a] transition-all active:scale-95 group"
-                >
-                    <span className="material-symbols-outlined text-blue-500 text-3xl">sentiment_very_satisfied</span>
-                    <span className="text-[10px] font-black text-white uppercase tracking-wider">Excelente</span>
-                </button>
-            </div>
-
-            <div className={`mt-8 text-center flex flex-col gap-2 transition-opacity duration-500 opacity-100`}>
-                <p className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-[0.3em] flex items-center justify-center gap-2">
-                    <span className="material-symbols-outlined text-xs">touch_app</span>
-                    Click en la tarjeta para ver respuesta
+        <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
+            <div className="mb-10">
+                <h1 className="text-4xl font-black mb-2 dark:text-white tracking-tight">Flashcards</h1>
+                <p className="text-gray-500 dark:text-slate-400 text-lg">
+                    Personaliza tu sesión de estudio para dominar los conceptos legales.
                 </p>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Category Selection */}
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 p-8 shadow-sm">
+                        <h2 className="text-xl font-black mb-6 dark:text-white flex items-center gap-3">
+                            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                <span className="material-symbols-outlined">category</span>
+                            </div>
+                            1. Selecciona Categorías
+                        </h2>
+                        <div className="flex flex-wrap gap-3">
+                            {categories.map(cat => {
+                                const count = safeConcepts.filter(c => c.category === cat).length;
+                                const isSelected = selectedCategories.includes(cat);
+
+                                return (
+                                    <button
+                                        key={cat}
+                                        onClick={() => toggleCategory(cat)}
+                                        className={`px-5 py-3 rounded-2xl font-black transition-all border-2 text-sm ${isSelected
+                                                ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                                : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border-gray-100 dark:border-slate-800 hover:border-primary/50'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {isSelected && (
+                                                <span className="material-symbols-outlined text-lg">check_circle</span>
+                                            )}
+                                            <span>{cat}</span>
+                                            <span className={`text-[10px] ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>({count})</span>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Quantity Selection */}
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 p-8 shadow-sm">
+                        <h2 className="text-xl font-black mb-6 dark:text-white flex items-center gap-3">
+                            <div className="size-10 rounded-xl bg-accent-gold/10 flex items-center justify-center text-accent-gold">
+                                <span className="material-symbols-outlined">list_alt</span>
+                            </div>
+                            2. Cantidad por Sesión
+                        </h2>
+                        <div className="flex gap-4">
+                            {[5, 10, 20, 'all'].map((limit) => (
+                                <button
+                                    key={limit}
+                                    onClick={() => setCardLimit(limit as number | 'all')}
+                                    className={`flex-1 py-4 rounded-2xl font-black transition-all border-2 ${cardLimit === limit
+                                            ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xl'
+                                            : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-100 dark:border-slate-800 hover:border-primary/50'
+                                        }`}
+                                >
+                                    {limit === 'all' ? 'Todos' : limit}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Summary & Start */}
+                <div className="space-y-6">
+                    <div className="bg-primary dark:bg-primary rounded-3xl p-8 text-white shadow-xl shadow-primary/20 sticky top-8">
+                        <span className="material-symbols-outlined text-4xl mb-4">analytics</span>
+                        <h3 className="text-2xl font-black mb-4">Resumen de Sesión</h3>
+
+                        <div className="space-y-4 mb-8">
+                            <div className="flex justify-between items-center text-white/70">
+                                <span className="text-sm font-bold uppercase tracking-wider">Conceptos</span>
+                                <span className="text-xl font-black text-white">{studySet.length}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-white/70">
+                                <span className="text-sm font-bold uppercase tracking-wider">Categorías</span>
+                                <span className="text-xl font-black text-white">{selectedCategories.length}</span>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={startStudying}
+                            disabled={studySet.length === 0}
+                            className="w-full py-4 bg-white text-primary rounded-2xl font-black text-lg hover:bg-slate-50 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">play_arrow</span>
+                            <span>Comenzar Sesión</span>
+                        </button>
+
+                        {studySet.length === 0 && (
+                            <p className="text-white/60 text-[10px] text-center mt-4 font-black uppercase tracking-widest">
+                                Selecciona categorías para empezar
+                            </p>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );

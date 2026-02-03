@@ -1,14 +1,10 @@
 
 import React, { useState, useRef } from 'react';
-import { LegalConcept, UserStats, User } from '../types';
+import { useAuth, useStats } from '../contexts';
 
-interface ProfileProps {
-  stats: UserStats;
-  user: User | null;
-  onUpdateUser: (user: User) => void;
-}
-
-const Profile: React.FC<ProfileProps> = ({ stats, user, onUpdateUser }) => {
+const Profile: React.FC = () => {
+  const { user, updateUser } = useAuth();
+  const { stats } = useStats();
   const [activeModal, setActiveModal] = useState<'edit' | 'ranking' | 'badges' | null>(null);
   const [editData, setEditData] = useState({
     name: user?.name || '',
@@ -41,7 +37,7 @@ const Profile: React.FC<ProfileProps> = ({ stats, user, onUpdateUser }) => {
 
   const handleSaveProfile = () => {
     if (user) {
-      onUpdateUser({
+      updateUser({
         ...user,
         name: editData.name,
         university: editData.university,

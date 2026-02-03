@@ -1,27 +1,61 @@
-
 import React, { useState, useMemo } from 'react';
-import { UserStats, LegalConcept, ViewType } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { useStats, useConcepts, useAuth } from '../contexts';
+import { useActivityLog } from '../hooks';
+import { LegalConcept } from '../types';
 
-interface DashboardProps {
-  onSelectConcept: (c: LegalConcept) => void;
-  navigateTo: (view: ViewType, concept?: any, category?: string, subcategory?: string) => void;
-  stats: UserStats;
-  concepts: LegalConcept[];
-  activityLogs: any[];
-}
+const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { stats } = useStats();
+  const { concepts, loading: conceptsLoading, error: conceptsError } = useConcepts();
+  const { activityLogs } = useActivityLog();
 
-const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateTo, concepts, activityLogs }) => {
+  // Show loading state while concepts are loading
+  if (conceptsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400 font-bold">Cargando conceptos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if concepts failed to load
+  if (conceptsError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center max-w-md">
+          <span className="material-symbols-outlined text-6xl text-red-500 mb-4">error</span>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Error al cargar conceptos</h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-4">{conceptsError.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const [searchText, setSearchText] = useState('');
   const [showResults, setShowResults] = useState(false);
 
-  const conceptOfTheDay = useMemo(() => concepts[0] || {} as LegalConcept, [concepts]);
+  // Safety check: ensure concepts is always an array
+  const safeСoncepts = concepts || [];
+
+  const conceptOfTheDay = useMemo(() => safeСoncepts[0] || {} as LegalConcept, [safeСoncepts]);
 
   const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   const searchResults = useMemo(() => {
-    if (searchText.trim().length < 2 || concepts.length === 0) return [];
+    if (searchText.trim().length < 2 || safeСoncepts.length === 0) return [];
     const term = normalize(searchText);
-    return concepts.filter(c =>
+    return safeСoncepts.filter(c =>
       normalize(c.concept).includes(term) ||
       normalize(c.id).includes(term) ||
       normalize(c.subcategory).includes(term) ||
@@ -31,13 +65,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
       normalize(c.jurisprudence).includes(term) ||
       term.includes(normalize(c.concept))
     ).slice(0, 6);
-  }, [searchText, concepts]);
+  }, [searchText, safeСoncepts]);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchResults.length > 0) {
-      onSelectConcept(searchResults[0]);
+  const handleConceptClick = (concept: LegalConcept) => {
+    // Verificar límite para usuarios gratuitos antes de navegar
+    if (user?.role === 'user' && stats.consultationsToday >= 10) {
+      const today = new Date().toDateString();
+      const lastDate = stats.lastConsultationAt ? new Date(stats.lastConsultationAt).toDateString() : '';
+
+      if (today === lastDate) {
+        navigate('/pricing');
+        return;
+      }
     }
+    navigate(`/app/concept/${concept.id}`);
   };
 
   const categories = useMemo(() => {
@@ -54,9 +95,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
 
     return cats.map(cat => ({
       ...cat,
-      count: concepts.filter(c => c.category === cat.name).length
+      count: safeСoncepts.filter(c => c.category === cat.name).length
     }));
-  }, [concepts]);
+  }, [safeСoncepts]);
 
   const userRank = useMemo(() => {
     if (stats.level >= 13) return { name: 'Magistrado de la Corte', color: 'text-indigo-600', bg: 'bg-indigo-50', icon: 'gavel', border: 'border-indigo-100' };
@@ -64,6 +105,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
     if (stats.level >= 4) return { name: 'Licenciado en Derecho', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'school', border: 'border-emerald-100' };
     return { name: 'Estudiante de Derecho', color: 'text-slate-600', bg: 'bg-slate-50', icon: 'history_edu', border: 'border-slate-200' };
   }, [stats.level]);
+
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'concept': return 'task_alt';
@@ -149,8 +191,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
           </div>
           <div>
             <p className="text-gray-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Racha de Repaso</p>
-            <p className="text-4xl font-black text-slate-900 dark:text-white mb-4">{stats.streak} <span className="text-lg text-slate-300 dark:text-slate-700">Días</span></p>
-            <p className="text-orange-500 text-[9px] font-black uppercase tracking-[0.15em]">¡No rompas el ciclo!</p>
+            <p className="text-4xl font-black text-slate-900 dark:text-white mb-2">{stats.streak} <span className="text-lg text-slate-300 dark:text-slate-700">Días</span></p>
+            {user?.role === 'user' && (
+              <div className="mt-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
+                <span>Límite Diario</span>
+                <span className={stats.consultationsToday >= 10 ? 'text-red-500' : 'text-primary'}>
+                  {stats.consultationsToday} / 10
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -158,7 +207,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
       {/* Main Content */}
       <div className="flex flex-col items-center max-w-2xl mx-auto mb-16 text-center">
         <h1 className="text-4xl md:text-5xl font-black leading-tight mb-8 dark:text-white">¿Qué concepto jurídico quieres <span className="text-primary italic">dominar</span> hoy?</h1>
-        <form onSubmit={(e) => { e.preventDefault(); if (searchResults.length > 0) onSelectConcept(searchResults[0]); }} className="w-full relative group">
+        <form onSubmit={(e) => { e.preventDefault(); if (searchResults.length > 0 && searchResults[0]) handleConceptClick(searchResults[0]); }} className="w-full relative group">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-2xl group-focus-within:text-primary transition-colors">search</span>
           <input
             type="text"
@@ -181,7 +230,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
                     <button
                       key={result.id}
                       onClick={() => {
-                        onSelectConcept(result);
+                        handleConceptClick(result);
                         setShowResults(false);
                         setSearchText('');
                       }}
@@ -217,14 +266,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-black tracking-tight dark:text-white">Categorías Principales</h2>
-            <button onClick={() => navigateTo('explorer')} className="text-primary text-sm font-bold hover:underline">Ver todas</button>
+            <button onClick={() => navigate('/app/explorer')} className="text-primary text-sm font-bold hover:underline">Ver todas</button>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {categories.map(cat => (
               <div
                 key={cat.name}
                 className="group flex items-center p-5 bg-white dark:bg-slate-900 rounded-2xl border border-transparent dark:border-slate-800 hover:border-primary/30 shadow-sm hover:shadow-xl transition-all cursor-pointer"
-                onClick={() => navigateTo('explorer', undefined, cat.name)}
+                onClick={() => navigate(`/app/explorer/${encodeURIComponent(cat.name)}`)}
               >
                 <div className={`size-14 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-primary mr-4 group-hover:scale-110 transition-transform`}>
                   <span className="material-symbols-outlined text-2xl">{cat.icon}</span>
@@ -243,7 +292,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
             <h4 className="font-bold text-sm mb-4 uppercase tracking-wider text-gray-400 dark:text-slate-500">Actividad Reciente</h4>
             <div className="space-y-4">
               {activityLogs.length > 0 ? (
-                activityLogs.map((log, i) => (
+                activityLogs.slice(0, 5).map((log, i) => (
                   <div key={i} className="flex gap-3 animate-in slide-in-from-right-2 duration-300" style={{ animationDelay: `${i * 100}ms` }}>
                     <div className="mt-1 size-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500">
                       <span className="material-symbols-outlined text-lg">{getActivityIcon(log.type)}</span>
@@ -262,7 +311,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
               )}
             </div>
           </div>
-          <div className="bg-gradient-to-br from-indigo-600 to-primary text-white rounded-[2.5rem] p-10 shadow-xl relative overflow-hidden group cursor-pointer" onClick={() => navigateTo('flashcards')}>
+
+          <div className="bg-gradient-to-br from-indigo-600 to-primary text-white rounded-[2.5rem] p-10 shadow-xl relative overflow-hidden group cursor-pointer" onClick={() => navigate('/app/flashcards')}>
             <div className="absolute top-[-10%] right-[-10%] opacity-10 group-hover:scale-110 transition-transform duration-700 rotate-12">
               <span className="material-symbols-outlined text-[150px]">style</span>
             </div>
@@ -291,12 +341,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectConcept, stats, navigateT
                 <span className="material-symbols-outlined text-sm">auto_awesome</span>
                 <span className="text-xs font-black uppercase tracking-widest">Concepto del día</span>
               </div>
-              <h3 className="text-2xl font-black mb-4 italic leading-tight">"{conceptOfTheDay.concept}"</h3>
+              <h3 className="text-2xl font-black mb-4 italic leading-tight">"{conceptOfTheDay.concept || 'Cargando...'}"</h3>
               <p className="text-slate-400 dark:text-slate-500 text-sm leading-relaxed mb-8 line-clamp-2">
-                {conceptOfTheDay.definitionSimple}
+                {conceptOfTheDay.definitionSimple || 'Cargando conceptos...'}
               </p>
               <button
-                onClick={() => onSelectConcept(conceptOfTheDay)}
+                onClick={() => conceptOfTheDay.id && handleConceptClick(conceptOfTheDay)}
                 className="w-full bg-white/10 hover:bg-white/20 py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all backdrop-blur-sm dark:bg-primary/20 dark:hover:bg-primary/30"
               >
                 Estudiar ahora

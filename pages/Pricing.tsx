@@ -1,26 +1,20 @@
-
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-interface PricingPageProps {
-    onBack?: () => void;
-    onSelectFree: () => void;
-}
-
-const Pricing: React.FC<PricingPageProps> = ({ onBack, onSelectFree }) => {
+const Pricing: React.FC = () => {
+    const navigate = useNavigate();
     const kofiUrl = "https://ko-fi.com/capsulasdederecho";
 
     return (
         <div className="min-h-screen bg-slate-50 py-20 px-6">
             <div className="max-w-5xl mx-auto">
-                {onBack && (
-                    <button
-                        onClick={onBack}
-                        className="flex items-center gap-2 text-slate-500 hover:text-primary mb-12 transition-colors font-bold group"
-                    >
-                        <span className="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back</span>
-                        Volver
-                    </button>
-                )}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-2 text-slate-500 hover:text-primary mb-12 transition-colors font-bold group"
+                >
+                    <span className="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    Volver
+                </button>
 
                 <div className="text-center mb-20">
                     <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Impulsa tu carrera, <br /><span className="text-primary italic">apoya la educación</span></h1>
@@ -41,77 +35,79 @@ const Pricing: React.FC<PricingPageProps> = ({ onBack, onSelectFree }) => {
                             </div>
                         </div>
 
-                        <ul className="space-y-4 mb-10 flex-1">
-                            {[
-                                { icon: 'check_circle', text: 'Acceso a todo el glosario' },
-                                { icon: 'check_circle', text: 'Límite de 10 consultas diarias' },
-                                { icon: 'check_circle', text: 'Seguimiento de XP básico' },
-                            ].map((item, i) => (
-                                <li key={i} className="flex items-center gap-3 text-slate-600">
-                                    <span className="material-symbols-outlined text-emerald-500 text-xl">{item.icon}</span>
-                                    <span className="font-medium">{item.text}</span>
+                        <p className="text-slate-600 leading-relaxed mb-10 text-sm">
+                            Acceso completo al glosario y todas las funciones principales. Perfecto para empezar a estudiar derecho hoy mismo.
+                        </p>
+
+                        <ul className="space-y-4 mb-12">
+                            {['Glosario Completo de Conceptos Legales', 'Sistema de XP, Niveles y Logros', 'Búsqueda Avanzada', 'Modo Estudio', 'Dark Mode', 'Actualizaciones Continuas'].map((feature) => (
+                                <li key={feature} className="flex items-start gap-3">
+                                    <span className="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                    <span className="text-slate-700 text-sm font-medium">{feature}</span>
                                 </li>
                             ))}
                         </ul>
 
                         <button
-                            onClick={onSelectFree}
-                            className="w-full py-4 px-6 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 hover:bg-slate-50 transition-all"
+                            onClick={() => navigate('/login')}
+                            className="mt-auto w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-lg hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
                         >
                             Empezar Gratis
                         </button>
                     </div>
 
-                    {/* Plan Donante */}
-                    <div className="bg-slate-900 rounded-[2.5rem] p-10 relative overflow-hidden flex flex-col transform hover:scale-[1.02] transition-all duration-300">
-                        {/* Decorative background gradient */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+                    {/* Plan Founder */}
+                    <div className="gradient-primary text-white rounded-[2.5rem] p-10 shadow-2xl shadow-primary/20 flex flex-col relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[100px] -mr-32 -mt-32"></div>
+                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent-gold/20 rounded-full blur-[80px] -ml-24 -mb-24"></div>
 
                         <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-8">
-                                <div>
-                                    <span className="bg-primary text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">Recomendado</span>
-                                    <h3 className="text-2xl font-black text-white mt-4">Socio Fundador</h3>
-                                    <p className="text-slate-400 font-medium">Donación voluntaria</p>
-                                </div>
-                                <div className="bg-primary/20 text-primary size-12 rounded-2xl flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-2xl">favorite</span>
+                            <span className="bg-white/20 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">Socio Fundador</span>
+                            <h3 className="text-2xl font-black mt-4">Founder</h3>
+                            <div className="flex flex-col mt-2">
+                                <span className="text-4xl font-black">Dona lo que quieras</span>
+                                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-accent-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest w-fit animate-pulse shadow-lg shadow-accent-gold/20">
+                                    <span className="material-symbols-outlined text-sm">schedule</span>
+                                    Cualquier monto = 3 meses Founder
                                 </div>
                             </div>
-
-                            <ul className="space-y-4 mb-10 flex-1">
-                                {[
-                                    { icon: 'quiz', text: 'Quizzes y Flashcards ilimitados' },
-                                    { icon: 'workspace_premium', text: 'Insignia de Socio Fundador' },
-                                    { icon: 'bolt', text: 'Funciones exclusivas' },
-                                    { icon: 'rocket_launch', text: 'Acceso anticipado a contenido' },
-                                ].map((item, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-slate-300">
-                                        <span className="material-symbols-outlined text-accent-gold text-xl">{item.icon}</span>
-                                        <span className="font-medium">{item.text}</span>
-                                    </li>
-                                ))}
-                            </ul>
-
-
-                            <a
-                                href={kofiUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block text-center w-full py-4 px-6 rounded-2xl bg-primary text-white font-bold shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-1 transition-all"
-                            >
-                                Donar en Ko-fi
-                            </a>
-                            <p className="text-center text-slate-500 text-[10px] mt-4 font-medium uppercase tracking-widest">Seguro vía PayPal / Stripe</p>
                         </div>
+
+                        <p className="text-white/90 leading-relaxed mb-10 text-sm relative z-10 mt-6">
+                            Tu aporte mantiene IurisAcademy independiente. Cualquier donación te otorga 3 meses de acceso completo a todas las funciones Premium y el estatus de Socio Fundador.
+                        </p>
+
+                        <ul className="space-y-4 mb-12 relative z-10">
+                            {[
+                                'Todo lo de Comunidad',
+                                'Badge especial "Founder" en tu perfil',
+                                'Acceso a funciones experimentales',
+                                'Agradecimiento en la sección Comunidad',
+                                'Voto en prioridad de nuevas features',
+                                'Apoyas que la educación legal sea accesible'
+                            ].map((feature) => (
+                                <li key={feature} className="flex items-start gap-3">
+                                    <span className="material-symbols-outlined text-accent-gold text-lg mt-0.5">star</span>
+                                    <span className="text-white/90 text-sm font-medium">{feature}</span>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <a
+                            href={kofiUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-auto w-full py-4 bg-white text-primary rounded-2xl font-black text-lg text-center hover:shadow-2xl transition-all relative z-10"
+                        >
+                            Donar en Ko-fi ☕
+                        </a>
                     </div>
                 </div>
 
-                {/* FAQ o Nota adicional */}
-                <div className="mt-20 glass p-8 rounded-[2rem] border border-white text-center">
-                    <p className="text-slate-600 font-medium">
-                        ¿Tienes dudas sobre cómo funcionan las donaciones? <br />
-                        Escríbenos directamente a <span className="text-primary font-bold">hola@iusacademy.cl</span>
+                <div className="mt-16 text-center">
+                    <p className="text-sm text-slate-500 font-medium mb-4">
+                        ¿Tienes dudas? Encuentra más información en nuestra{' '}
+                        <button className="text-primary font-bold hover:underline">página de inicio</button>.
                     </p>
                 </div>
             </div>

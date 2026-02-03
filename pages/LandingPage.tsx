@@ -1,13 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-interface LandingPageProps {
-  onStart: () => void;
-  onLogin: () => void;
-  onViewPricing: () => void;
-}
-
-const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin, onViewPricing }) => {
+const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -57,7 +52,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin, onViewPrici
             </div>
 
             <div className="hidden md:flex items-center gap-8">
-              <button onClick={onViewPricing} className="text-sm font-bold text-slate-600 hover:text-primary transition-colors flex items-center gap-2">
+              <button onClick={() => navigate('/pricing')} className="text-sm font-bold text-slate-600 hover:text-primary transition-colors flex items-center gap-2">
                 <span className="material-symbols-outlined text-lg text-accent-gold">favorite</span>
                 Apoyar Proyecto
               </button>
@@ -65,10 +60,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin, onViewPrici
             </div>
 
             <div className="flex items-center gap-3">
-              <button onClick={onLogin} className="hidden sm:block text-sm font-bold text-slate-700 hover:bg-slate-100 px-5 py-2.5 rounded-xl transition-all">
+              <button onClick={() => navigate('/login')} className="hidden sm:block text-sm font-bold text-slate-700 hover:bg-slate-100 px-5 py-2.5 rounded-xl transition-all">
                 Iniciar Sesión
               </button>
-              <button onClick={onStart} className="bg-primary text-white px-6 py-3 rounded-xl text-sm font-bold shadow-xl shadow-primary/25 hover:scale-105 active:scale-95 transition-all">
+              <button onClick={() => navigate('/login')} className="bg-primary text-white px-6 py-3 rounded-xl text-sm font-bold shadow-xl shadow-primary/25 hover:scale-105 active:scale-95 transition-all">
                 Prueba Gratis
               </button>
             </div>
@@ -101,7 +96,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin, onViewPrici
           </div>
         </div>
 
-        {/* Hero Section Re-diseñado */}
+        {/* Hero Section */}
         <section className="relative pt-16 pb-24 overflow-hidden">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -121,10 +116,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin, onViewPrici
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
-                  <button onClick={onStart} className="w-full sm:w-auto bg-primary text-white px-10 py-5 rounded-2xl text-lg font-bold shadow-2xl shadow-primary/20 hover:scale-[1.03] active:scale-95 transition-all">
+                  <button onClick={() => navigate('/login')} className="w-full sm:w-auto bg-primary text-white px-10 py-5 rounded-2xl text-lg font-bold shadow-2xl shadow-primary/20 hover:scale-[1.03] active:scale-95 transition-all">
                     Empezar a Estudiar
                   </button>
-                  <button onClick={onViewPricing} className="w-full sm:w-auto flex items-center justify-center gap-3 border-2 border-slate-200 px-10 py-5 rounded-2xl text-lg font-bold text-slate-700 hover:bg-slate-50 transition-all group">
+                  <button onClick={() => navigate('/pricing')} className="w-full sm:w-auto flex items-center justify-center gap-3 border-2 border-slate-200 px-10 py-5 rounded-2xl text-lg font-bold text-slate-700 hover:bg-slate-50 transition-all group">
                     <span className="material-symbols-outlined text-accent-gold group-hover:scale-125 transition-transform">favorite</span>
                     Apoyar Proyecto
                   </button>
@@ -238,7 +233,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin, onViewPrici
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <a href="https://ko-fi.com/capsulasdederecho" target="_blank" className="bg-[#13c3ff] text-white px-8 py-4 rounded-2xl font-bold text-center shadow-lg shadow-blue-200">Visitar mi Ko-fi</a>
-                  <button onClick={onStart} className="text-slate-900 px-8 py-4 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all text-center">Registrarme Gratis</button>
+                  <button onClick={() => navigate('/login')} className="text-slate-900 px-8 py-4 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all text-center">Registrarme Gratis</button>
                 </div>
               </div>
             </div>

@@ -1,26 +1,15 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { UserStats, User, LegalConcept, ViewType } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth, useStats, useTheme, useConcepts } from '../contexts';
 
-interface HeaderProps {
-  user: User | null;
-  stats: UserStats;
-  onProfileClick: () => void;
-  onLogoClick: () => void;
-  onLibraryClick: () => void;
-  onAdminClick: () => void;
-  onPricingClick: () => void;
-  onSelectConcept: (c: LegalConcept) => void;
-  onLogout: () => void;
-  concepts: LegalConcept[];
-  currentView: ViewType;
-  isDarkMode: boolean;
-  onToggleDarkMode: () => void;
-}
+const Header: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, signOut } = useAuth();
+  const { stats } = useStats();
+  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { concepts } = useConcepts();
 
-const Header: React.FC<HeaderProps> = ({
-  user, stats, onProfileClick, onLogoClick, onLibraryClick, onAdminClick,
-  onPricingClick, onSelectConcept, onLogout, concepts, currentView, isDarkMode, onToggleDarkMode
-}) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -29,11 +18,11 @@ const Header: React.FC<HeaderProps> = ({
   const notificationRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const notifications = [
+  const [notifications, setNotifications] = useState([
     { id: 1, title: '¡Bienvenido a IurisAcademy!', content: 'Empieza a estudiar los conceptos fundamentales del derecho civil.', time: '2h ago', unread: true },
     { id: 2, title: 'Nuevos códigos en Biblioteca', content: 'Hemos actualizado los links de BCN para el Código Civil y CPC.', time: '5h ago', unread: true },
     { id: 3, title: 'Meta alcanzada', content: 'Has completado tus primeros 100 puntos de XP. ¡Sigue así!', time: '1d ago', unread: false },
-  ];
+  ]);
 
   const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -79,11 +68,35 @@ const Header: React.FC<HeaderProps> = ({
     return Math.min(100, (stats.xp / stats.nextLevelXp) * 100);
   }, [stats.xp, stats.nextLevelXp]);
 
+  const handleLogout = async () => {
+    try {
+      setShowMenu(false);
+      await signOut();
+      navigate('/');
+    } catch (err) {
+      console.error('Logout error:', err);
+      // Forzar salida aunque falle Supabase
+      navigate('/');
+    }
+  };
+
+  const handleToggleNotifications = () => {
+    if (!showNotifications) {
+      // Marcar todas como leídas al abrir
+      setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+    }
+    setShowNotifications(!showNotifications);
+  };
+
+  const isActive = (path: string) => location.pathname === path;
+
+  if (!user) return null;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#e7ebf3] dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-3 transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={onLogoClick}>
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/app/dashboard')}>
             <div className="size-8 bg-primary text-white rounded-lg flex items-center justify-center group-hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20">
               <span className="material-symbols-outlined text-xl">balance</span>
             </div>
@@ -92,25 +105,33 @@ const Header: React.FC<HeaderProps> = ({
 
           <nav className="hidden lg:flex items-center gap-8">
             <button
-              onClick={onLogoClick}
-              className={`text-sm font-black uppercase tracking-[0.15em] transition-all pb-1 ${currentView === 'dashboard' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-primary'}`}
+              onClick={() => navigate('/app/dashboard')}
+              className={`text-sm font-black uppercase tracking-[0.15em] transition-all pb-1 ${isActive('/app/dashboard') ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-primary'}`}
             >
               Dashboard
             </button>
             <button
-              onClick={onLibraryClick}
-              className={`text-[11px] font-black uppercase tracking-[0.15em] transition-all ${currentView === 'library' ? 'text-primary' : 'text-gray-500 hover:text-primary'}`}
+              onClick={() => navigate('/app/explorer')}
+              className={`text-sm font-black uppercase tracking-[0.15em] transition-all pb-1 ${isActive('/app/explorer') ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-primary'}`}
+            >
+              Explorer
+            </button>
+            <button
+              onClick={() => navigate('/app/library')}
+              className={`text-sm font-black uppercase tracking-[0.15em] transition-all pb-1 ${isActive('/app/library') ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-primary'}`}
             >
               Biblioteca
             </button>
-            <button onClick={onPricingClick} className="flex items-center gap-2 px-3 py-1.5 bg-accent-gold/10 text-accent-gold rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-accent-gold/20 transition-all border border-accent-gold/20">
-              <span className="material-symbols-outlined text-sm">favorite</span>
-              Apoyar
+            <button
+              onClick={() => navigate('/app/flashcards')}
+              className={`text-sm font-black uppercase tracking-[0.15em] transition-all pb-1 ${isActive('/app/flashcards') ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-primary'}`}
+            >
+              Flashcards
             </button>
-            {user?.role === 'admin' && (
+            {user.role === 'admin' && (
               <button
-                onClick={onAdminClick}
-                className={`text-[11px] font-black uppercase tracking-[0.15em] transition-all ${currentView === 'admin' ? 'text-primary' : 'text-gray-500 hover:text-primary'}`}
+                onClick={() => navigate('/app/admin')}
+                className={`text-sm font-black uppercase tracking-[0.15em] transition-all pb-1 ${isActive('/app/admin') ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-primary'}`}
               >
                 Admin
               </button>
@@ -118,148 +139,194 @@ const Header: React.FC<HeaderProps> = ({
           </nav>
         </div>
 
-        <div className="flex-1 max-w-md mx-8 hidden md:block relative" ref={searchRef}>
-          <div className="relative group">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">search</span>
-            <input
-              type="text"
-              placeholder="Buscar conceptos, códigos..."
-              value={searchText}
-              onChange={(e) => {
-                setSearchText(e.target.value);
-                setShowSearchResults(true);
-              }}
-              onFocus={() => setShowSearchResults(true)}
-              className="w-full h-10 pl-10 pr-4 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-medium focus:bg-white dark:focus:bg-slate-700 focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all dark:text-white"
-            />
+        <div className="flex items-center gap-4">
+          {/* Search */}
+          <div className="relative hidden md:block" ref={searchRef}>
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus-within:border-primary dark:focus-within:border-primary transition-colors">
+              <span className="material-symbols-outlined text-xl text-slate-400">search</span>
+              <input
+                type="text"
+                placeholder="Buscar concepto..."
+                value={searchText}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                  setShowSearchResults(true);
+                }}
+                className="bg-transparent outline-none text-sm text-slate-900 dark:text-white placeholder-slate-400 w-48"
+              />
+            </div>
+
+            {showSearchResults && searchResults.length > 0 && (
+              <div className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-slide-in-top">
+                {searchResults.map((concept) => (
+                  <button
+                    key={concept.id}
+                    onClick={() => {
+                      navigate(`/app/concept/${concept.id}`);
+                      setShowSearchResults(false);
+                      setSearchText('');
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-b border-slate-100 dark:border-slate-700 last:border-0"
+                  >
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">{concept.concept}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{concept.id} • {concept.category}</p>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {showSearchResults && searchText.trim().length >= 2 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 dark:border-slate-700 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2">
-              {searchResults.length > 0 ? (
-                <div className="divide-y divide-gray-50 dark:divide-slate-700 max-h-[400px] overflow-y-auto">
-                  {searchResults.map((result) => (
-                    <button
-                      key={result.id}
-                      onClick={() => {
-                        onSelectConcept(result);
-                        setShowSearchResults(false);
-                        setSearchText('');
-                      }}
-                      className="w-full flex items-center gap-4 p-4 hover:bg-primary/[0.02] dark:hover:bg-primary/[0.05] text-left transition-colors group"
-                    >
-                      <div className="size-10 rounded-xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-primary font-mono text-[10px] font-black border border-slate-100 dark:border-slate-700 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
-                        {result.id.split('-').pop()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-black text-slate-900 dark:text-white group-hover:text-primary truncate">{result.concept}</p>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest truncate">{result.subcategory}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-slate-400">
-                  <span className="material-symbols-outlined text-4xl mb-2 opacity-20">search_off</span>
-                  <p className="text-xs font-black uppercase tracking-widest">Sin resultados</p>
-                </div>
-              )}
+          {/* Concept Limit Counter for Free Users */}
+          {user.role === 'user' && (
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              <span className="material-symbols-outlined text-sm text-primary">visibility</span>
+              <span className={`text-[10px] font-black uppercase tracking-widest ${stats.consultationsToday >= 10 ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>
+                {stats.consultationsToday}/10 Diarios
+              </span>
             </div>
           )}
-        </div>
 
-        <div className="flex items-center gap-5">
-          <div className="hidden sm:flex flex-col items-end gap-1.5">
-            <div className="flex items-center gap-2">
-              <div className={`px-2 py-0.5 ${userRank.color} text-white rounded text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm`}>
-                <span className="material-symbols-outlined text-[12px]">{userRank.icon}</span>
-                {userRank.name}
-              </div>
-              <span className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">LVL {stats.level}</span>
-            </div>
-            <div className="w-24 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700">
-              <div
-                className={`h-full ${userRank.color} transition-all duration-1000 ease-out`}
-                style={{ width: `${xpPercentage}%` }}
-              ></div>
-            </div>
-          </div>
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700 md:block hidden"
+          >
+            <span className="material-symbols-outlined">
+              {isDarkMode ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
 
-          <div className="flex items-center gap-2 border-l border-gray-100 dark:border-slate-800 pl-5">
+          {/* Notifications */}
+          <div className="relative" ref={notificationRef}>
             <button
-              onClick={onToggleDarkMode}
-              className="p-2 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-primary transition-all duration-300 transform active:rotate-180"
-              title={isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'}
+              onClick={handleToggleNotifications}
+              className="relative size-10 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
-              <span className="material-symbols-outlined">
-                {isDarkMode ? 'light_mode' : 'dark_mode'}
-              </span>
+              <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
+              {notifications.some(n => n.unread) && (
+                <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full animate-pulse"></span>
+              )}
             </button>
 
-            <div className="relative" ref={notificationRef}>
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className={`relative p-2 rounded-full transition-all duration-300 ${showNotifications ? 'bg-primary/10 text-primary rotate-12' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-white'}`}
-              >
-                <span className="material-symbols-outlined">notifications</span>
-                <span className="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-              </button>
-
-              {showNotifications && (
-                <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-200">
-                  <div className="p-4 border-b border-gray-50 dark:border-slate-700 flex items-center justify-between">
-                    <h3 className="font-bold text-sm dark:text-white">Notificaciones</h3>
-                    <span className="text-[10px] bg-primary text-white px-2 py-0.5 rounded-full font-black uppercase">2 Nuevas</span>
-                  </div>
-                  <div className="max-h-[350px] overflow-y-auto">
-                    {notifications.map(n => (
-                      <div key={n.id} className={`p-4 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-50 dark:border-slate-700 last:border-0 cursor-pointer relative ${n.unread ? 'bg-primary/[0.02] dark:bg-primary/[0.05]' : ''}`}>
-                        {n.unread && <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-full"></div>}
-                        <p className="text-xs font-bold text-slate-900 dark:text-white mb-0.5">{n.title}</p>
-                        <p className="text-[10px] text-gray-500 dark:text-slate-400 leading-relaxed mb-1.5">{n.content}</p>
-                        <span className="text-[9px] font-bold text-gray-300 dark:text-slate-500 uppercase tracking-widest">{n.time}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button className="w-full py-3 text-[10px] font-black text-primary uppercase tracking-widest hover:bg-primary/5 transition-colors border-t border-gray-50 dark:border-slate-700">
-                    Marcar todas como leídas
-                  </button>
+            {showNotifications && (
+              <div className="absolute top-full mt-2 right-0 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-slide-in-top">
+                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                  <h3 className="font-black text-slate-900 dark:text-white">Notificaciones</h3>
                 </div>
-              )}
-            </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`p-4 border-b border-slate-100 dark:border-slate-700 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${notif.unread ? 'bg-primary/5 dark:bg-primary/10' : ''}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {notif.unread && <span className="size-2 bg-primary rounded-full mt-2 flex-shrink-0"></span>}
+                        <div className="flex-1">
+                          <p className="font-bold text-sm text-slate-900 dark:text-white">{notif.title}</p>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{notif.content}</p>
+                          <p className="text-xs text-slate-400 mt-2">{notif.time}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
-            <div className="relative" ref={menuRef}>
-              <div
-                className="size-10 rounded-full border-2 border-white dark:border-slate-800 shadow-sm bg-center bg-cover cursor-pointer hover:border-primary transition-colors"
-                style={{ backgroundImage: `url("${user?.avatarUrl || 'https://picsum.photos/seed/lawyer/100/100'}")` }}
-                onClick={() => setShowMenu(!showMenu)}
-              />
+          {/* User Menu */}
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <div className="size-10 bg-gradient-gold text-white rounded-xl flex items-center justify-center font-black shadow-md">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="hidden lg:block text-left">
+                <p className="text-sm font-black text-slate-900 dark:text-white">{user.name}</p>
+                <div className="flex items-center gap-2">
+                  <div className={`px-2 py-0.5 ${userRank.color} text-white rounded-full text-[9px] font-black uppercase tracking-wide`}>
+                    {userRank.name}
+                  </div>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Nv {stats.level}</span>
+                </div>
+              </div>
+            </button>
 
-              {showMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 py-2 z-50 animate-in fade-in slide-in-from-top-2">
-                  <button onClick={() => { onProfileClick(); setShowMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-lg">person</span>
-                    Mi Perfil
-                  </button>
-                  <div className="border-t border-gray-50 dark:border-slate-700 my-1"></div>
+            {showMenu && (
+              <div className="absolute top-full mt-2 right-0 w-72 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-slide-in-top">
+                <div className="p-4 bg-gradient-primary text-white">
+                  <div className="flex items-center gap-3">
+                    <div className="size-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center font-black text-xl">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-black">{user.name}</p>
+                      <p className="text-xs opacity-90">{user.university || 'Estudiante'}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span>Nivel {stats.level}</span>
+                      <span>{stats.xp} / {stats.nextLevelXp} XP</span>
+                    </div>
+                    <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-white rounded-full transition-all duration-500"
+                        style={{ width: `${xpPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-2">
                   <button
                     onClick={() => {
+                      navigate('/app/profile');
                       setShowMenu(false);
-                      onLogout();
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2 font-bold transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
                   >
-                    <span className="material-symbols-outlined text-lg">logout</span>
-                    Cerrar Sesión
+                    <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">person</span>
+                    <span className="text-sm text-slate-900 dark:text-white">Mi Perfil</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/pricing');
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">workspace_premium</span>
+                    <span className="text-sm text-slate-900 dark:text-white">Apoyar Academia</span>
+                  </button>
+                  <button
+                    onClick={toggleDarkMode}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left md:hidden"
+                  >
+                    <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">
+                      {isDarkMode ? 'light_mode' : 'dark_mode'}
+                    </span>
+                    <span className="text-sm text-slate-900 dark:text-white">
+                      {isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}
+                    </span>
+                  </button>
+                  <hr className="my-2 border-slate-200 dark:border-slate-700" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left text-red-600 dark:text-red-400"
+                  >
+                    <span className="material-symbols-outlined">logout</span>
+                    <span className="text-sm font-bold">Cerrar Sesión</span>
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </header>
-
   );
 };
 

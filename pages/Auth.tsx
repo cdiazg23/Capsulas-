@@ -1,13 +1,11 @@
-
 import React, { useState } from 'react';
-import { User } from '../types';
-import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts';
 
-interface AuthProps {
-  onAuthSuccess?: () => void;
-}
+const Auth: React.FC = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading, signIn, signUp } = useAuth();
 
-const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,40 +16,63 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Redirigir si ya está autenticado
+  React.useEffect(() => {
+    if (user && !authLoading) {
+      console.log('🚀 Usuario ya autenticado, redirigiendo...');
+      navigate('/app/dashboard');
+    }
+  }, [user, authLoading, navigate]);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
+
+    console.log('🔐 Iniciando autenticación...', { email, isSignUp });
 
     if (isSignUp && password !== confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
     }
 
+    if (!email || !password) {
+      setError('Por favor completa todos los campos');
+      return;
+    }
+
     setLoading(true);
+
+    // Timeout de seguridad para evitar que se quede pegado indefinidamente
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setError('La operación está tardando más de lo esperado. Por favor, revisa tu conexión o intenta recargar la página.');
+    }, 15000);
 
     try {
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-
-        if (data.user && !data.session) {
-          setSuccessMsg('¡Registro exitoso! Por favor, revisa tu correo para confirmar tu cuenta.');
-          setLoading(false);
-        }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        console.log('📝 Registrando usuario...');
+        await signUp(email, password);
+        clearTimeout(timeoutId);
+        console.log('✅ Registro exitoso');
+        setSuccessMsg('¡Registro exitoso! Por favor, revisa tu correo para confirmar tu cuenta.');
         setLoading(false);
-        if (onAuthSuccess) onAuthSuccess();
+      } else {
+        console.log('🔑 Iniciando sesión...');
+        await signIn(email, password);
+        clearTimeout(timeoutId);
+        console.log('✅ Login exitoso, navegando al dashboard...');
+
+        // Pequeña espera para asegurar que el contexto se actualice
+        setTimeout(() => {
+          setLoading(false);
+          navigate('/app/dashboard');
+        }, 500);
       }
     } catch (err: any) {
-      console.error('Auth error:', err);
-      if (err.status === 429) {
-        setError('Demasiados intentos. Por favor, intenta de nuevo en unos minutos.');
-      } else {
-        setError(err.message || 'Error en la autenticación');
-      }
+      clearTimeout(timeoutId);
+      console.error('❌ Auth error:', err);
+      setError(err.message || 'Error en la autenticación. Por favor intenta de nuevo.');
       setLoading(false);
     }
   };
@@ -211,7 +232,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
             <div className="p-6 rounded-2xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/50 dark:border-amber-900/20 text-center">
               <p className="text-xs text-amber-800 dark:text-amber-200 font-medium">
                 IurisAcademy es libre gracias a sus aportantes.
-                <button onClick={() => window.location.reload()} className="ml-2 underline font-bold">Ver cómo apoyar</button>
+                <button onClick={() => navigate('/pricing')} className="ml-2 underline font-bold">Ver cómo apoyar</button>
               </p>
             </div>
           )}

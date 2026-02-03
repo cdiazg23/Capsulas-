@@ -1,7 +1,10 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './router';
+import { AuthProvider, StatsProvider, ThemeProvider, ConceptsProvider } from './contexts';
+import ErrorBoundary from './components/ErrorBoundary';
+import './index.css';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -11,6 +14,16 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <StatsProvider>
+            <ConceptsProvider>
+              <RouterProvider router={router} />
+            </ConceptsProvider>
+          </StatsProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
