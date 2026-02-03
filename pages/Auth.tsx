@@ -61,13 +61,10 @@ const Auth: React.FC = () => {
         console.log('🔑 Iniciando sesión...');
         await signIn(email, password);
         clearTimeout(timeoutId);
-        console.log('✅ Login exitoso, navegando al dashboard...');
-
-        // Pequeña espera para asegurar que el contexto se actualice
-        setTimeout(() => {
-          setLoading(false);
-          navigate('/app/dashboard');
-        }, 500);
+        console.log('✅ Login exitoso, esperando sincronización de perfil...');
+        // No navegamos manualmente aquí. Dejamos que el useEffect de Auth.tsx 
+        // o el ProtectedRoute manejen la transición una vez que 'user' esté listo
+        // y 'isSyncing' sea false.
       }
     } catch (err: any) {
       clearTimeout(timeoutId);

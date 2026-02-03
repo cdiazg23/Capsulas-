@@ -16,6 +16,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const userRef = React.useRef<User | null>(null);
+
+    // Actualizar el ref cada vez que el usuario cambie
+    useEffect(() => {
+        userRef.current = user;
+    }, [user]);
 
     useEffect(() => {
         // Check active session
@@ -77,46 +84,63 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         initAuth();
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log(`🔐 Evento de Autenticación: ${event}`);
+
             if (session?.user) {
-                let { data: profile, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single();
+                // Si ya tenemos el perfil y no es un login fresco, evitamos re-fetching
+                if (userRef.current && event !== 'SIGNED_IN' && event !== 'TOKEN_REFRESHED') {
+                    return;
+                }
 
-                // Si el perfil no existe, crearlo
-                if (!profile || error) {
-                    console.log('📝 Creando perfil en auth state change...');
-                    const newProfile = {
-                        id: session.user.id,
-                        email: session.user.email,
-                        full_name: session.user.email?.split('@')[0] || 'User',
-                        role: 'user',
-                        created_at: new Date().toISOString()
-                    };
-
-                    const { data: createdProfile, error: createError } = await supabase
+                setIsSyncing(true);
+                try {
+                    let { data: profile, error } = await supabase
                         .from('profiles')
-                        .insert([newProfile])
-                        .select()
-                        .single();
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .maybeSingle(); // maybeSingle es más resiliente que single()
 
-                    if (!createError) {
+                    if (!profile || error) {
+                        console.log('📝 Perfil no detectado, intentando crear uno...');
+                        const newProfile = {
+                            id: session.user.id,
+                            email: session.user.email,
+                            full_name: session.user.email?.split('@')[0] || 'User',
+                            role: 'user',
+                            created_at: new Date().toISOString()
+                        };
+
+                        const { data: createdProfile, error: createError } = await supabase
+                            .from('profiles')
+                            .insert([newProfile])
+                            .select()
+                            .single();
+
+                        if (createError) throw createError;
                         profile = createdProfile;
                     }
-                }
 
-                if (profile) {
-                    setUser({
-                        username: session.user.email?.split('@')[0] || 'User',
-                        role: profile.role || 'user',
-                        name: profile.full_name || session.user.email?.split('@')[0] || 'User',
-                        avatarUrl: profile.avatar_url
-                    });
+                    if (profile) {
+                        const newUser: User = {
+                            username: session.user.email?.split('@')[0] || 'User',
+                            role: (profile.role as any) || 'user',
+                            name: profile.full_name || session.user.email?.split('@')[0] || 'User',
+                            avatarUrl: profile.avatar_url
+                        };
+                        setUser(newUser);
+                        console.log('✅ Sesión y perfil sincronizados correctamente');
+                    }
+                } catch (err) {
+                    console.error('❌ Error crítico en sincronización de perfil:', err);
+                    // Si falla el perfil crítico, podemos decidir si dejamos entrar o no
+                    // Por ahora reseteamos para forzar re-login si es necesario
+                } finally {
+                    setIsSyncing(false);
                 }
-            } else {
+            } else if (event === 'SIGNED_OUT') {
                 setUser(null);
+                setIsSyncing(false);
             }
         });
 
@@ -150,7 +174,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, updateUser }}>
+        <AuthContext.Provider value={{ user, loading: loading || isSyncing, signIn, signUp, signOut, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
