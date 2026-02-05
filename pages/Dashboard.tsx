@@ -11,6 +11,56 @@ const Dashboard: React.FC = () => {
   const { concepts, loading: conceptsLoading, error: conceptsError } = useConcepts();
   const { activityLogs } = useActivityLog();
 
+  const [searchText, setSearchText] = useState('');
+  const [showResults, setShowResults] = useState(false);
+
+  // Safety check: ensure concepts is always an array
+  const safeСoncepts = useMemo(() => concepts || [], [concepts]);
+
+  const conceptOfTheDay = useMemo(() => safeСoncepts[0] || {} as LegalConcept, [safeСoncepts]);
+
+  const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  const searchResults = useMemo(() => {
+    if (searchText.trim().length < 2 || safeСoncepts.length === 0) return [];
+    const term = normalize(searchText);
+    return safeСoncepts.filter(c =>
+      normalize(c.concept).includes(term) ||
+      normalize(c.id).includes(term) ||
+      normalize(c.subcategory).includes(term) ||
+      normalize(c.definitionSimple).includes(term) ||
+      normalize(c.category).includes(term) ||
+      normalize(c.regulation).includes(term) ||
+      normalize(c.jurisprudence).includes(term) ||
+      term.includes(normalize(c.concept))
+    ).slice(0, 6);
+  }, [searchText, safeСoncepts]);
+
+  const categories = useMemo(() => {
+    const cats = [
+      { name: 'Derecho Civil', icon: 'gavel', color: 'blue' },
+      { name: 'Derecho Penal', icon: 'policy', color: 'red' },
+      { name: 'Derecho Laboral', icon: 'work', color: 'orange' },
+      { name: 'Derecho Administrativo', icon: 'account_balance', color: 'purple' },
+      { name: 'Derecho Constitucional', icon: 'history_edu', color: 'slate' },
+      { name: 'Derecho Procesal', icon: 'account_tree', color: 'indigo' },
+      { name: 'Derecho Comercial', icon: 'storefront', color: 'emerald' },
+      { name: 'Derecho de Familia', icon: 'family_restroom', color: 'rose' }
+    ];
+
+    return cats.map(cat => ({
+      ...cat,
+      count: safeСoncepts.filter(c => c.category === cat.name).length
+    }));
+  }, [safeСoncepts]);
+
+  const userRank = useMemo(() => {
+    if (stats.level >= 13) return { name: 'Magistrado de la Corte', color: 'text-indigo-600', bg: 'bg-indigo-50', icon: 'gavel', border: 'border-indigo-100' };
+    if (stats.level >= 8) return { name: 'Abogado de la República', color: 'text-primary', bg: 'bg-primary/5', icon: 'balance', border: 'border-primary/20' };
+    if (stats.level >= 4) return { name: 'Licenciado en Derecho', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'school', border: 'border-emerald-100' };
+    return { name: 'Estudiante de Derecho', color: 'text-slate-600', bg: 'bg-slate-50', icon: 'history_edu', border: 'border-slate-200' };
+  }, [stats.level]);
+
   // Show loading state while concepts are loading
   if (conceptsLoading) {
     return (
@@ -41,70 +91,6 @@ const Dashboard: React.FC = () => {
       </div>
     );
   }
-
-  const [searchText, setSearchText] = useState('');
-  const [showResults, setShowResults] = useState(false);
-
-  // Safety check: ensure concepts is always an array
-  const safeСoncepts = concepts || [];
-
-  const conceptOfTheDay = useMemo(() => safeСoncepts[0] || {} as LegalConcept, [safeСoncepts]);
-
-  const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-
-  const searchResults = useMemo(() => {
-    if (searchText.trim().length < 2 || safeСoncepts.length === 0) return [];
-    const term = normalize(searchText);
-    return safeСoncepts.filter(c =>
-      normalize(c.concept).includes(term) ||
-      normalize(c.id).includes(term) ||
-      normalize(c.subcategory).includes(term) ||
-      normalize(c.definitionSimple).includes(term) ||
-      normalize(c.category).includes(term) ||
-      normalize(c.regulation).includes(term) ||
-      normalize(c.jurisprudence).includes(term) ||
-      term.includes(normalize(c.concept))
-    ).slice(0, 6);
-  }, [searchText, safeСoncepts]);
-
-  const handleConceptClick = (concept: LegalConcept) => {
-    // Verificar límite para usuarios gratuitos antes de navegar
-    if (user?.role === 'user' && stats.consultationsToday >= 10) {
-      const today = new Date().toDateString();
-      const lastDate = stats.lastConsultationAt ? new Date(stats.lastConsultationAt).toDateString() : '';
-
-      if (today === lastDate) {
-        navigate('/pricing');
-        return;
-      }
-    }
-    navigate(`/app/concept/${concept.id}`);
-  };
-
-  const categories = useMemo(() => {
-    const cats = [
-      { name: 'Derecho Civil', icon: 'gavel', color: 'blue' },
-      { name: 'Derecho Penal', icon: 'policy', color: 'red' },
-      { name: 'Derecho Laboral', icon: 'work', color: 'orange' },
-      { name: 'Derecho Administrativo', icon: 'account_balance', color: 'purple' },
-      { name: 'Derecho Constitucional', icon: 'history_edu', color: 'slate' },
-      { name: 'Derecho Procesal', icon: 'account_tree', color: 'indigo' },
-      { name: 'Derecho Comercial', icon: 'storefront', color: 'emerald' },
-      { name: 'Derecho de Familia', icon: 'family_restroom', color: 'rose' }
-    ];
-
-    return cats.map(cat => ({
-      ...cat,
-      count: safeСoncepts.filter(c => c.category === cat.name).length
-    }));
-  }, [safeСoncepts]);
-
-  const userRank = useMemo(() => {
-    if (stats.level >= 13) return { name: 'Magistrado de la Corte', color: 'text-indigo-600', bg: 'bg-indigo-50', icon: 'gavel', border: 'border-indigo-100' };
-    if (stats.level >= 8) return { name: 'Abogado de la República', color: 'text-primary', bg: 'bg-primary/5', icon: 'balance', border: 'border-primary/20' };
-    if (stats.level >= 4) return { name: 'Licenciado en Derecho', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'school', border: 'border-emerald-100' };
-    return { name: 'Estudiante de Derecho', color: 'text-slate-600', bg: 'bg-slate-50', icon: 'history_edu', border: 'border-slate-200' };
-  }, [stats.level]);
 
   const getActivityIcon = (type: string) => {
     switch (type) {
