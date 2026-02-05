@@ -24,14 +24,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (session?.user) {
                 try {
-                    // Intentar obtener el perfil
-                    const { data: profile } = await supabase
+                    console.log('🔄 [Auth] Sincronizando perfil para:', session.user.email);
+
+                    // Timeout para la consulta del perfil (15s)
+                    const profilePromise = supabase
                         .from('profiles')
                         .select('*')
                         .eq('id', session.user.id)
                         .maybeSingle();
 
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Profile sync timeout')), 15000)
+                    );
+
+                    const { data: profile } = await Promise.race([profilePromise, timeoutPromise]) as any;
+
                     if (profile) {
+                        console.log('✅ [Auth] Perfil sincronizado. Rol:', profile.role);
                         setUser({
                             username: session.user.email?.split('@')[0] || 'User',
                             role: (profile.role as any) || 'user',
@@ -39,6 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             avatarUrl: profile.avatar_url
                         });
                     } else {
+                        console.warn('⚠️ [Auth] No se encontró perfil en DB, asignando rol por defecto');
                         // Fail-safe: Si no hay perfil aún, permitir entrada con datos de sesión
                         setUser({
                             username: session.user.email?.split('@')[0] || 'User',
@@ -47,8 +57,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         });
                     }
                 } catch (err) {
-                    console.error('❌ [Auth] Error sincronizando perfil:', err);
-                    // Entrar de todas formas para no bloquear al usuario
+                    console.error('❌ [Auth] Error o timeout sincronizando perfil:', err);
+                    // Entrar de todas formas para no bloquear al usuario, pero loguear el fallo
                     setUser({
                         username: session.user.email?.split('@')[0] || 'User',
                         role: 'user',
