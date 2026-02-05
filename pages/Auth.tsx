@@ -47,7 +47,8 @@ const Auth: React.FC = () => {
     const timeoutId = setTimeout(() => {
       setLoading(false);
       setError('La operación está tardando más de lo esperado. Por favor, revisa tu conexión o intenta recargar la página.');
-    }, 15000);
+      console.warn('⚠️ [Auth] La operación excedió el tiempo límite (45s)');
+    }, 45000);
 
     try {
       if (isSignUp) {
@@ -62,6 +63,7 @@ const Auth: React.FC = () => {
         await signIn(email, password);
         clearTimeout(timeoutId);
         console.log('✅ Login exitoso, esperando sincronización de perfil...');
+        setLoading(false); // Aseguramos que el botón deje de cargar tras el éxito de Supabase
         // No navegamos manualmente aquí. Dejamos que el useEffect de Auth.tsx 
         // o el ProtectedRoute manejen la transición una vez que 'user' esté listo
         // y 'isSyncing' sea false.
