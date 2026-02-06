@@ -9,6 +9,7 @@ interface AuthContextType {
     signUp: (email: string, password: string) => Promise<void>;
     signOut: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
+    updatePassword: (password: string) => Promise<void>;
     updateUser: (updates: Partial<User>) => void;
 }
 
@@ -118,9 +119,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
     const resetPassword = async (email: string) => {
+        // En desarrollo local, nos aseguramos de que window.location.origin incluya el puerto correcto
+        const redirectTo = window.location.hostname === 'localhost'
+            ? `${window.location.protocol}//${window.location.host}/login`
+            : `${window.location.origin}/login`;
+
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/login`,
+            redirectTo,
         });
+        if (error) throw error;
+    };
+
+    const updatePassword = async (newPassword: string) => {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
         if (error) throw error;
     };
 
@@ -130,7 +141,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resetPassword, updateUser }}>
+        <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resetPassword, updatePassword, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
