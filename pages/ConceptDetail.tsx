@@ -142,28 +142,37 @@ const ConceptDetail: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!user || user.role !== 'user') return;
+    if (!user) return;
 
     const today = new Date().toDateString();
     const lastDate = stats.lastConsultationAt ? new Date(stats.lastConsultationAt).toDateString() : '';
 
-    let currentDaily = stats.consultationsToday;
+    // Only "user" role has consultation limits
+    if (user.role === 'user') {
+      let currentDaily = stats.consultationsToday;
 
-    if (today !== lastDate) {
-      currentDaily = 0;
-    }
+      if (today !== lastDate) {
+        currentDaily = 0;
+      }
 
-    if (currentDaily >= 10) {
-      navigate('/pricing');
-      return;
-    }
+      if (currentDaily >= 10) {
+        navigate('/pricing');
+        return;
+      }
 
-    if (concept) {
       updateStats({
         consultationsToday: currentDaily + 1,
         consultationsMonth: stats.consultationsMonth + 1,
         lastConsultationAt: new Date().toISOString()
       });
+    } else {
+      // Admins and Founders: Just update last activity for streak purposes
+      // No need to update consultationsToday if they are unlimited
+      if (today !== lastDate) {
+        updateStats({
+          lastConsultationAt: new Date().toISOString()
+        });
+      }
     }
   }, [id, user?.role]);
 

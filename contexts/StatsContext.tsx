@@ -62,17 +62,54 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                     .single();
 
                 if (profile) {
+                    const now = new Date();
+                    const today = now.toDateString();
+                    const lastDateStr = profile.last_consultation_at ? new Date(profile.last_consultation_at).toDateString() : '';
+
+                    let newStreak = profile.streak || 0;
+                    let newConsultationsToday = profile.consultations_today || 0;
+
+                    // Logic for daily reset and streak
+                    if (lastDateStr !== today) {
+                        // It's a new day
+                        newConsultationsToday = 0;
+
+                        // Check if streak continues (was active yesterday)
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        const yesterdayStr = yesterday.toDateString();
+
+                        if (lastDateStr === yesterdayStr) {
+                            // Streak continues! (Will be incremented when activity happens, or now?)
+                            // Let's increment it now as they just "logged in/loaded" which counts as activity
+                            newStreak += 1;
+                        } else if (lastDateStr === '') {
+                            // First time ever
+                            newStreak = 1;
+                        } else {
+                            // Streak broken
+                            newStreak = 1; // Start a new one today
+                        }
+
+                        // Update DB immediately for the new day
+                        await supabase.from('profiles').update({
+                            streak: newStreak,
+                            consultations_today: newConsultationsToday,
+                            last_consultation_at: now.toISOString()
+                        }).eq('id', user.id);
+                    }
+
                     const loadedStats: UserStats = {
                         level: profile.level || 1,
                         xp: profile.xp || 0,
                         nextLevelXp: profile.next_level_xp || 100,
                         points: profile.points || 0,
-                        streak: profile.streak || 0,
+                        streak: newStreak,
                         learnedConcepts: profile.learned_concepts || 0,
                         completedQuizzes: profile.completed_quizzes || 0,
-                        consultationsToday: profile.consultations_today || 0,
+                        consultationsToday: newConsultationsToday,
                         consultationsMonth: profile.consultations_month || 0,
-                        lastConsultationAt: profile.last_consultation_at
+                        lastConsultationAt: now.toISOString()
                     };
                     setStats(loadedStats);
                     lastSyncedStats.current = JSON.stringify(loadedStats);
@@ -81,7 +118,6 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 console.error('Error fetching stats:', error);
             } finally {
                 setLoading(false);
-                // Pequeño delay para asegurar que el siguiente useEffect no se dispare por el setStats de arriba
                 setTimeout(() => {
                     isInitialLoad.current = false;
                 }, 100);
@@ -91,7 +127,7 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         fetchStats();
     }, [user?.id]);
 
-    // Sync stats to database
+    // Sync stats to database (with debounce)
     useEffect(() => {
         if (!user || loading || isInitialLoad.current) return;
 
@@ -100,7 +136,6 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
         const syncStats = async () => {
             try {
-                console.log('💾 [Stats] Sincronizando avances...');
                 const { error } = await supabase.from('profiles').update({
                     xp: stats.xp,
                     level: stats.level,
@@ -116,9 +151,7 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
                 if (!error) {
                     lastSyncedStats.current = currentStatsStr;
-                    console.log('✅ [Stats] Avances guardados correctamente');
-                } else {
-                    console.error('❌ [Stats] Error al sincronizar:', error);
+                    console.log('✅ [Stats] Perfil sincronizado');
                 }
             } catch (err) {
                 console.error('❌ [Stats] Error en syncStats:', err);
