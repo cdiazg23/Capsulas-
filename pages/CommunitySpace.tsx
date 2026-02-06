@@ -73,8 +73,15 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
         }
     };
 
+    const isAuthorized = user?.role === 'founder' || user?.role === 'admin';
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!isAuthorized) {
+            alert('Solo los Socios Fundadores y Administradores pueden publicar mensajes.');
+            return;
+        }
 
         // Filtro de contenido básico
         const hasForbiddenContent = forbiddenKeywords.some(word =>
@@ -157,65 +164,75 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
             </div>
 
             {/* Nuevo Mensaje */}
-            <form onSubmit={handleSend} className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 shadow-xl shadow-primary/5 mb-12">
-                <div className="grid md:grid-cols-3 gap-6 mb-6">
-                    <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">Tipo de Mensaje</label>
-                        <select
-                            value={type}
-                            onChange={(e) => setType(e.target.value as any)}
-                            className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold p-3 focus:ring-primary/20 dark:text-white"
-                        >
-                            <option value="suggestion">Sugerencia</option>
-                            <option value="query">Inquietud</option>
-                            <option value="complaint">Descargo</option>
-                        </select>
+            {isAuthorized ? (
+                <form onSubmit={handleSend} className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 shadow-xl shadow-primary/5 mb-12 animate-in zoom-in-95 duration-300">
+                    <div className="grid md:grid-cols-3 gap-6 mb-6">
+                        <div>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">Tipo de Mensaje</label>
+                            <select
+                                value={type}
+                                onChange={(e) => setType(e.target.value as any)}
+                                className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold p-3 focus:ring-primary/20 dark:text-white"
+                            >
+                                <option value="suggestion">Sugerencia</option>
+                                <option value="query">Inquietud</option>
+                                <option value="complaint">Descargo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">País</label>
+                            <select
+                                value={country}
+                                onChange={(e) => setCountry(e.target.value)}
+                                className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold p-3 focus:ring-primary/20 dark:text-white"
+                            >
+                                {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">Ciudad</label>
+                            <input
+                                type="text"
+                                placeholder="Ej: Santiago, Lima..."
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold p-3 focus:ring-primary/20 dark:text-white"
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">País</label>
-                        <select
-                            value={country}
-                            onChange={(e) => setCountry(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold p-3 focus:ring-primary/20 dark:text-white"
-                        >
-                            {countries.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">Ciudad</label>
-                        <input
-                            type="text"
-                            placeholder="Ej: Santiago, Lima..."
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold p-3 focus:ring-primary/20 dark:text-white"
-                        />
-                    </div>
-                </div>
 
-                <div className="mb-6">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">Tu Mensaje</label>
-                    <textarea
-                        required
-                        rows={3}
-                        placeholder="Comparte tu sugerencia o inquietud con la comunidad..."
-                        value={newContent}
-                        onChange={(e) => setNewContent(e.target.value)}
-                        className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium p-4 focus:ring-primary/20 dark:text-white resize-none"
-                    ></textarea>
-                </div>
+                    <div className="mb-6">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block ml-1">Tu Mensaje</label>
+                        <textarea
+                            required
+                            rows={3}
+                            placeholder="Comparte tu sugerencia o inquietud con la comunidad..."
+                            value={newContent}
+                            onChange={(e) => setNewContent(e.target.value)}
+                            className="w-full bg-slate-50 dark:bg-slate-950 border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium p-4 focus:ring-primary/20 dark:text-white resize-none"
+                        ></textarea>
+                    </div>
 
-                <div className="flex justify-end">
-                    <button
-                        type="submit"
-                        disabled={sending}
-                        className="bg-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
-                    >
-                        {sending ? 'Enviando...' : 'Publicar'}
-                        <span className="material-symbols-outlined text-sm">send</span>
-                    </button>
+                    <div className="flex justify-end">
+                        <button
+                            type="submit"
+                            disabled={sending}
+                            className="bg-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
+                        >
+                            {sending ? 'Enviando...' : 'Publicar'}
+                            <span className="material-symbols-outlined text-sm">send</span>
+                        </button>
+                    </div>
+                </form>
+            ) : (
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-slate-700 text-center mb-12">
+                    <span className="material-symbols-outlined text-4xl text-primary/40 mb-3">lock</span>
+                    <h3 className="text-lg font-bold dark:text-white mb-2">Función Exclusiva</h3>
+                    <p className="text-sm text-slate-500 dark:text-gray-400 max-w-sm mx-auto leading-relaxed">
+                        Este espacio de interacción está habilitado únicamente para nuestros <strong>Socios Fundadores</strong> como beneficio por su apoyo inicial.
+                    </p>
                 </div>
-            </form>
+            )}
 
             {/* Listado de Mensajes */}
             <div className="space-y-6">

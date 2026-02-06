@@ -240,7 +240,7 @@ const Header: React.FC = () => {
               onClick={() => setShowMenu(!showMenu)}
               className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
-              <div className="size-10 bg-gradient-gold text-white rounded-xl flex items-center justify-center font-black shadow-md">
+              <div className="size-10 bg-gradient-to-br from-amber-400 to-accent-gold text-white rounded-xl flex items-center justify-center font-black shadow-md">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="hidden lg:block text-left">
@@ -256,7 +256,7 @@ const Header: React.FC = () => {
 
             {showMenu && (
               <div className="absolute top-full mt-2 right-0 w-72 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-slide-in-top">
-                <div className="p-4 bg-gradient-primary text-white">
+                <div className="p-4 bg-gradient-to-br from-primary to-primary-dark text-white">
                   <div className="flex items-center gap-3">
                     <div className="size-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center font-black text-xl">
                       {user.name.charAt(0).toUpperCase()}
