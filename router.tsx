@@ -13,6 +13,7 @@ import Library from './pages/Library';
 import Pricing from './pages/Pricing';
 import Flashcards from './pages/Flashcards';
 import CommunitySpace from './pages/CommunitySpace';
+import MasterClasses from './pages/MasterClasses';
 import AdminPanel from './pages/AdminPanel';
 
 export const router = createBrowserRouter([
@@ -73,10 +74,14 @@ export const router = createBrowserRouter([
                 element: <Flashcards />
             },
             {
+                path: 'masterclasses',
+                element: <MasterClasses />
+            },
+            {
                 path: 'community',
                 element: (
                     <ProtectedRoute role="founder">
-                        <CommunitySpace />
+                        <CommunitySpace user={null} /> {/* User will be fetched via hook inside layout/context if needed, but the component requires it for now */}
                     </ProtectedRoute>
                 )
             },

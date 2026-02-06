@@ -1,53 +1,44 @@
-
 import React, { useState, useEffect } from 'react';
-import { LegalConcept, User } from '../types';
-import { categories, fetchLegalConcepts } from '../data';
+import { LegalConcept, MasterClass } from '../types';
+import { categories, fetchLegalConcepts, fetchMasterClasses } from '../data';
 import { supabase } from '../lib/supabase';
 
 const AdminPanel: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'concepts' | 'users'>('concepts');
+  const [activeTab, setActiveTab] = useState<'concepts' | 'users' | 'masterclasses'>('concepts');
   const [concepts, setConcepts] = useState<LegalConcept[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
+  const [masterClasses, setMasterClasses] = useState<MasterClass[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isMassUploadOpen, setIsMassUploadOpen] = useState(false);
+  const [isMCModalOpen, setIsMCModalOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+
   const [editingConcept, setEditingConcept] = useState<LegalConcept | null>(null);
-  const [massData, setMassData] = useState('');
+  const [editingMC, setEditingMC] = useState<MasterClass | null>(null);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('Todas');
+  const [filterSubcategory, setFilterSubcategory] = useState('Todas');
+
+  const [formData, setFormData] = useState<Partial<LegalConcept>>({});
+  const [mcFormData, setMcFormData] = useState<Partial<MasterClass>>({});
+  const [newKeyPoint, setNewKeyPoint] = useState('');
 
   const filteredConcepts = concepts.filter(c => {
     const matchesSearch = c.concept.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === 'Todas' || c.category === filterCategory;
-    return matchesSearch && matchesCategory;
+    const matchesSubcategory = filterSubcategory === 'Todas' || (c.subcategory || '') === filterSubcategory;
+    return matchesSearch && matchesCategory && matchesSubcategory;
   });
 
-  const exportToExcel = () => {
-    const headers = ['ID', 'Concepto', 'Categoría', 'Subcategoría', 'Definición', 'Ejemplo', 'Normativa', 'Jurisprudencia', 'Video URL'];
-    const rows = filteredConcepts.map(c => [
-      c.id, c.concept, c.category, c.subcategory,
-      `"${c.definitionSimple.replace(/"/g, '""')}"`,
-      `"${c.realExample.replace(/"/g, '""')}"`,
-      c.regulation, c.jurisprudence, c.videoUrl
-    ]);
-
-    // Using semicolon for Excel compatibility in some regions, or comma
-    const csvContent = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
-    const blob = new Blob([`\ufeff${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `IurisAcademy_Conceptos_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Form State
-  const [formData, setFormData] = useState<Partial<LegalConcept>>({});
+  const subcategories = Array.from(new Set(
+    concepts
+      .filter(c => filterCategory === 'Todas' || c.category === filterCategory)
+      .map(c => c.subcategory)
+  )).filter(Boolean).sort() as string[];
 
   useEffect(() => {
     loadData();
@@ -56,8 +47,11 @@ const AdminPanel: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const data = await fetchLegalConcepts();
-      setConcepts(data || []);
+      const conceptsData = await fetchLegalConcepts();
+      setConcepts(conceptsData || []);
+
+      const mcData = await fetchMasterClasses();
+      setMasterClasses(mcData || []);
 
       const { data: userData, error: userError } = await supabase
         .from('profiles')
@@ -83,7 +77,7 @@ const AdminPanel: React.FC = () => {
     } else {
       setEditingConcept(null);
       setFormData({
-        id: `DC-NEW-${Math.floor(Math.random() * 999)}`,
+        id: `DC-${Math.floor(Math.random() * 9999)}`,
         concept: '',
         category: categories[0] || 'Derecho Civil',
         subcategory: '',
@@ -91,28 +85,24 @@ const AdminPanel: React.FC = () => {
         realExample: '',
         regulation: '',
         jurisprudence: '',
-        videoUrl: ''
+        videoUrl: '',
+        keyPoints: []
       });
     }
     setIsModalOpen(true);
   };
 
   const handleDeleteConcept = async (id: string) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este concepto?')) {
-      const { error } = await supabase.from('legal_concepts').delete().eq('id', id);
-      if (error) {
-        alert('Error al eliminar: ' + error.message);
-      } else {
-        setConcepts(prev => prev.filter(c => c.id !== id));
-      }
-    }
+    if (!confirm('¿Seguro que deseas eliminar este concepto?')) return;
+    const { error } = await supabase.from('legal_concepts').delete().eq('id', id);
+    if (error) alert(error.message);
+    else await loadData();
   };
 
   const handleSaveConcept = async (e: React.FormEvent) => {
     e.preventDefault();
     const conceptToSave = formData as LegalConcept;
 
-    // Map camelCase to snake_case for Supabase
     const dbPayload = {
       id: conceptToSave.id,
       concept: conceptToSave.concept,
@@ -122,7 +112,8 @@ const AdminPanel: React.FC = () => {
       real_example: conceptToSave.realExample,
       regulation: conceptToSave.regulation,
       jurisprudence: conceptToSave.jurisprudence,
-      video_url: conceptToSave.videoUrl
+      video_url: conceptToSave.videoUrl,
+      key_points: conceptToSave.keyPoints || []
     };
 
     const { error } = await supabase.from('legal_concepts').upsert(dbPayload);
@@ -135,77 +126,139 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleMassUpload = async () => {
+  const handleBulkSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const lines = massData.trim().split('\n');
-      const dbPayloads = lines.map(line => {
-        const [id, concept, category, subcategory, definitionSimple, realExample, regulation, jurisprudence, videoUrl] = line.split(';');
+      setLoading(true);
+      const rows = bulkText.trim().split('\n');
+      if (rows.length === 0) return;
+
+      const conceptsToSave = rows.map(row => {
+        const [concept, category, subcategory, definition, example, regulation, jurisprudence, keyPointsStr] = row.split(';').map(s => s?.trim());
+
+        if (!concept) return null;
+
         return {
-          id,
+          id: `DC-${Math.floor(Math.random() * 99999)}`,
           concept,
-          category,
-          subcategory,
-          definition_simple: definitionSimple,
-          real_example: realExample,
-          regulation,
-          jurisprudence,
-          video_url: videoUrl
+          category: category || categories[0],
+          subcategory: subcategory || '',
+          definition_simple: definition || '',
+          real_example: example || '',
+          regulation: regulation || '',
+          jurisprudence: jurisprudence || '',
+          video_url: '', // Video removed as requested
+          key_points: keyPointsStr ? keyPointsStr.split('|').map(kp => kp.trim()) : []
         };
+      }).filter(Boolean);
+
+      if (conceptsToSave.length === 0) {
+        alert('No se encontraron conceptos válidos.');
+        return;
+      }
+
+      const { error } = await supabase.from('legal_concepts').upsert(conceptsToSave);
+
+      if (error) {
+        alert('Error al guardar masivamente: ' + error.message);
+      } else {
+        await loadData();
+        setIsBulkModalOpen(false);
+        setBulkText('');
+        alert(`${conceptsToSave.length} conceptos cargados con éxito.`);
+      }
+    } catch (err) {
+      alert('Error procesando los datos: ' + (err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownloadCSV = () => {
+    const headers = ['Concepto', 'Categoría', 'Subcategoría', 'Definición', 'Ejemplo', 'Regulación', 'Jurisprudencia', 'Sintesis Tecnica'];
+    const rows = concepts.map(c => [
+      c.concept || '',
+      c.category || '',
+      c.subcategory || '',
+      (c.definitionSimple || '').replace(/;/g, ','),
+      (c.realExample || '').replace(/;/g, ','),
+      (c.regulation || '').replace(/;/g, ','),
+      (c.jurisprudence || '').replace(/;/g, ','),
+      (c.keyPoints || []).join('|')
+    ]);
+
+    const csvContent = [
+      headers.join(';'),
+      ...rows.map(r => r.join(';'))
+    ].join('\n');
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `conceptos_iuris_${new Date().toISOString().split('T')[0]}.csv`);
+    link.click();
+  };
+
+
+
+  const handleAddKeyPoint = () => {
+    if (!newKeyPoint.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      keyPoints: [...(prev.keyPoints || []), newKeyPoint.trim()]
+    }));
+    setNewKeyPoint('');
+  };
+
+  const handleRemoveKeyPoint = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      keyPoints: (prev.keyPoints || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  // MasterClass Handlers
+  const handleOpenMCModal = (mc?: MasterClass) => {
+    if (mc) {
+      setEditingMC(mc);
+      setMcFormData(mc);
+    } else {
+      setEditingMC(null);
+      setMcFormData({
+        title: '',
+        description: '',
+        video_url: '',
+        category: 'Masterclass',
+        professor: 'Iuris Academy',
+        duration: ''
       });
+    }
+    setIsMCModalOpen(true);
+  };
 
-      const { error } = await supabase.from('legal_concepts').upsert(dbPayloads);
-
-      if (error) throw error;
-
+  const handleSaveMC = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { error } = await supabase.from('masterclasses').upsert(mcFormData);
+    if (error) {
+      alert('Error: ' + error.message);
+    } else {
       await loadData();
-      setIsMassUploadOpen(false);
-      setMassData('');
-      alert(`${dbPayloads.length} conceptos cargados exitosamente.`);
-    } catch (err: any) {
-      alert('Error: ' + err.message);
+      setIsMCModalOpen(false);
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: 'admin' | 'founder' | 'user') => {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ role: newRole })
-      .eq('id', userId);
-
-    if (error) {
-      alert('Error: ' + error.message);
-    } else {
-      setProfiles(prev => prev.map(p => p.id === userId ? { ...p, role: newRole } : p));
-    }
+  const handleDeleteMC = async (id: string) => {
+    if (!confirm('¿Eliminar esta Masterclass?')) return;
+    const { error } = await supabase.from('masterclasses').delete().eq('id', id);
+    if (error) alert(error.message);
+    else await loadData();
   };
 
-  const handleResetPassword = async (userId: string) => {
-    const newPass = prompt('Ingresa la nueva contraseña para este usuario:', '123456');
-    if (!newPass) return;
-
-    const { error } = await supabase.rpc('reset_user_password', {
-      user_id: userId,
-      new_password: newPass
-    });
-
-    if (error) {
-      alert('Error: ' + error.message);
-    } else {
-      alert('Contraseña actualizada correctamente.');
-    }
-  };
-
-  const handleDeleteUser = async (userId: string) => {
-    if (!window.confirm('¿ELIMINAR USUARIO? Esta acción borrará permanentemente la cuenta y es irreversible.')) return;
-
-    const { error } = await supabase.rpc('delete_user', { user_id: userId });
-
-    if (error) {
-      alert('Error: ' + error.message);
-    } else {
-      setProfiles(prev => prev.filter(p => p.id !== userId));
-      alert('Usuario eliminado del sistema.');
-    }
+  const updateUserRole = async (userId: string, newRole: string) => {
+    const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
+    if (error) alert(error.message);
+    else await loadData();
   };
 
   if (loading) {
@@ -219,217 +272,206 @@ const AdminPanel: React.FC = () => {
   return (
     <div className="animate-in slide-in-from-right duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight">Gestión del Sistema</h1>
-          <p className="text-gray-500">Administra conceptos legales y roles de usuario.</p>
+        <div>
+          <h1 className="text-3xl font-black tracking-tight dark:text-white">Gestión del Sistema</h1>
+          <p className="text-gray-500">Administra conceptos, roles y Aula Iuris.</p>
         </div>
         <div className="flex items-center gap-3">
           {activeTab === 'concepts' && (
-            <>
+            <div className="flex gap-2">
               <button
-                onClick={exportToExcel}
-                className="flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border border-emerald-100"
+                onClick={() => setIsBulkModalOpen(true)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-all"
               >
-                <span className="material-symbols-outlined text-[20px]">download</span>
-                <span>Exportar Excel</span>
-              </button>
-              <button
-                onClick={() => setIsMassUploadOpen(true)}
-                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-slate-800 px-5 py-2.5 rounded-xl text-sm font-bold transition-all"
-              >
-                <span className="material-symbols-outlined text-[20px]">upload_file</span>
-                <span>Carga Masiva</span>
+                Carga Masiva
               </button>
               <button
                 onClick={() => handleOpenModal()}
-                className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-primary/20"
+                className="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg"
               >
-                <span className="material-symbols-outlined text-[20px]">add</span>
-                <span>Nuevo Concepto</span>
+                + Nuevo Concepto
               </button>
-            </>
+            </div>
+          )}
+          {activeTab === 'masterclasses' && (
+            <button
+              onClick={() => handleOpenMCModal()}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg"
+            >
+              + Nueva Masterclass
+            </button>
           )}
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+        {[
+          { id: 'concepts', label: 'Conceptos', count: concepts.length },
+          { id: 'masterclasses', label: 'Aula Iuris', count: masterClasses.length },
+          { id: 'users', label: 'Usuarios', count: profiles.length }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`px-6 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-primary text-white' : 'bg-white dark:bg-slate-900 text-gray-500 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+          >
+            {tab.label} ({tab.count})
+          </button>
+        ))}
+      </div>
+
+      {/* Search and Filter for Conceptos */}
       {activeTab === 'concepts' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="relative">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex-1 relative">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
             <input
               type="text"
-              placeholder="Filtrar por nombre o ID..."
+              placeholder="Buscar concepto..."
+              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl text-sm dark:text-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
           </div>
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="h-11 px-4 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-          >
-            <option value="Todas">Categorías: Todas</option>
-            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-          </select>
+          <div className="flex flex-wrap gap-2">
+            <select
+              className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm dark:text-white"
+              value={filterCategory}
+              onChange={(e) => {
+                setFilterCategory(e.target.value);
+                setFilterSubcategory('Todas');
+              }}
+            >
+              <option value="Todas">Todas las áreas</option>
+              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+
+            <select
+              className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm dark:text-white min-w-[150px]"
+              value={filterSubcategory}
+              onChange={(e) => setFilterSubcategory(e.target.value)}
+            >
+              <option value="Todas">Todas las subáreas</option>
+              {subcategories.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+
+            <button
+              onClick={handleDownloadCSV}
+              className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm dark:text-white flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              title="Descargar CSV"
+            >
+              <span className="material-symbols-outlined text-xl">download</span>
+              <span className="hidden md:inline">Exportar CSV</span>
+            </button>
+          </div>
+        </div>
+
+      )}
+
+      {activeTab === 'concepts' && (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50 dark:bg-slate-800/50 border-b dark:border-slate-800">
+                <tr>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Concepto</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Área</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Subárea</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
+                {filteredConcepts.map(c => (
+                  <tr key={c.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="p-4">
+                      <p className="text-sm font-bold dark:text-white">{c.concept}</p>
+                      <p className="text-[10px] text-gray-400">{c.id}</p>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-800 dark:text-gray-300">
+                        {c.category}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                        {c.subcategory || 'Sin subárea'}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right space-x-2">
+                      <button onClick={() => handleOpenModal(c)} className="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                        <span className="material-symbols-outlined text-xl">edit</span>
+                      </button>
+                      <button onClick={() => handleDeleteConcept(c.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <span className="material-symbols-outlined text-xl">delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      <div className="flex gap-4 mb-8">
-        <button
-          onClick={() => setActiveTab('concepts')}
-          className={`px-6 py-2 rounded-xl text-sm font-black transition-all ${activeTab === 'concepts' ? 'bg-primary text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-        >
-          Conceptos ({concepts.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('users')}
-          className={`px-6 py-2 rounded-xl text-sm font-black transition-all ${activeTab === 'users' ? 'bg-primary text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-        >
-          Usuarios ({profiles.length})
-        </button>
-      </div>
-
-      {activeTab === 'concepts' ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            {[
-              { label: 'Total Conceptos', val: concepts.length, color: 'slate' },
-              { label: 'Categorías Activas', val: new Set(concepts.map(c => c.category)).size, color: 'blue' },
-              { label: 'Último Ingreso', val: concepts[0]?.id || 'N/A', color: 'green' },
-              { label: 'Sincronizado', val: 'Vía Supabase', color: 'primary' }
-            ].map(stat => (
-              <div key={stat.label} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{stat.label}</p>
-                <p className={`text-2xl font-black text-${stat.color === 'primary' ? 'primary' : stat.color + '-600'}`}>{stat.val}</p>
+      {activeTab === 'masterclasses' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {masterClasses.map(mc => (
+            <div key={mc.id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm relative group">
+              <h3 className="text-lg font-black mb-1 dark:text-white line-clamp-1">{mc.title}</h3>
+              <p className="text-xs text-gray-400 mb-6 line-clamp-2">{mc.description}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 px-2.5 py-1 rounded-lg">
+                  {mc.category || 'Masterclass'}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => handleOpenMCModal(mc)} className="size-9 flex items-center justify-center text-primary hover:bg-primary/5 rounded-lg">
+                    <span className="material-symbols-outlined text-xl">edit</span>
+                  </button>
+                  <button onClick={() => handleDeleteMC(mc.id)} className="size-9 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg">
+                    <span className="material-symbols-outlined text-xl">delete</span>
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+          {masterClasses.length === 0 && (
+            <div className="col-span-full py-20 text-center opacity-30">
+              <span className="material-symbols-outlined text-6xl block mb-2">video_library</span>
+              <p className="font-bold uppercase tracking-widest text-xs">No hay videos registrados</p>
+            </div>
+          )}
+        </div>
+      )}
 
-          <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
-                    <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">ID</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Concepto</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Categoría</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-right">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {filteredConcepts.map((c) => (
-                    <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 text-xs font-mono text-gray-400">{c.id}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-slate-900">{c.concept}</span>
-                          <span className="text-[10px] text-gray-400 truncate max-w-[200px]">{c.definitionSimple}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-primary/5 text-primary">
-                          {c.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right space-x-1">
-                        <button
-                          onClick={() => handleOpenModal(c)}
-                          className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
-                          title="Editar"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">edit</span>
-                        </button>
-                        <button
-                          onClick={() => handleDeleteConcept(c.id)}
-                          className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                          title="Eliminar"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">delete</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
-          <div className="p-8 border-b border-gray-100 flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-black">Control de Accesos</h2>
-              <p className="text-sm text-gray-400">Promueve administradores o gestiona cuentas de estudiantes.</p>
-            </div>
-          </div>
+      {activeTab === 'users' && (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Email / Usuario</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Rol Actual</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-right">Acciones</th>
+            <table className="w-full text-left">
+              <thead className="bg-gray-50 dark:bg-slate-800/50 border-b dark:border-slate-800">
+                <tr>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Usuario</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Rol Actual</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right">Asignar Rol</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
-                {profiles.map((u) => (
-                  <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{u.username}</span>
-                        <span className="text-[10px] text-gray-400">{u.full_name || 'Sin nombre'}</span>
-                      </div>
+              <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
+                {profiles.map(p => (
+                  <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50">
+                    <td className="p-4">
+                      <p className="text-sm font-bold dark:text-white">{p.username || 'Usuario sin nombre'}</p>
+                      <p className="text-[10px] text-gray-400">{p.full_name}</p>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${u.role === 'admin'
-                        ? 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
-                        : u.role === 'founder'
-                          ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light border border-primary/20'
-                          : 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400'
-                        }`}>
-                        {u.role === 'admin' ? 'Administrador' : u.role === 'founder' ? 'Socio Fundador' : 'Estudiante'}
+                    <td className="p-4">
+                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${p.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : p.role === 'founder' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'}`}>
+                        {p.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <div className="flex border border-gray-100 dark:border-slate-800 rounded-lg overflow-hidden">
-                          <button
-                            onClick={() => updateUserRole(u.id, 'user')}
-                            className={`px-2 py-1 text-[9px] font-bold uppercase transition-all ${u.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-900 text-gray-400 hover:text-blue-600'}`}
-                            title="Set Estudiante"
-                          >
-                            User
-                          </button>
-                          <button
-                            onClick={() => updateUserRole(u.id, 'founder')}
-                            className={`px-2 py-1 text-[9px] font-bold uppercase border-l border-gray-100 dark:border-slate-800 transition-all ${u.role === 'founder' ? 'bg-primary text-white' : 'bg-white dark:bg-slate-900 text-gray-400 hover:text-primary'}`}
-                            title="Set Socio Fundador"
-                          >
-                            Founder
-                          </button>
-                          <button
-                            onClick={() => updateUserRole(u.id, 'admin')}
-                            className={`px-2 py-1 text-[9px] font-bold uppercase border-l border-gray-100 dark:border-slate-800 transition-all ${u.role === 'admin' ? 'bg-amber-500 text-white' : 'bg-white dark:bg-slate-900 text-gray-400 hover:text-amber-500'}`}
-                            title="Set Admin"
-                          >
-                            Admin
-                          </button>
-                        </div>
-                        <button
-                          onClick={() => handleResetPassword(u.id)}
-                          className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors"
-                          title="Resetear Password"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">lock_reset</span>
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(u.id)}
-                          className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-                          title="Eliminar Cuenta"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">person_remove</span>
-                        </button>
+                    <td className="p-4 text-right">
+                      <div className="inline-flex rounded-lg border dark:border-slate-800 overflow-hidden text-[9px] font-bold">
+                        <button onClick={() => updateUserRole(p.id, 'user')} className={`px-2 py-1.5 ${p.role === 'user' ? 'bg-gray-200 dark:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>USER</button>
+                        <button onClick={() => updateUserRole(p.id, 'founder')} className={`px-2 py-1.5 border-l dark:border-slate-800 ${p.role === 'founder' ? 'bg-primary text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>FOUNDER</button>
+                        <button onClick={() => updateUserRole(p.id, 'admin')} className={`px-2 py-1.5 border-l dark:border-slate-800 ${p.role === 'admin' ? 'bg-indigo-600 text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>ADMIN</button>
                       </div>
                     </td>
                   </tr>
@@ -440,156 +482,150 @@ const AdminPanel: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL: Add/Edit Concept */}
+      {/* MODALS */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-8 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-2xl font-black">{editingConcept ? 'Editar Concepto' : 'Nuevo Concepto'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-slate-900 transition-colors">
-                <span className="material-symbols-outlined">close</span>
-              </button>
+          <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95">
+            <div className="p-8 border-b dark:border-slate-800 flex justify-between items-center">
+              <h2 className="text-2xl font-black dark:text-white">{editingConcept ? 'Editar Concepto' : 'Nuevo Concepto'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="dark:text-gray-400"><span className="material-symbols-outlined">close</span></button>
             </div>
             <form onSubmit={handleSaveConcept} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">ID Único</label>
-                  <input
-                    type="text"
-                    value={formData.id}
-                    onChange={e => setFormData({ ...formData, id: e.target.value })}
-                    className="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-primary/20 text-sm p-3 font-mono"
-                    required
-                    readOnly={!!editingConcept}
-                  />
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">ID</label>
+                  <input className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" value={formData.id} onChange={e => setFormData({ ...formData, id: e.target.value })} required />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Nombre del Concepto</label>
-                  <input
-                    type="text"
-                    value={formData.concept}
-                    onChange={e => setFormData({ ...formData, concept: e.target.value })}
-                    className="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-primary/20 text-sm p-3"
-                    required
-                  />
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Nombre</label>
+                  <input className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" value={formData.concept} onChange={e => setFormData({ ...formData, concept: e.target.value })} required />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Categoría</label>
-                  <select
-                    value={formData.category}
-                    onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-primary/20 text-sm p-3"
-                    required
-                  >
-                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Categoría</label>
+                  <select className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
+                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Subcategoría</label>
-                  <input
-                    type="text"
-                    value={formData.subcategory}
-                    onChange={e => setFormData({ ...formData, subcategory: e.target.value })}
-                    className="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-primary/20 text-sm p-3"
-                    required
-                  />
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Subcategoría</label>
+                  <input className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" value={formData.subcategory} onChange={e => setFormData({ ...formData, subcategory: e.target.value })} />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Definición "En Simple"</label>
-                <textarea
-                  rows={3}
-                  value={formData.definitionSimple}
-                  onChange={e => setFormData({ ...formData, definitionSimple: e.target.value })}
-                  className="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-primary/20 text-sm p-3 leading-relaxed"
-                  required
-                ></textarea>
+                <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Definición</label>
+                <textarea className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" rows={2} value={formData.definitionSimple} onChange={e => setFormData({ ...formData, definitionSimple: e.target.value })} />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Ejemplo Real</label>
-                <textarea
-                  rows={3}
-                  value={formData.realExample}
-                  onChange={e => setFormData({ ...formData, realExample: e.target.value })}
-                  className="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-primary/20 text-sm p-3 leading-relaxed"
-                  required
-                ></textarea>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Normativa (Chile)</label>
-                  <input
-                    type="text"
-                    value={formData.regulation}
-                    onChange={e => setFormData({ ...formData, regulation: e.target.value })}
-                    className="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-primary/20 text-sm p-3"
-                  />
+              <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl">
+                <label className="text-[10px] font-black uppercase tracking-widest text-primary">SÍNTESIS TÉCNICA (Puntos Clave)</label>
+                <div className="flex flex-wrap gap-2">
+                  {formData.keyPoints?.map((kp, i) => (
+                    <span key={i} className="bg-white dark:bg-slate-900 border dark:border-slate-800 text-[11px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-2 dark:text-white">
+                      {kp}
+                      <button type="button" onClick={() => handleRemoveKeyPoint(i)} className="text-red-400 hover:text-red-600">×</button>
+                    </span>
+                  ))}
+                  {(!formData.keyPoints || formData.keyPoints.length === 0) && (
+                    <p className="text-[10px] text-gray-400 italic">No hay puntos clave asignados.</p>
+                  )}
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Jurisprudencia</label>
+                <div className="flex gap-2">
                   <input
-                    type="text"
-                    value={formData.jurisprudence}
-                    onChange={e => setFormData({ ...formData, jurisprudence: e.target.value })}
-                    className="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-primary/20 text-sm p-3"
+                    placeholder="Agregar nuevo punto..."
+                    className="flex-1 bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-xl px-4 py-2 text-sm dark:text-white"
+                    value={newKeyPoint}
+                    onChange={e => setNewKeyPoint(e.target.value)}
+                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddKeyPoint())}
                   />
+                  <button type="button" onClick={handleAddKeyPoint} className="bg-primary text-white px-4 rounded-xl font-bold">+</button>
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Link Video (YouTube)</label>
-                <input
-                  type="url"
-                  value={formData.videoUrl}
-                  onChange={e => setFormData({ ...formData, videoUrl: e.target.value })}
-                  className="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-primary/20 text-sm p-3"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                />
               </div>
 
               <div className="flex gap-4 pt-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-slate-900 rounded-2xl font-bold hover:bg-gray-200 transition-all">Cancelar</button>
-                <button type="submit" className="flex-[2] py-4 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all">
-                  {editingConcept ? 'Actualizar Concepto' : 'Guardar Concepto'}
-                </button>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-gray-100 dark:bg-slate-800 dark:text-white rounded-2xl font-bold">Cancelar</button>
+                <button type="submit" className="flex-[2] py-4 bg-primary text-white rounded-2xl font-black shadow-lg">Guardar Concepto</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* MODAL: Mass Upload */}
-      {isMassUploadOpen && (
+      {isMCModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden">
-            <div className="p-8 border-b border-gray-100 flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-black">Carga Masiva</h2>
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Formato: CSV (separado por ;)</p>
+          <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95">
+            <h2 className="text-2xl font-black mb-6 dark:text-white">{editingMC ? 'Editar Masterclass' : 'Nueva Masterclass'}</h2>
+            <form onSubmit={handleSaveMC} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Título de la Clase</label>
+                <input required className="w-full bg-gray-50 dark:bg-slate-800 border-none p-3 rounded-xl text-sm dark:text-white" value={mcFormData.title} onChange={e => setMcFormData({ ...mcFormData, title: e.target.value })} />
               </div>
-              <button onClick={() => setIsMassUploadOpen(false)} className="text-gray-400 hover:text-slate-900 transition-colors">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="p-8 space-y-6">
-              <textarea
-                rows={10}
-                placeholder="ID;Concepto;Categoría;Subcategoría;Definición;Ejemplo;Normativa;Jurisprudencia;Link"
-                value={massData}
-                onChange={e => setMassData(e.target.value)}
-                className="w-full bg-gray-50 border-gray-100 rounded-2xl font-mono text-xs p-4 focus:ring-primary/20 custom-scrollbar"
-              ></textarea>
-              <div className="flex gap-4">
-                <button onClick={() => setIsMassUploadOpen(false)} className="flex-1 py-4 bg-gray-100 text-slate-900 rounded-2xl font-bold hover:bg-gray-200 transition-all">Cancelar</button>
-                <button onClick={handleMassUpload} className="flex-[2] py-4 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all">Procesar Datos</button>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Descripción</label>
+                <textarea rows={3} className="w-full bg-gray-50 dark:bg-slate-800 border-none p-3 rounded-xl text-sm dark:text-white" value={mcFormData.description} onChange={e => setMcFormData({ ...mcFormData, description: e.target.value })} />
               </div>
-            </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-gray-400 ml-1">URL YouTube</label>
+                <input required className="w-full bg-gray-50 dark:bg-slate-800 border-none p-3 rounded-xl text-sm dark:text-white" value={mcFormData.video_url} onChange={e => setMcFormData({ ...mcFormData, video_url: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Categoría</label>
+                  <input className="w-full bg-gray-50 dark:bg-slate-800 border-none p-3 rounded-xl text-sm dark:text-white" value={mcFormData.category} onChange={e => setMcFormData({ ...mcFormData, category: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Duración</label>
+                  <input className="w-full bg-gray-50 dark:bg-slate-800 border-none p-3 rounded-xl text-sm dark:text-white" placeholder="Ej: 45 min" value={mcFormData.duration} onChange={e => setMcFormData({ ...mcFormData, duration: e.target.value })} />
+                </div>
+              </div>
+              <div className="flex gap-4 pt-6">
+                <button type="button" onClick={() => setIsMCModalOpen(false)} className="flex-1 py-4 bg-gray-100 dark:bg-slate-800 dark:text-white rounded-2xl font-bold">Cancelar</button>
+                <button type="submit" className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg">Publicar Video</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
+
+      {isBulkModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95">
+            <div className="p-8 border-b dark:border-slate-800 flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-black dark:text-white">Carga Masiva de Conceptos</h2>
+                <p className="text-xs text-gray-500 mt-1">Pega tus datos separados por punto y coma (;)</p>
+              </div>
+              <button onClick={() => setIsBulkModalOpen(false)} className="dark:text-gray-400"><span className="material-symbols-outlined">close</span></button>
+            </div>
+            <form onSubmit={handleBulkSave} className="p-8 space-y-6">
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl">
+                <p className="text-[10px] font-black uppercase text-primary mb-2">Formato Requerido:</p>
+                <code className="text-[10px] dark:text-gray-300 break-all">
+                  Concepto;Categoría;Subcategoría;Definición;Ejemplo;Regulación;Jurisprudencia;SintesisTecnica
+                </code>
+                <p className="text-[9px] text-gray-400 mt-2 italic">* Usa el símbolo "|" para separar múltiples puntos en la Síntesis Técnica.</p>
+              </div>
+              <textarea
+                className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-4 text-xs font-mono dark:text-white"
+                rows={12}
+                placeholder="Ejemplo:&#10;Contrato de Compraventa;Derecho Civil;Contratos;Acuerdo donde uno se obliga a dar...;Venta de una casa;Art. 1793;Corte Suprema Rol 123...;Punto 1|Punto 2|Punto 3"
+                value={bulkText}
+                onChange={e => setBulkText(e.target.value)}
+                required
+              />
+
+              <div className="flex gap-4">
+                <button type="button" onClick={() => setIsBulkModalOpen(false)} className="flex-1 py-4 bg-gray-100 dark:bg-slate-800 dark:text-white rounded-2xl font-bold">Cancelar</button>
+                <button type="submit" className="flex-[2] py-4 bg-primary text-white rounded-2xl font-black shadow-lg">Iniciar Carga</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

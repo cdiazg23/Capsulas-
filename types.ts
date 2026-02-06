@@ -20,9 +20,22 @@ export interface LegalConcept {
   regulation: string;
   jurisprudence: string;
   videoUrl: string;
+  keyPoints?: string[];
 }
 
-export type ViewType = 'landing' | 'dashboard' | 'explorer' | 'detail' | 'admin' | 'profile' | 'login' | 'library' | 'pricing' | 'flashcards' | 'community';
+export interface MasterClass {
+  id: string;
+  title: string;
+  description: string;
+  video_url: string;
+  thumbnail_url?: string;
+  duration?: string;
+  category?: string;
+  professor?: string;
+  created_at: string;
+}
+
+export type ViewType = 'landing' | 'dashboard' | 'explorer' | 'detail' | 'admin' | 'profile' | 'login' | 'library' | 'pricing' | 'flashcards' | 'community' | 'masterclasses';
 
 export interface UserStats {
   level: number;

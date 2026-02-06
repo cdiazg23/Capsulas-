@@ -83,10 +83,10 @@ const Sidebar: React.FC = () => {
                       key={item}
                       onClick={() => navigate(`/app/explorer/${encodeURIComponent(cat.name)}/${encodeURIComponent(item)}`)}
                       className={`text-left py-2 px-4 text-sm transition-colors ${isExplorerRoute &&
-                          selectedCategory === cat.name &&
-                          selectedSubcategory === item
-                          ? 'font-semibold text-primary bg-primary/5 dark:bg-primary/10 rounded-r-lg border-l-2 border-primary -ml-[2px]'
-                          : 'text-gray-500 dark:text-slate-500 hover:text-primary'
+                        selectedCategory === cat.name &&
+                        selectedSubcategory === item
+                        ? 'font-semibold text-primary bg-primary/5 dark:bg-primary/10 rounded-r-lg border-l-2 border-primary -ml-[2px]'
+                        : 'text-gray-500 dark:text-slate-500 hover:text-primary'
                         }`}
                     >
                       {item}
@@ -107,18 +107,27 @@ const Sidebar: React.FC = () => {
           </div>
           <p className="text-[10px] text-orange-700 dark:text-orange-300 italic">¡Tu examen de grado está más cerca, no pares!</p>
         </div>
+        <div className="p-4 space-y-1">
+          <p className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600">Comunidad</p>
+          {(user?.role === 'founder' || user?.role === 'admin') && (
+            <button
+              onClick={() => navigate('/app/community')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/community' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}
+            >
+              <span className="material-symbols-outlined text-[20px]">forum</span>
+              <span>Espacio Fundadores</span>
+            </button>
+          )}
 
-        {(user?.role === 'founder' || user?.role === 'admin') && (
           <button
-            onClick={() => navigate('/app/community')}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 ${location.pathname === '/app/community'
-                ? 'bg-accent-gold text-white border-accent-gold shadow-lg shadow-accent-gold/20'
-                : 'border-accent-gold/30 text-accent-gold hover:bg-accent-gold/5'}`}
+            onClick={() => navigate('/app/masterclasses')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/masterclasses' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}
           >
-            <span className="material-symbols-outlined">groups</span>
-            <span>Espacio Comunidad</span>
+            <span className="material-symbols-outlined text-[20px]">school</span>
+            <span>Aula Iuris</span>
+            <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">NUEVO</span>
           </button>
-        )}
+        </div>
 
         <button
           onClick={() => navigate('/app/explorer')}

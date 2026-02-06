@@ -11,7 +11,6 @@ const ConceptDetail: React.FC = () => {
   const { stats, addXP, incrementLearnedConcepts, updateStats } = useStats();
   const { user } = useAuth();
 
-  const [isPlaying, setIsPlaying] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [isMastered, setIsMastered] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -92,23 +91,6 @@ const ConceptDetail: React.FC = () => {
 
   const isFreeUser = user?.role !== 'founder' && user?.role !== 'admin';
 
-  const getEmbedUrl = (url: string | undefined) => {
-    if (!url) return '';
-    try {
-      const urlObj = new URL(url);
-      let videoId = '';
-
-      if (urlObj.hostname.includes('youtube.com')) {
-        videoId = urlObj.searchParams.get('v') || '';
-      } else if (urlObj.hostname === 'youtu.be') {
-        videoId = urlObj.pathname.substring(1);
-      }
-
-      return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : url;
-    } catch (e) {
-      return url || '';
-    }
-  };
 
   const handleToggleMastery = () => {
     if (!isMastered) {
@@ -219,49 +201,39 @@ const ConceptDetail: React.FC = () => {
         </div>
 
         <div className="lg:col-span-4 space-y-6">
-          <div className="space-y-3">
-            <div className="aspect-video bg-black rounded-[2rem] overflow-hidden shadow-2xl relative group ring-8 ring-white dark:ring-slate-900">
-              {isPlaying ? (
-                <iframe
-                  src={getEmbedUrl(concept.videoUrl)}
-                  className="w-full h-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+          <section className="bg-slate-900 dark:bg-slate-800 text-white p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+            <div className="absolute -top-10 -right-10 size-40 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-colors"></div>
+
+            <div className="flex items-center gap-3 mb-6 relative">
+              <div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary text-2xl">tips_and_updates</span>
+              </div>
+              <h2 className="text-lg font-black uppercase tracking-tight">Síntesis Técnica</h2>
+            </div>
+
+            <div className="space-y-4 relative">
+              {concept.keyPoints && concept.keyPoints.length > 0 ? (
+                concept.keyPoints.map((point, index) => (
+                  <div key={index} className="flex gap-3 items-start group/item">
+                    <span className="mt-1.5 size-1.5 rounded-full bg-primary flex-shrink-0 group-hover/item:scale-150 transition-transform"></span>
+                    <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                      {point}
+                    </p>
+                  </div>
+                ))
               ) : (
-                <>
-                  <img
-                    src={`https://picsum.photos/seed/${concept.id}/600/400`}
-                    className="w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-110"
-                    alt="Video Thumbnail"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button
-                      onClick={() => setIsPlaying(true)}
-                      className="size-16 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-4xl fill-1">play_arrow</span>
-                    </button>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
-                    <p className="text-white text-xs font-bold uppercase tracking-widest">Video Explicativo</p>
-                  </div>
-                </>
+                <div className="py-8 text-center opacity-40">
+                  <span className="material-symbols-outlined text-4xl mb-2">construction</span>
+                  <p className="text-xs font-bold uppercase tracking-widest">Contenido en proceso</p>
+                </div>
               )}
             </div>
-            <div className="flex items-center justify-between px-4">
-              <a
-                href={concept.videoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-wider"
-              >
-                <span className="material-symbols-outlined text-xs">link</span>
-                Ver fuente en YouTube
-              </a>
-              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Uso Académico</span>
+
+            <div className="mt-8 pt-6 border-t border-white/10 relative">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Dato Clave</p>
+              <p className="text-xs text-primary font-bold">{concept.subcategory} es fundamental en {concept.category}</p>
             </div>
-          </div>
+          </section>
 
           <div className="bg-accent-gold/5 dark:bg-accent-gold/10 border border-accent-gold/20 dark:border-accent-gold/30 rounded-[2rem] p-8">
             <div className="flex items-center gap-3 mb-4">

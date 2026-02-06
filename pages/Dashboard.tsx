@@ -15,16 +15,16 @@ const Dashboard: React.FC = () => {
   const [showResults, setShowResults] = useState(false);
 
   // Safety check: ensure concepts is always an array
-  const safeСoncepts = useMemo(() => concepts || [], [concepts]);
+  const safeConcepts = useMemo(() => concepts || [], [concepts]);
 
-  const conceptOfTheDay = useMemo(() => safeСoncepts[0] || {} as LegalConcept, [safeСoncepts]);
+  const conceptOfTheDay = useMemo(() => safeConcepts[0] || {} as LegalConcept, [safeConcepts]);
 
   const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   const searchResults = useMemo(() => {
-    if (searchText.trim().length < 2 || safeСoncepts.length === 0) return [];
+    if (searchText.trim().length < 2 || safeConcepts.length === 0) return [];
     const term = normalize(searchText);
-    return safeСoncepts.filter(c =>
+    return safeConcepts.filter(c =>
       normalize(c.concept).includes(term) ||
       normalize(c.id).includes(term) ||
       normalize(c.subcategory).includes(term) ||
@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
       normalize(c.jurisprudence).includes(term) ||
       term.includes(normalize(c.concept))
     ).slice(0, 6);
-  }, [searchText, safeСoncepts]);
+  }, [searchText, safeConcepts]);
 
   const categories = useMemo(() => {
     const cats = [
@@ -50,9 +50,9 @@ const Dashboard: React.FC = () => {
 
     return cats.map(cat => ({
       ...cat,
-      count: safeСoncepts.filter(c => c.category === cat.name).length
+      count: safeConcepts.filter(c => c.category === cat.name).length
     }));
-  }, [safeСoncepts]);
+  }, [safeConcepts]);
 
   const userRank = useMemo(() => {
     if (stats.level >= 13) return { name: 'Magistrado de la Corte', color: 'text-indigo-600', bg: 'bg-indigo-50', icon: 'gavel', border: 'border-indigo-100' };
@@ -112,6 +112,10 @@ const Dashboard: React.FC = () => {
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `Hace ${hours} h`;
     return date.toLocaleDateString();
+  };
+
+  const handleConceptClick = (concept: LegalConcept) => {
+    navigate(`/app/concept/${concept.id}`);
   };
 
   return (
@@ -178,7 +182,7 @@ const Dashboard: React.FC = () => {
           <div>
             <p className="text-gray-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Racha de Repaso</p>
             <p className="text-4xl font-black text-slate-900 dark:text-white mb-2">{stats.streak} <span className="text-lg text-slate-300 dark:text-slate-700">Días</span></p>
-            {user?.role === 'user' && (
+            {user?.role === 'user' && user?.role !== 'admin' && user?.role !== 'founder' && (
               <div className="mt-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
                 <span>Límite Diario</span>
                 <span className={stats.consultationsToday >= 10 ? 'text-red-500' : 'text-primary'}>
@@ -186,6 +190,7 @@ const Dashboard: React.FC = () => {
                 </span>
               </div>
             )}
+
           </div>
         </div>
       </div>
