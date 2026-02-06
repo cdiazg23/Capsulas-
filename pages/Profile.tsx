@@ -1,13 +1,23 @@
-
 import React, { useState, useRef } from 'react';
 import { useAuth, useStats } from '../contexts';
+
+const JUDICIAL_CAREER = [
+  { level: 1, name: 'Estudiante de Derecho', icon: 'auto_stories' },
+  { level: 2, name: 'Procurador', icon: 'ink_pen' },
+  { level: 4, name: 'Licenciado en Derecho', icon: 'verified' },
+  { level: 6, name: 'Bachiller', icon: 'school' },
+  { level: 8, name: 'Abogado de la República', icon: 'history_edu' },
+  { level: 10, name: 'Juez de Letras', icon: 'balance' },
+  { level: 13, name: 'Magistrado de Corte', icon: 'gavel' },
+  { level: 16, name: 'Ministro Suprema', icon: 'account_balance' },
+];
 
 const Profile: React.FC = () => {
   const { user, updateUser } = useAuth();
   const { stats } = useStats();
   const [activeModal, setActiveModal] = useState<'edit' | 'ranking' | 'badges' | null>(null);
   const [editData, setEditData] = useState({
-    name: user?.name || '',
+    name: user?.name || 'Usuario',
     university: user?.university || '',
     studentLevel: user?.studentLevel || '',
     avatarUrl: user?.avatarUrl || 'https://picsum.photos/seed/lawyer/200/200'
@@ -19,21 +29,19 @@ const Profile: React.FC = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
 
-  const rankings = [
-    { name: 'Carolina Paz', points: 4500, level: 8 },
-    { name: 'Juan Carlos', points: 4100, level: 7 },
-    { name: user?.name || 'Diego Valdés', points: stats.points, level: stats.level },
-    { name: 'María Ignacia', points: 2100, level: 4 },
-  ];
+  const currentRank = React.useMemo(() => {
+    const rank = [...JUDICIAL_CAREER].reverse().find(r => stats.level >= r.level);
+    return rank || JUDICIAL_CAREER[0];
+  }, [stats.level]) as typeof JUDICIAL_CAREER[number];
 
-  const allBadges = [
-    { icon: 'gavel', color: 'blue', label: 'Civil', desc: 'Dominio de Teoría de la Ley' },
-    { icon: 'balance', color: 'slate', label: 'Penal', locked: true, desc: 'Próximamente' },
-    { icon: 'menu_book', color: 'orange', label: 'Teoría', desc: 'Conceptos Fundamentales' },
-    { icon: 'stars', color: 'purple', label: 'Pro', desc: 'Racha de 30 días' },
-    { icon: 'history_edu', color: 'emerald', label: 'Escribano', locked: true, desc: 'Completa 10 quizes' },
-    { icon: 'groups', color: 'indigo', label: 'Social', locked: true, desc: 'Invita a un colega' },
-  ];
+  const allBadges = React.useMemo(() => [
+    { icon: 'cognition', color: 'blue', label: 'Iniciado', desc: 'Aprende 10 conceptos', active: stats.learnedConcepts >= 10 },
+    { icon: 'workspace_premium', color: 'slate', label: 'Enciclopedia', desc: 'Aprende 50 conceptos', active: stats.learnedConcepts >= 50 },
+    { icon: 'history_edu', color: 'orange', label: 'Escribano', desc: 'Aprende 100 conceptos', active: stats.learnedConcepts >= 100 },
+    { icon: 'local_fire_department', color: 'purple', label: 'Constancia', desc: 'Racha de 7 días', active: stats.streak >= 7 },
+    { icon: 'stars', color: 'emerald', label: 'Ley de Acero', desc: 'Racha de 30 días', active: stats.streak >= 30 },
+    { icon: 'military_tech', color: 'indigo', label: 'Fundador', desc: 'Socio IurisAcademy', active: user?.role === 'founder' || user?.role === 'admin' },
+  ], [stats.learnedConcepts, stats.streak, user?.role]);
 
   const handleSaveProfile = () => {
     if (user) {
@@ -96,6 +104,8 @@ const Profile: React.FC = () => {
     }
   };
 
+  if (!user) return null;
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 md:space-y-10 animate-in slide-in-from-right-4 duration-500">
       <div className="bg-white rounded-[2rem] p-6 md:p-10 border border-gray-100 shadow-sm relative overflow-hidden">
@@ -108,7 +118,12 @@ const Profile: React.FC = () => {
             />
             <button
               onClick={() => {
-                setEditData({ ...editData, avatarUrl: user?.avatarUrl || '' });
+                setEditData({
+                  name: user?.name || 'Usuario',
+                  university: user?.university || '',
+                  studentLevel: user?.studentLevel || '',
+                  avatarUrl: user?.avatarUrl || ''
+                });
                 setActiveModal('edit');
               }}
               className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-white hover:scale-110 transition-transform"
@@ -128,28 +143,40 @@ const Profile: React.FC = () => {
             <h1 className="text-2xl md:text-4xl font-black mb-2">{user?.name || 'Invitado'}</h1>
             <div className="flex flex-col gap-1 mb-4">
               <p className="text-gray-400 font-medium">
-                {user?.role === 'admin' ? 'Administrador del Sistema' : 'Estudiante de Derecho'}
+                {user?.role === 'admin' ? 'Administrador del Sistema' : (user?.role === 'founder' ? 'Socio Fundador' : 'Estudiante de Derecho')}
               </p>
               {user?.university && (
                 <p className="text-primary text-sm font-bold flex items-center justify-center md:justify-start gap-1">
                   <span className="material-symbols-outlined text-sm">school</span>
-                  {user.university}
+                  {user?.university}
                 </p>
               )}
               {user?.studentLevel && (
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">
-                  Nivel: {user.studentLevel}
+                  Nivel: {user?.studentLevel}
                 </p>
               )}
             </div>
 
             <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-              <div className="flex items-center gap-2 px-4 py-2 bg-accent-gold/10 text-accent-gold rounded-xl border border-accent-gold/20">
-                <span className="material-symbols-outlined text-lg fill-1">military_tech</span>
-                <span className="text-xs font-bold uppercase tracking-widest">
-                  {user?.role === 'admin' ? 'Consejo Superior' : 'Estudiante Inicial'}
-                </span>
-              </div>
+              {(user?.role === 'admin' || user?.role === 'founder') ? (
+                <div className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-accent-gold/20 to-amber-500/20 text-accent-gold rounded-2xl border border-accent-gold/30 shadow-lg shadow-accent-gold/10 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shine transition-transform duration-1000"></div>
+                  <span className="material-symbols-outlined text-xl fill-1 animate-float">
+                    {user?.role === 'admin' ? 'military_tech' : 'workspace_premium'}
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em]">
+                    {user?.role === 'admin' ? 'CONSEJO SUPERIOR' : 'SOCIO FUNDADOR'}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                  <span className="material-symbols-outlined text-lg fill-1 text-primary">{currentRank.icon}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
+                    {currentRank.name}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-primary rounded-xl border border-blue-100">
                 <span className="material-symbols-outlined text-lg fill-1">local_fire_department</span>
                 <span className="text-xs font-bold uppercase tracking-widest">{stats.streak} días racha</span>
@@ -160,7 +187,7 @@ const Profile: React.FC = () => {
           <button
             onClick={() => {
               setEditData({
-                name: user?.name || '',
+                name: user?.name || 'Usuario',
                 university: user?.university || '',
                 studentLevel: user?.studentLevel || '',
                 avatarUrl: user?.avatarUrl || 'https://picsum.photos/seed/lawyer/200/200'
@@ -189,11 +216,11 @@ const Profile: React.FC = () => {
           <div className="space-y-8">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <p className="text-sm font-bold text-slate-800">Nivel {stats.level} (Junior Associate)</p>
+                <p className="text-sm font-bold text-slate-800">{currentRank.name}</p>
                 <p className="text-xs font-black text-primary">{stats.xp} / {stats.nextLevelXp} XP</p>
               </div>
               <div className="w-full bg-gray-50 h-3 rounded-full overflow-hidden">
-                <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${(stats.xp / stats.nextLevelXp) * 100}%` }}></div>
+                <div className="bg-primary h-full transition-all duration-1000 animate-shine" style={{ width: `${(stats.xp / stats.nextLevelXp) * 100}%` }}></div>
               </div>
             </div>
 
@@ -214,8 +241,8 @@ const Profile: React.FC = () => {
           <h2 className="text-xl font-black uppercase tracking-tight mb-8 text-center md:text-left">Insignias Destacadas</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {allBadges.slice(0, 4).map((badge, i) => (
-              <div key={i} className={`flex flex-col items-center gap-2 ${badge.locked ? 'opacity-30' : ''}`}>
-                <div className={`size-14 rounded-2xl bg-${badge.color}-50 text-${badge.color}-600 flex items-center justify-center border border-${badge.color}-100 shadow-sm`}>
+              <div key={i} className={`flex flex-col items-center gap-2 ${!badge.active ? 'opacity-30 grayscale' : ''}`}>
+                <div className={`size-14 rounded-2xl bg-${badge.color}-50 text-${badge.color}-600 flex items-center justify-center border border-${badge.color}-100 shadow-sm transition-all hover:scale-110`}>
                   <span className="material-symbols-outlined text-2xl">{badge.icon}</span>
                 </div>
                 <span className="text-[9px] font-black uppercase tracking-widest text-center">{badge.label}</span>
@@ -226,8 +253,36 @@ const Profile: React.FC = () => {
             onClick={() => setActiveModal('badges')}
             className="w-full mt-8 py-3 bg-gray-50 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors"
           >
-            Ver todas las insignias
+            Ver todas las insignias ({allBadges.filter(b => b.active).length}/{allBadges.length})
           </button>
+        </div>
+      </div>
+
+      {/* Judicial Career Section */}
+      <div className="bg-slate-900 text-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-12 opacity-5">
+          <span className="material-symbols-outlined text-[150px]">gavel</span>
+        </div>
+        <div className="relative z-10">
+          <h2 className="text-2xl font-black italic mb-2 tracking-tight">CARRERA JUDICIAL</h2>
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-12">Escalafón del Poder Judicial de IurisAcademy</p>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {JUDICIAL_CAREER.map((rank, i) => {
+              const isLocked = stats.level < rank.level;
+              return (
+                <div key={i} className={`flex flex-col items-center gap-4 transition-all ${isLocked ? 'opacity-20' : 'scale-110'}`}>
+                  <div className={`size-16 rounded-3xl flex items-center justify-center shadow-xl ${isLocked ? 'bg-white/5 border border-white/5' : 'bg-primary border-4 border-white/20'}`}>
+                    <span className="material-symbols-outlined text-3xl">{rank.icon}</span>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Nivel {rank.level}</p>
+                    <p className={`text-xs font-black uppercase mt-1 ${isLocked ? 'text-slate-600' : 'text-primary'}`}>{rank.name}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -313,18 +368,28 @@ const Profile: React.FC = () => {
               <button onClick={() => setActiveModal(null)} className="text-gray-400"><span className="material-symbols-outlined">close</span></button>
             </div>
             <div className="space-y-4">
-              {rankings.map((r, i) => (
-                <div key={i} className={`flex items-center justify-between p-4 rounded-2xl ${r.name === user?.name ? 'bg-primary/5 border border-primary/10' : 'bg-gray-50'}`}>
-                  <div className="flex items-center gap-4">
-                    <span className="text-lg font-black text-gray-300 w-4">#{i + 1}</span>
-                    <div>
-                      <p className="text-sm font-bold text-slate-800">{r.name}</p>
-                      <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Nivel {r.level}</p>
-                    </div>
+              <div className="p-6 bg-primary/5 border border-dashed border-primary/20 rounded-2xl text-center">
+                <span className="material-symbols-outlined text-4xl text-primary mb-2">diversity_3</span>
+                <p className="text-sm font-bold text-slate-800">Ranking Global en Desarrollo</p>
+                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1 italic">Tus puntos actuales: {stats.points}</p>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-white border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <span className="text-lg font-black text-primary w-4">🏆</span>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">{user?.name} (Tú)</p>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Nivel {stats.level} • {currentRank.name}</p>
                   </div>
-                  <p className="text-primary font-black">{r.points} <span className="text-[10px] uppercase">PTS</span></p>
                 </div>
-              ))}
+                <p className="text-primary font-black">{stats.points} <span className="text-[10px] uppercase">PTS</span></p>
+              </div>
+
+              <div className="pt-4 text-center">
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
+                  Próximamente podrás competir contra otros estudiantes de derecho de toda Latinoamérica. ¡Sigue acumulando prestigio!
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -339,7 +404,7 @@ const Profile: React.FC = () => {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {allBadges.map((badge, i) => (
-                <div key={i} className={`p-4 rounded-2xl border flex flex-col items-center text-center gap-3 transition-all ${badge.locked ? 'bg-gray-50 border-gray-100 grayscale opacity-60' : 'bg-white border-gray-100 shadow-sm'}`}>
+                <div key={i} className={`p-4 rounded-2xl border flex flex-col items-center text-center gap-3 transition-all ${!badge.active ? 'bg-gray-50 border-gray-100 grayscale opacity-60' : 'bg-white border-primary shadow-lg shadow-primary/5'}`}>
                   <div className={`size-16 rounded-3xl bg-${badge.color}-50 text-${badge.color}-600 flex items-center justify-center`}>
                     <span className="material-symbols-outlined text-3xl">{badge.icon}</span>
                   </div>
@@ -347,8 +412,11 @@ const Profile: React.FC = () => {
                     <h3 className="text-sm font-black uppercase tracking-tight">{badge.label}</h3>
                     <p className="text-[10px] text-gray-400 font-medium">{badge.desc}</p>
                   </div>
-                  {badge.locked && (
+                  {!badge.active && (
                     <span className="material-symbols-outlined text-xs text-gray-400">lock</span>
+                  )}
+                  {badge.active && (
+                    <div className="px-2 py-1 bg-primary text-[8px] text-white font-black rounded-full uppercase">Completado</div>
                   )}
                 </div>
               ))}
