@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
+import MarchaBlancaModal from '../components/MarchaBlancaModal';
 
 /**
  * Main layout wrapper for authenticated pages
@@ -9,6 +10,7 @@ import Sidebar from '../components/Sidebar';
 const MainLayout: React.FC = () => {
     return (
         <div className="min-h-screen bg-white dark:bg-slate-950">
+            <MarchaBlancaModal />
             <Header />
             <div className="flex">
                 <Sidebar />
