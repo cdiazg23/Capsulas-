@@ -520,6 +520,22 @@ const AdminPanel: React.FC = () => {
                 <textarea className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" rows={2} value={formData.definitionSimple} onChange={e => setFormData({ ...formData, definitionSimple: e.target.value })} />
               </div>
 
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Ejemplo Real</label>
+                <textarea className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" rows={2} value={formData.realExample} onChange={e => setFormData({ ...formData, realExample: e.target.value })} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Regulación / Base Legal</label>
+                  <input className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" value={formData.regulation} onChange={e => setFormData({ ...formData, regulation: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Jurisprudencia / Referencia</label>
+                  <input className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" value={formData.jurisprudence} onChange={e => setFormData({ ...formData, jurisprudence: e.target.value })} />
+                </div>
+              </div>
+
               <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl">
                 <label className="text-[10px] font-black uppercase tracking-widest text-primary">SÍNTESIS TÉCNICA (Puntos Clave)</label>
                 <div className="flex flex-wrap gap-2">
