@@ -4,8 +4,8 @@ import { useAuth } from '../contexts';
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading, signIn, signUp } = useAuth();
-
+  const { user, loading: authLoading, signIn, signUp, resetPassword } = useAuth();
+  const [isResetMode, setIsResetMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,6 +15,25 @@ const Auth: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      setError('Ingresa tu email para resetear la contraseña');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await resetPassword(email);
+      setSuccessMsg('Se ha enviado un enlace de recuperación a tu correo. Revisa tu bandeja de entrada o spam.');
+      setIsResetMode(false);
+    } catch (err: any) {
+      setError(err.message || 'Error al enviar el correo de recuperación');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Redirigir si ya está autenticado
   React.useEffect(() => {
@@ -114,16 +133,18 @@ const Auth: React.FC = () => {
         <div className="w-full max-w-md space-y-10">
           <div className="space-y-2">
             <h2 className="text-slate-900 dark:text-white text-4xl font-black tracking-tight">
-              {isSignUp ? 'Únete a la comunidad' : 'Bienvenido de vuelta'}
+              {isResetMode ? 'Recuperar clave' : isSignUp ? 'Únete a la comunidad' : 'Bienvenido de vuelta'}
             </h2>
             <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-              {isSignUp
-                ? 'Crea tu cuenta gratuita y empieza a dominar el código hoy mismo.'
-                : 'Ingresa tus credenciales para continuar con tu progreso de aprendizaje.'}
+              {isResetMode
+                ? 'Te enviaremos un correo con las instrucciones para crear una nueva contraseña.'
+                : isSignUp
+                  ? 'Crea tu cuenta gratuita y empieza a dominar el código hoy mismo.'
+                  : 'Ingresa tus credenciales para continuar con tu progreso de aprendizaje.'}
             </p>
           </div>
 
-          <form className="space-y-6" onSubmit={handleAuth}>
+          <form className="space-y-6" onSubmit={isResetMode ? handleResetPassword : handleAuth}>
             {error && (
               <div className="p-4 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold border border-red-100 dark:border-red-900/20 animate-in fade-in slide-in-from-top-2">
                 <div className="flex items-center gap-2">
@@ -154,29 +175,43 @@ const Auth: React.FC = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center ml-1">
-                <label className="text-sm font-bold text-slate-800 dark:text-slate-300 uppercase tracking-widest">Contraseña</label>
-                {!isSignUp && <a href="#" className="text-[10px] font-black text-primary uppercase tracking-wider hover:underline">¿Olvidaste tu clave?</a>}
+            {!isResetMode && (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-sm font-bold text-slate-800 dark:text-slate-300 uppercase tracking-widest">Contraseña</label>
+                  {!isSignUp && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsResetMode(true);
+                        setError('');
+                        setSuccessMsg('');
+                      }}
+                      className="text-[10px] font-black text-primary uppercase tracking-wider hover:underline"
+                    >
+                      ¿Olvidaste tu clave?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full h-14 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all p-4 text-slate-900 dark:text-white pr-12"
+                    required={!isResetMode}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
+                  >
+                    <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                  </button>
+                </div>
               </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-14 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all p-4 text-slate-900 dark:text-white pr-12"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
-                >
-                  <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
-                </button>
-              </div>
-            </div>
+            )}
 
             {isSignUp && (
               <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
@@ -206,7 +241,13 @@ const Auth: React.FC = () => {
               disabled={loading}
               className={`w-full h-14 bg-primary text-white rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              {loading ? 'Preparando ganchos...' : isSignUp ? 'Unirse Ahora' : 'Ingresar al Dashboard'}
+              {loading
+                ? 'Procesando...'
+                : isResetMode
+                  ? 'Enviar enlace de recuperación'
+                  : isSignUp
+                    ? 'Unirse Ahora'
+                    : 'Ingresar al Dashboard'}
             </button>
           </form>
 
@@ -217,14 +258,26 @@ const Auth: React.FC = () => {
           </div>
 
           <p className="text-center text-sm font-semibold text-slate-400 dark:text-slate-500">
-            {isSignUp ? '¿Ya eres parte de nosotros?' : '¿Aún no tienes cuenta?'} {' '}
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary font-black hover:underline"
-            >
-              {isSignUp ? 'Inicia sesión' : 'Crear cuenta gratis'}
-            </button>
+            {isResetMode ? (
+              <button
+                type="button"
+                onClick={() => setIsResetMode(false)}
+                className="text-primary font-black hover:underline"
+              >
+                Volver al inicio de sesión
+              </button>
+            ) : (
+              <>
+                {isSignUp ? '¿Ya eres parte de nosotros?' : '¿Aún no tienes cuenta?'} {' '}
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-primary font-black hover:underline"
+                >
+                  {isSignUp ? 'Inicia sesión' : 'Crear cuenta gratis'}
+                </button>
+              </>
+            )}
           </p>
 
           {!isSignUp && (

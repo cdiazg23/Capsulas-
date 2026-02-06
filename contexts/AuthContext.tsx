@@ -8,6 +8,7 @@ interface AuthContextType {
     signIn: (email: string, password: string) => Promise<void>;
     signUp: (email: string, password: string) => Promise<void>;
     signOut: () => Promise<void>;
+    resetPassword: (email: string) => Promise<void>;
     updateUser: (updates: Partial<User>) => void;
 }
 
@@ -113,6 +114,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // No hacemos el navigate aquí, dejamos que ProtectedRoute o el componente disparen la redirección
         }
     };
+    const resetPassword = async (email: string) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/login`,
+        });
+        if (error) throw error;
+    };
 
 
     const updateUser = (updates: Partial<User>) => {
@@ -120,7 +127,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, updateUser }}>
+        <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resetPassword, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
