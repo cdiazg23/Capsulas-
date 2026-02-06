@@ -121,8 +121,8 @@ const Dashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div className={`p-8 bg-white dark:bg-slate-900 rounded-[2rem] border ${userRank.border} dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col justify-between relative overflow-hidden group hover:scale-[1.02] transition-all duration-500`}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+        <div className={`p-6 md:p-8 bg-white dark:bg-slate-900 rounded-[2rem] border ${userRank.border} dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col justify-between relative overflow-hidden group hover:scale-[1.02] transition-all duration-500`}>
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
             <span className="material-symbols-outlined text-[100px] dark:text-white">{userRank.icon}</span>
           </div>
@@ -139,7 +139,7 @@ const Dashboard: React.FC = () => {
 
             <div className="mb-4">
               <div className="flex items-end justify-between mb-2">
-                <p className="text-3xl font-black text-slate-900 dark:text-white leading-none">Nivel {stats.level}</p>
+                <p className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-none">Nivel {stats.level}</p>
                 <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stats.xp} / {stats.nextLevelXp} XP</p>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-50 dark:border-slate-700 p-0.5">
@@ -182,7 +182,7 @@ const Dashboard: React.FC = () => {
           <div>
             <p className="text-gray-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Racha de Repaso</p>
             <p className="text-4xl font-black text-slate-900 dark:text-white mb-2">{stats.streak} <span className="text-lg text-slate-300 dark:text-slate-700">Días</span></p>
-            {user?.role === 'user' && user?.role !== 'admin' && user?.role !== 'founder' && (
+            {user?.role === 'user' && (
               <div className="mt-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
                 <span>Límite Diario</span>
                 <span className={stats.consultationsToday >= 10 ? 'text-red-500' : 'text-primary'}>
@@ -196,8 +196,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center max-w-2xl mx-auto mb-16 text-center">
-        <h1 className="text-4xl md:text-5xl font-black leading-tight mb-8 dark:text-white">¿Qué concepto jurídico quieres <span className="text-primary italic">dominar</span> hoy?</h1>
+      <div className="flex flex-col items-center max-w-2xl mx-auto mb-10 md:mb-16 text-center">
+        <h1 className="text-2xl md:text-5xl font-black leading-tight mb-6 md:mb-8 dark:text-white">¿Qué concepto jurídico quieres <span className="text-primary italic">dominar</span> hoy?</h1>
         <form onSubmit={(e) => { e.preventDefault(); if (searchResults.length > 0 && searchResults[0]) handleConceptClick(searchResults[0]); }} className="w-full relative group">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-2xl group-focus-within:text-primary transition-colors">search</span>
           <input
@@ -209,9 +209,9 @@ const Dashboard: React.FC = () => {
             }}
             onFocus={() => setShowResults(true)}
             placeholder="Busca por ID, término o descripción..."
-            className="w-full h-16 pl-12 pr-32 bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-200 dark:border-slate-800 shadow-xl shadow-primary/5 focus:border-primary focus:ring-0 text-lg transition-all dark:text-white dark:placeholder-slate-600"
+            className="w-full h-14 md:h-16 pl-12 pr-28 md:pr-32 bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-200 dark:border-slate-800 shadow-xl shadow-primary/5 focus:border-primary focus:ring-0 text-base md:text-lg transition-all dark:text-white dark:placeholder-slate-600"
           />
-          <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 bg-primary text-white h-10 px-6 rounded-xl font-bold hover:bg-primary-dark transition-all">Buscar</button>
+          <button type="submit" className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 bg-primary text-white h-10 px-4 md:px-6 rounded-xl font-bold hover:bg-primary-dark transition-all text-sm">Buscar</button>
 
           {showResults && searchText.length > 1 && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 overflow-hidden z-[60] animate-in fade-in slide-in-from-top-2">
@@ -303,7 +303,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-indigo-600 to-primary text-white rounded-[2.5rem] p-10 shadow-xl relative overflow-hidden group cursor-pointer" onClick={() => navigate('/app/flashcards')}>
+          <div className="bg-gradient-to-br from-indigo-600 to-primary text-white rounded-[2.5rem] p-6 md:p-10 shadow-xl relative overflow-hidden group cursor-pointer" onClick={() => navigate('/app/flashcards')}>
             <div className="absolute top-[-10%] right-[-10%] opacity-10 group-hover:scale-110 transition-transform duration-700 rotate-12">
               <span className="material-symbols-outlined text-[150px]">style</span>
             </div>
@@ -323,7 +323,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-[#1e293b] dark:bg-slate-900 text-white rounded-[2.5rem] p-10 shadow-xl relative overflow-hidden group border dark:border-slate-800">
+          <div className="bg-[#1e293b] dark:bg-slate-900 text-white rounded-[2.5rem] p-6 md:p-10 shadow-xl relative overflow-hidden group border dark:border-slate-800">
             <div className="absolute top-[-10%] right-[-10%] opacity-10 group-hover:scale-110 transition-transform duration-700">
               <span className="material-symbols-outlined text-[150px]">auto_awesome</span>
             </div>

@@ -16,16 +16,16 @@ const Pricing: React.FC = () => {
                     Volver
                 </button>
 
-                <div className="text-center mb-20">
-                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Impulsa tu carrera, <br /><span className="text-primary italic">apoya la educación</span></h1>
+                <div className="text-center mb-10 md:mb-20">
+                    <h1 className="text-2xl md:text-5xl font-black text-slate-900 mb-6">Impulsa tu carrera, <br /><span className="text-primary italic">apoya la educación</span></h1>
                     <p className="text-xl text-slate-600 max-w-2xl mx-auto">
                         IurisAcademy es un proyecto independiente. Tu apoyo nos permite mantener los servidores, mejorar la IA y llegar a más estudiantes.
                     </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-8 items-stretch">
+                <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch">
                     {/* Plan Gratis */}
-                    <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col">
+                    <div className="bg-white rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col">
                         <div className="mb-8">
                             <span className="bg-slate-100 text-slate-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">Marcha Blanca</span>
                             <h3 className="text-2xl font-black text-slate-900 mt-4">Comunidad</h3>
@@ -40,7 +40,7 @@ const Pricing: React.FC = () => {
                         </p>
 
                         <ul className="space-y-4 mb-12">
-                            {['Glosario Completo de Conceptos Legales', 'Sistema de XP, Niveles y Logros', 'Búsqueda Avanzada', 'Modo Estudio', 'Dark Mode', 'Actualizaciones Continuas'].map((feature) => (
+                            {['10 Consultas Diarias', 'Glosario Completo de Conceptos Legales', 'Sistema de XP, Niveles y Logros', 'Búsqueda Avanzada', 'Modo Estudio', 'Dark Mode'].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3">
                                     <span className="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
                                     <span className="text-slate-700 text-sm font-medium">{feature}</span>
@@ -57,7 +57,7 @@ const Pricing: React.FC = () => {
                     </div>
 
                     {/* Plan Founder */}
-                    <div className="gradient-primary text-white rounded-[2.5rem] p-10 shadow-2xl shadow-primary/20 flex flex-col relative overflow-hidden">
+                    <div className="gradient-primary text-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl shadow-primary/20 flex flex-col relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[100px] -mr-32 -mt-32"></div>
                         <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent-gold/20 rounded-full blur-[80px] -ml-24 -mb-24"></div>
 
@@ -79,12 +79,12 @@ const Pricing: React.FC = () => {
 
                         <ul className="space-y-4 mb-12 relative z-10">
                             {[
+                                'Acceso y Consultas Ilimitadas',
                                 'Todo lo de Comunidad',
                                 'Badge especial "Founder" en tu perfil',
                                 'Acceso a funciones experimentales',
                                 'Agradecimiento en la sección Comunidad',
-                                'Voto en prioridad de nuevas features',
-                                'Apoyas que la educación legal sea accesible'
+                                'Voto en prioridad de nuevas features'
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3">
                                     <span className="material-symbols-outlined text-accent-gold text-lg mt-0.5">star</span>

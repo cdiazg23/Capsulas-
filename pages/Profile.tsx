@@ -97,13 +97,13 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 animate-in slide-in-from-right-4 duration-500">
-      <div className="bg-white rounded-[2rem] p-10 border border-gray-100 shadow-sm relative overflow-hidden">
+    <div className="max-w-4xl mx-auto space-y-6 md:space-y-10 animate-in slide-in-from-right-4 duration-500">
+      <div className="bg-white rounded-[2rem] p-6 md:p-10 border border-gray-100 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32"></div>
-        <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
+        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 relative z-10">
           <div className="relative group">
             <div
-              className="size-32 rounded-full border-4 border-white shadow-2xl bg-center bg-cover overflow-hidden"
+              className="size-24 md:size-32 rounded-full border-4 border-white shadow-2xl bg-center bg-cover overflow-hidden"
               style={{ backgroundImage: `url("${user?.avatarUrl || 'https://picsum.photos/seed/lawyer/200/200'}")` }}
             />
             <button
@@ -125,7 +125,7 @@ const Profile: React.FC = () => {
           </div>
 
           <div className="flex-1 text-center md:text-left">
-            <h1 className="text-4xl font-black mb-2">{user?.name || 'Invitado'}</h1>
+            <h1 className="text-2xl md:text-4xl font-black mb-2">{user?.name || 'Invitado'}</h1>
             <div className="flex flex-col gap-1 mb-4">
               <p className="text-gray-400 font-medium">
                 {user?.role === 'admin' ? 'Administrador del Sistema' : 'Estudiante de Derecho'}
@@ -175,7 +175,7 @@ const Profile: React.FC = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-black uppercase tracking-tight">Estadísticas</h2>
             <button
@@ -210,9 +210,9 @@ const Profile: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm">
-          <h2 className="text-xl font-black uppercase tracking-tight mb-8">Insignias Destacadas</h2>
-          <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-sm">
+          <h2 className="text-xl font-black uppercase tracking-tight mb-8 text-center md:text-left">Insignias Destacadas</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {allBadges.slice(0, 4).map((badge, i) => (
               <div key={i} className={`flex flex-col items-center gap-2 ${badge.locked ? 'opacity-30' : ''}`}>
                 <div className={`size-14 rounded-2xl bg-${badge.color}-50 text-${badge.color}-600 flex items-center justify-center border border-${badge.color}-100 shadow-sm`}>

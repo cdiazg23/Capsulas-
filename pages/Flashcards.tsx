@@ -65,10 +65,10 @@ const Flashcards: React.FC = () => {
     if (isStudying && currentCard) {
         return (
             <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
-                        <h1 className="text-4xl font-black dark:text-white mb-2">Modo Flashcards</h1>
-                        <p className="text-gray-500 dark:text-slate-400">
+                        <h1 className="text-2xl md:text-4xl font-black dark:text-white mb-1">Modo Flashcards</h1>
+                        <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 font-bold uppercase tracking-widest">
                             Tarjeta {currentIndex + 1} de {studySet.length}
                         </p>
                     </div>
@@ -81,8 +81,8 @@ const Flashcards: React.FC = () => {
                 </div>
 
                 {/* Progress Bar */}
-                <div className="mb-8">
-                    <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="mb-6">
+                    <div className="h-1.5 md:h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-primary transition-all duration-300"
                             style={{ width: `${((currentIndex + 1) / studySet.length) * 100}%` }}
@@ -93,23 +93,23 @@ const Flashcards: React.FC = () => {
                 {/* Flashcard */}
                 <div
                     onClick={() => setIsFlipped(!isFlipped)}
-                    className="relative h-96 cursor-pointer mb-8 perspective-1000"
+                    className="relative h-[26rem] md:h-96 cursor-pointer mb-8 perspective-1000"
                 >
                     <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
                         {/* Front */}
                         <div className="absolute w-full h-full backface-hidden">
-                            <div className="h-full bg-white dark:bg-slate-900 rounded-3xl border-2 border-gray-200 dark:border-slate-800 p-12 flex flex-col items-center justify-center shadow-xl">
-                                <span className="px-4 py-2 rounded-lg bg-primary/10 text-primary text-xs font-black uppercase tracking-wider mb-6">
+                            <div className="h-full bg-white dark:bg-slate-900 rounded-3xl border-2 border-gray-100 dark:border-slate-800 p-6 md:p-12 flex flex-col items-center justify-center shadow-xl">
+                                <span className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-[10px] md:text-xs font-black uppercase tracking-wider mb-4">
                                     {currentCard.subcategory}
                                 </span>
-                                <h2 className="text-4xl font-black text-center dark:text-white mb-4 leading-tight">
+                                <h2 className="text-xl md:text-4xl font-black text-center dark:text-white mb-4 leading-tight">
                                     {currentCard.concept}
                                 </h2>
-                                <p className="text-sm text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest font-mono">
+                                <p className="text-[10px] md:text-sm text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest font-mono">
                                     {currentCard.id}
                                 </p>
-                                <div className="absolute bottom-8 text-sm text-gray-400 dark:text-slate-500 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-lg">touch_app</span>
+                                <div className="absolute bottom-6 md:bottom-8 text-[10px] md:text-sm text-gray-400 dark:text-slate-500 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-base md:text-lg">touch_app</span>
                                     <span>Toca para ver la definición</span>
                                 </div>
                             </div>
@@ -117,25 +117,25 @@ const Flashcards: React.FC = () => {
 
                         {/* Back */}
                         <div className="absolute w-full h-full backface-hidden rotate-y-180">
-                            <div className="h-full bg-primary text-white rounded-3xl border-2 border-primary p-12 flex flex-col justify-center shadow-xl">
-                                <span className="text-xs font-black uppercase tracking-wider mb-4 opacity-80">
+                            <div className="h-full bg-primary text-white rounded-3xl border-2 border-primary p-6 md:p-12 flex flex-col justify-center shadow-xl">
+                                <span className="text-[10px] md:text-xs font-black uppercase tracking-wider mb-2 md:mb-4 opacity-80">
                                     Definición
                                 </span>
-                                <p className="text-lg leading-relaxed mb-6 font-medium">
+                                <p className="text-sm md:text-lg leading-relaxed mb-4 md:mb-6 font-medium line-clamp-6 md:line-clamp-none">
                                     {currentCard.definitionSimple}
                                 </p>
                                 {currentCard.regulation && (
-                                    <div className="mt-auto pt-6 border-t border-white/20">
-                                        <p className="text-xs font-bold uppercase tracking-wider mb-2 opacity-80">
+                                    <div className="mt-auto pt-4 md:pt-6 border-t border-white/20">
+                                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1 md:mb-2 opacity-80">
                                             Regulación
                                         </p>
-                                        <p className="text-sm opacity-90">
+                                        <p className="text-xs md:text-sm opacity-90 line-clamp-2 md:line-clamp-none">
                                             {currentCard.regulation}
                                         </p>
                                     </div>
                                 )}
-                                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-sm opacity-80 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-lg">touch_app</span>
+                                <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 text-[10px] md:text-sm opacity-80 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-base md:text-lg">touch_app</span>
                                     <span>Toca para volver</span>
                                 </div>
                             </div>
@@ -144,29 +144,29 @@ const Flashcards: React.FC = () => {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                     <button
                         onClick={prevCard}
                         disabled={currentIndex === 0}
-                        className="flex items-center gap-2 px-6 py-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary transition-all dark:text-white"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 md:py-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl font-black text-xs md:text-sm shadow-sm disabled:opacity-20 transition-all dark:text-white"
                     >
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <span className="material-symbols-outlined text-lg">arrow_back</span>
                         <span>Anterior</span>
                     </button>
 
-                    <div className="text-center hidden md:block">
-                        <p className="text-sm text-gray-500 dark:text-slate-400 font-bold">
-                            {selectedCategories.join(', ')}
+                    <div className="text-center hidden lg:block">
+                        <p className="text-xs text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest">
+                            {selectedCategories.slice(0, 2).join(', ')} {selectedCategories.length > 2 ? '...' : ''}
                         </p>
                     </div>
 
                     <button
                         onClick={nextCard}
                         disabled={currentIndex === studySet.length - 1}
-                        className="flex items-center gap-2 px-6 py-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary transition-all dark:text-white"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 md:py-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl font-black text-xs md:text-sm shadow-sm disabled:opacity-20 transition-all dark:text-white"
                     >
                         <span>Siguiente</span>
-                        <span className="material-symbols-outlined">arrow_forward</span>
+                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
                     </button>
                 </div>
             </div>
@@ -202,8 +202,8 @@ const Flashcards: React.FC = () => {
                                         key={cat}
                                         onClick={() => toggleCategory(cat)}
                                         className={`px-5 py-3 rounded-2xl font-black transition-all border-2 text-sm ${isSelected
-                                                ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
-                                                : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border-gray-100 dark:border-slate-800 hover:border-primary/50'
+                                            ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                            : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border-gray-100 dark:border-slate-800 hover:border-primary/50'
                                             }`}
                                     >
                                         <div className="flex items-center gap-2">
@@ -233,8 +233,8 @@ const Flashcards: React.FC = () => {
                                     key={limit}
                                     onClick={() => setCardLimit(limit as number | 'all')}
                                     className={`flex-1 py-4 rounded-2xl font-black transition-all border-2 ${cardLimit === limit
-                                            ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xl'
-                                            : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-100 dark:border-slate-800 hover:border-primary/50'
+                                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xl'
+                                        : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-100 dark:border-slate-800 hover:border-primary/50'
                                         }`}
                                 >
                                     {limit === 'all' ? 'Todos' : limit}
