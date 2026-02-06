@@ -2,10 +2,13 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { UserStats } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
+import LevelUpModal from '../components/LevelUpModal';
 
 interface StatsContextType {
     stats: UserStats;
     loading: boolean;
+    showLevelUp: boolean;
+    setShowLevelUp: (show: boolean) => void;
     updateStats: (updates: Partial<UserStats>) => void;
     addXP: (xp: number) => void;
     incrementLearnedConcepts: () => void;
@@ -29,6 +32,7 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         consultationsMonth: 0
     });
     const [loading, setLoading] = useState(true);
+    const [showLevelUp, setShowLevelUp] = useState(false);
 
     const isInitialLoad = React.useRef(true);
     const lastSyncedStats = React.useRef<string>('');
@@ -177,6 +181,7 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 newLevel += 1;
                 newXp -= newNextLevelXp;
                 newNextLevelXp = Math.round(newNextLevelXp * 1.5);
+                setShowLevelUp(true);
             }
 
             return {
@@ -209,11 +214,27 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             addXP,
             incrementLearnedConcepts,
             incrementCompletedQuizzes,
-            updateStreak
+            updateStreak,
+            showLevelUp,
+            setShowLevelUp
         }}>
+            {showLevelUp && (
+                <LevelUpModal
+                    level={stats.level}
+                    rank={getUserRank(stats.level).name}
+                    onClose={() => setShowLevelUp(false)}
+                />
+            )}
             {children}
         </StatsContext.Provider>
     );
+};
+
+const getUserRank = (level: number) => {
+    if (level >= 13) return { name: 'Magistrado de la Corte' };
+    if (level >= 8) return { name: 'Abogado de la República' };
+    if (level >= 4) return { name: 'Licenciado en Derecho' };
+    return { name: 'Estudiante de Derecho' };
 };
 
 export const useStats = (): StatsContextType => {

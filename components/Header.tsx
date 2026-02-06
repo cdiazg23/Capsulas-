@@ -247,10 +247,11 @@ const Header: React.FC = () => {
               <div className="hidden lg:block text-left">
                 <p className="text-sm font-black text-slate-900 dark:text-white">{user.name}</p>
                 <div className="flex items-center gap-2">
-                  <div className={`px-2 py-0.5 ${userRank.color} text-white rounded-full text-[9px] font-black uppercase tracking-wide`}>
+                  <div className={`px-2 py-0.5 ${userRank.color} text-white rounded-full text-[9px] font-black uppercase tracking-wide flex items-center gap-1`}>
+                    <span className="material-symbols-outlined text-[10px] fill-1">{userRank.icon}</span>
                     {userRank.name}
                   </div>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Nv {stats.level}</span>
+                  <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Nv {stats.level}</span>
                 </div>
               </div>
             </button>
@@ -274,7 +275,7 @@ const Header: React.FC = () => {
                     </div>
                     <div className="h-2 bg-white/20 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-white rounded-full transition-all duration-500"
+                        className="h-full bg-white rounded-full transition-all duration-500 animate-shine"
                         style={{ width: `${xpPercentage}%` }}
                       />
                     </div>

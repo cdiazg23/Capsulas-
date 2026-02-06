@@ -117,6 +117,7 @@ const ConceptDetail: React.FC = () => {
         setIsMastered(true); // Optimistic update
         addXP(50);
         incrementLearnedConcepts();
+        triggerXPFeedback();
 
         const { error } = await supabase
           .from('user_mastery')
@@ -137,8 +138,13 @@ const ConceptDetail: React.FC = () => {
       }
     } catch (error) {
       console.error('Error toggling mastery:', error);
-      // Revert if error? Maybe just log for now.
     }
+  };
+
+  const [showXPFeedback, setShowXPFeedback] = useState(false);
+  const triggerXPFeedback = () => {
+    setShowXPFeedback(true);
+    setTimeout(() => setShowXPFeedback(false), 2000);
   };
 
   useEffect(() => {
@@ -177,7 +183,15 @@ const ConceptDetail: React.FC = () => {
   }, [id, user?.role]);
 
   return (
-    <div className="max-w-4xl mx-auto pb-32 animate-in fade-in zoom-in duration-300">
+    <div className="max-w-4xl mx-auto pb-32 animate-in fade-in zoom-in duration-300 relative">
+      {showXPFeedback && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] pointer-events-none animate-in slide-in-from-bottom-8 fade-in duration-500">
+          <div className="bg-primary text-white px-6 py-3 rounded-2xl font-black shadow-2xl flex items-center gap-3">
+            <span className="material-symbols-outlined fill-1 animate-level-up">bolt</span>
+            <span>+50 XP PRESTIGIO</span>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(-1)} className="p-2 text-gray-400 dark:text-slate-500 hover:text-primary hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all border border-transparent hover:border-gray-100 dark:hover:border-slate-800">

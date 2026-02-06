@@ -144,7 +144,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-50 dark:border-slate-700 p-0.5">
                 <div
-                  className="bg-primary h-full rounded-full transition-all duration-1000 ease-out shadow-lg shadow-primary/30"
+                  className="bg-primary h-full rounded-full transition-all duration-1000 ease-out shadow-lg shadow-primary/30 animate-shine"
                   style={{ width: `${(stats.xp / stats.nextLevelXp) * 100}%` }}
                 ></div>
               </div>
@@ -155,33 +155,58 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-8 bg-white dark:bg-slate-900 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col justify-between group hover:scale-[1.02] transition-all duration-500">
-          <div className="flex justify-between items-start mb-6">
-            <div className="size-12 bg-accent-gold/10 text-accent-gold rounded-2xl flex items-center justify-center">
-              <span className="material-symbols-outlined text-2xl font-black">stars</span>
+        {/* Points & Badge Quick View */}
+        <div className="p-8 bg-slate-900 dark:bg-slate-900 rounded-[2rem] border border-slate-800 shadow-2xl flex flex-col justify-between group hover:scale-[1.02] transition-all duration-500 overflow-hidden relative">
+          <div className="absolute -top-10 -right-10 size-40 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-colors"></div>
+
+          <div className="relative z-10 h-full flex flex-col justify-between">
+            <div>
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-4">Puntos de Prestigio</p>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-accent-gold shadow-inner">
+                  <span className="material-symbols-outlined text-3xl fill-1 animate-float">generating_tokens</span>
+                </div>
+                <p className="text-4xl font-black text-white tracking-tight">{stats.points.toLocaleString()}</p>
+              </div>
             </div>
-            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Global</span>
-          </div>
-          <div>
-            <p className="text-gray-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Prestigio Acumulado</p>
-            <p className="text-4xl font-black text-slate-900 dark:text-white mb-4">{stats.xp.toLocaleString()} <span className="text-lg text-slate-300 dark:text-slate-700">XP</span></p>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500 rounded-full text-[10px] font-black uppercase tracking-wider">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
-              En ascenso
+
+            <div className="space-y-3">
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Insignias por Desbloquear</p>
+              <div className="flex gap-2">
+                {[
+                  { icon: 'cognition', color: 'text-blue-400' },
+                  { icon: 'workspace_premium', color: 'text-accent-gold' },
+                  { icon: 'history_edu', color: 'text-emerald-400' }
+                ].map((b, i) => (
+                  <div key={i} className={`size-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center ${b.color} opacity-30 hover:opacity-100 transition-opacity cursor-help`}>
+                    <span className="material-symbols-outlined text-sm">{b.icon}</span>
+                  </div>
+                ))}
+                <div className="size-8 rounded-lg bg-white/5 border border-dashed border-white/10 flex items-center justify-center text-slate-600 text-[8px] font-black">
+                  +12
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="p-8 bg-white dark:bg-slate-900 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col justify-between group hover:scale-[1.02] transition-all duration-500">
-          <div className="flex justify-between items-start mb-6">
-            <div className="size-12 bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 rounded-2xl flex items-center justify-center animate-pulse">
-              <span className="material-symbols-outlined text-2xl font-black">local_fire_department</span>
-            </div>
-            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Estudio</span>
+        <div className="p-8 bg-white dark:bg-slate-900 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col justify-between group hover:scale-[1.02] transition-all duration-500 overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:rotate-12 transition-transform duration-700">
+            <span className="material-symbols-outlined text-[100px] text-orange-500">local_fire_department</span>
           </div>
-          <div>
-            <p className="text-gray-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Racha de Repaso</p>
-            <p className="text-4xl font-black text-slate-900 dark:text-white mb-2">{stats.streak} <span className="text-lg text-slate-300 dark:text-slate-700">Días</span></p>
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="size-12 bg-orange-50 dark:bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center animate-pulse">
+                <span className="material-symbols-outlined text-2xl font-black fill-1">local_fire_department</span>
+              </div>
+              <div>
+                <p className="text-gray-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest">Racha de Repaso</p>
+                <div className="flex items-baseline gap-1">
+                  <p className="text-4xl font-black text-slate-900 dark:text-white">{stats.streak}</p>
+                  <p className="text-xs font-black text-orange-500 uppercase tracking-widest italic">¡En Fuego! 🔥</p>
+                </div>
+              </div>
+            </div>
             {user?.role === 'user' && (
               <div className="mt-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
                 <span>Límite Diario</span>
@@ -190,7 +215,6 @@ const Dashboard: React.FC = () => {
                 </span>
               </div>
             )}
-
           </div>
         </div>
       </div>
