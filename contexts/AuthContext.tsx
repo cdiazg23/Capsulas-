@@ -43,6 +43,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     if (profile) {
                         console.log('✅ [Auth] Perfil sincronizado. Rol:', profile.role);
                         setUser({
+                            id: session.user.id,
                             username: session.user.email?.split('@')[0] || 'User',
                             role: (profile.role as any) || 'user',
                             name: profile.full_name || session.user.email?.split('@')[0] || 'User',
@@ -52,6 +53,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         console.warn('⚠️ [Auth] No se encontró perfil en DB, asignando rol por defecto');
                         // Fail-safe: Si no hay perfil aún, permitir entrada con datos de sesión
                         setUser(prev => prev || {
+                            id: session.user.id,
                             username: session.user.email?.split('@')[0] || 'User',
                             role: 'user',
                             name: session.user.email?.split('@')[0] || 'User',
@@ -67,6 +69,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             return prev;
                         }
                         return {
+                            id: session.user.id,
                             username: session.user.email?.split('@')[0] || 'User',
                             role: 'user',
                             name: session.user.email?.split('@')[0] || 'User',

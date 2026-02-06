@@ -19,19 +19,16 @@ export const useActivityLog = (): ActivityLogHook => {
     const [loading, setLoading] = useState(true);
 
     const fetchLogs = async () => {
-        if (!user) {
+        if (!user?.id) {
             setLoading(false);
             return;
         }
 
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-
             const { data } = await supabase
                 .from('activity_logs')
                 .select('*')
-                .eq('user_id', session.user.id)
+                .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
                 .limit(10);
 
@@ -45,19 +42,16 @@ export const useActivityLog = (): ActivityLogHook => {
 
     useEffect(() => {
         fetchLogs();
-    }, [user]);
+    }, [user?.id]);
 
     const addLog = async (type: ActivityLog['type'], description: string) => {
-        if (!user) return;
+        if (!user?.id) return;
 
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-
             const { error } = await supabase
                 .from('activity_logs')
                 .insert({
-                    user_id: session.user.id,
+                    user_id: user.id,
                     type,
                     description
                 });

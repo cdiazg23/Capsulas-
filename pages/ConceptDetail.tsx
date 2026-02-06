@@ -21,8 +21,25 @@ const ConceptDetail: React.FC = () => {
   useEffect(() => {
     if (user && id) {
       checkIfSaved();
+      checkIfMastered();
     }
   }, [user, id]);
+
+  const checkIfMastered = async () => {
+    if (!user || !id) return;
+    try {
+      const { data } = await supabase
+        .from('user_mastery')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('concept_id', id)
+        .maybeSingle();
+
+      setIsMastered(!!data);
+    } catch (error) {
+      console.error('Error checking mastery:', error);
+    }
+  };
 
   const checkIfSaved = async () => {
     if (!user || !id) return;
@@ -92,13 +109,35 @@ const ConceptDetail: React.FC = () => {
   const isFreeUser = user?.role !== 'founder' && user?.role !== 'admin';
 
 
-  const handleToggleMastery = () => {
-    if (!isMastered) {
-      addXP(50);
-      incrementLearnedConcepts();
-      setIsMastered(true);
-    } else {
-      setIsMastered(false);
+  const handleToggleMastery = async () => {
+    if (!user || !id) return;
+
+    try {
+      if (!isMastered) {
+        setIsMastered(true); // Optimistic update
+        addXP(50);
+        incrementLearnedConcepts();
+
+        const { error } = await supabase
+          .from('user_mastery')
+          .insert({
+            user_id: user.id,
+            concept_id: id
+          });
+
+        if (error) throw error;
+      } else {
+        setIsMastered(false);
+        // Not reducing XP or concept count for consistency/simplicity unless asked
+        await supabase
+          .from('user_mastery')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('concept_id', id);
+      }
+    } catch (error) {
+      console.error('Error toggling mastery:', error);
+      // Revert if error? Maybe just log for now.
     }
   };
 
