@@ -108,7 +108,7 @@ const Flashcards: React.FC = () => {
                                 <p className="text-[10px] md:text-sm text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest font-mono">
                                     {currentCard.id}
                                 </p>
-                                <div className="absolute bottom-6 md:bottom-8 text-[10px] md:text-sm text-gray-400 dark:text-slate-500 flex items-center gap-2">
+                                <div className="mt-auto pt-6 text-[10px] md:text-sm text-gray-400 dark:text-slate-500 flex items-center justify-center gap-2">
                                     <span className="material-symbols-outlined text-base md:text-lg">touch_app</span>
                                     <span>Toca para ver la definición</span>
                                 </div>
@@ -117,24 +117,29 @@ const Flashcards: React.FC = () => {
 
                         {/* Back */}
                         <div className="absolute w-full h-full backface-hidden rotate-y-180">
-                            <div className="h-full bg-primary text-white rounded-3xl border-2 border-primary p-6 md:p-12 flex flex-col justify-center shadow-xl">
-                                <span className="text-[10px] md:text-xs font-black uppercase tracking-wider mb-2 md:mb-4 opacity-80">
+                            <div className="h-full bg-primary text-white rounded-3xl border-2 border-primary p-6 md:p-10 flex flex-col shadow-xl overflow-hidden">
+                                <span className="text-[10px] md:text-xs font-black uppercase tracking-wider mb-3 opacity-80 shrink-0">
                                     Definición
                                 </span>
-                                <p className="text-sm md:text-lg leading-relaxed mb-4 md:mb-6 font-medium line-clamp-6 md:line-clamp-none">
-                                    {currentCard.definitionSimple}
-                                </p>
-                                {currentCard.regulation && (
-                                    <div className="mt-auto pt-4 md:pt-6 border-t border-white/20">
-                                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1 md:mb-2 opacity-80">
-                                            Regulación
-                                        </p>
-                                        <p className="text-xs md:text-sm opacity-90 line-clamp-2 md:line-clamp-none">
-                                            {currentCard.regulation}
-                                        </p>
-                                    </div>
-                                )}
-                                <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 text-[10px] md:text-sm opacity-80 flex items-center gap-2">
+
+                                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar flex flex-col justify-center">
+                                    <p className="text-sm md:text-lg leading-relaxed mb-6 font-medium">
+                                        {currentCard.definitionSimple}
+                                    </p>
+
+                                    {currentCard.regulation && (
+                                        <div className="pt-4 border-t border-white/20">
+                                            <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2 opacity-80">
+                                                Regulación
+                                            </p>
+                                            <p className="text-xs md:text-sm opacity-90 italic">
+                                                {currentCard.regulation}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-center gap-2 text-[10px] md:text-sm opacity-80 shrink-0">
                                     <span className="material-symbols-outlined text-base md:text-lg">touch_app</span>
                                     <span>Toca para volver</span>
                                 </div>
