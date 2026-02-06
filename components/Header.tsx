@@ -71,12 +71,13 @@ const Header: React.FC = () => {
   const handleLogout = async () => {
     try {
       setShowMenu(false);
+      // Navegamos primero a la landing para una transición visual limpia
+      navigate('/', { replace: true });
+      // Luego disparamos el signOut del contexto
       await signOut();
-      navigate('/');
     } catch (err) {
       console.error('Logout error:', err);
-      // Forzar salida aunque falle Supabase
-      navigate('/');
+      navigate('/', { replace: true });
     }
   };
 

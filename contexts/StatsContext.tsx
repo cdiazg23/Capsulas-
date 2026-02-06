@@ -34,6 +34,17 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     useEffect(() => {
         const fetchStats = async () => {
             if (!user) {
+                setStats({
+                    level: 1,
+                    xp: 0,
+                    nextLevelXp: 100,
+                    points: 0,
+                    streak: 0,
+                    learnedConcepts: 0,
+                    completedQuizzes: 0,
+                    consultationsToday: 0,
+                    consultationsMonth: 0
+                });
                 setLoading(false);
                 return;
             }

@@ -95,13 +95,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const signOut = async () => {
         try {
-            await supabase.auth.signOut();
+            console.log('🚪 [Auth] Iniciando cierre de sesión...');
+            // Limpiar estado local primero para una respuesta visual instantánea
             setUser(null);
+            setLoading(false);
+
+            // Cerrar sesión en Supabase
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
+
+            console.log('✅ [Auth] Sesión cerrada correctamente');
         } catch (error) {
+            console.error('❌ [Auth] Error al cerrar sesión:', error);
+            // Aseguramos que el usuario sea null incluso si falla la red
             setUser(null);
-            console.error('Error signing out:', error);
+        } finally {
+            // No hacemos el navigate aquí, dejamos que ProtectedRoute o el componente disparen la redirección
         }
     };
+
 
     const updateUser = (updates: Partial<User>) => {
         setUser(prev => prev ? { ...prev, ...updates } : null);
