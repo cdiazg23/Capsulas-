@@ -12,7 +12,7 @@ const MainLayout: React.FC = () => {
             <Header />
             <div className="flex">
                 <Sidebar />
-                <main className="flex-1 p-6">
+                <main className="flex-1 p-6 min-w-0 overflow-hidden">
                     <Outlet />
                 </main>
             </div>

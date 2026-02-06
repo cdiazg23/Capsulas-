@@ -270,7 +270,7 @@ const AdminPanel: React.FC = () => {
   }
 
   return (
-    <div className="animate-in slide-in-from-right duration-500">
+    <div className="max-w-7xl mx-auto animate-in slide-in-from-right duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
         <div>
           <h1 className="text-3xl font-black tracking-tight dark:text-white">Gestión del Sistema</h1>
@@ -375,10 +375,10 @@ const AdminPanel: React.FC = () => {
             <table className="w-full text-left">
               <thead className="bg-gray-50 dark:bg-slate-800/50 border-b dark:border-slate-800">
                 <tr>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Concepto</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 w-1/3">Concepto</th>
                   <th className="p-4 text-[10px] font-black uppercase text-gray-400">Área</th>
                   <th className="p-4 text-[10px] font-black uppercase text-gray-400">Subárea</th>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right">Acciones</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right w-40">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
@@ -389,12 +389,12 @@ const AdminPanel: React.FC = () => {
                       <p className="text-[10px] text-gray-400">{c.id}</p>
                     </td>
                     <td className="p-4">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-800 dark:text-gray-300">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-800 dark:text-gray-300 whitespace-nowrap">
                         {c.category}
                       </span>
                     </td>
                     <td className="p-4">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 whitespace-nowrap">
                         {c.subcategory || 'Sin subárea'}
                       </span>
                     </td>
