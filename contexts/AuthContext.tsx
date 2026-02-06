@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 try {
                     console.log('🔄 [Auth] Sincronizando perfil para:', session.user.email);
 
-                    // Timeout para la consulta del perfil (15s)
+                    // Timeout para la consulta del perfil (30s)
                     const profilePromise = supabase
                         .from('profiles')
                         .select('*')
@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         .maybeSingle();
 
                     const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Profile sync timeout')), 15000)
+                        setTimeout(() => reject(new Error('Profile sync timeout')), 30000)
                     );
 
                     const { data: profile } = await Promise.race([profilePromise, timeoutPromise]) as any;
@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     } else {
                         console.warn('⚠️ [Auth] No se encontró perfil en DB, asignando rol por defecto');
                         // Fail-safe: Si no hay perfil aún, permitir entrada con datos de sesión
-                        setUser({
+                        setUser(prev => prev || {
                             username: session.user.email?.split('@')[0] || 'User',
                             role: 'user',
                             name: session.user.email?.split('@')[0] || 'User',
@@ -58,11 +58,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     }
                 } catch (err) {
                     console.error('❌ [Auth] Error o timeout sincronizando perfil:', err);
-                    // Entrar de todas formas para no bloquear al usuario, pero loguear el fallo
-                    setUser({
-                        username: session.user.email?.split('@')[0] || 'User',
-                        role: 'user',
-                        name: session.user.email?.split('@')[0] || 'User',
+                    // IMPORTANTE: Si ya tenemos un usuario cargado, NO lo sobrescribimos con 'user' por defecto
+                    // Esto evita que el admin sea expulsado si la DB está saturada momentáneamente
+                    setUser(prev => {
+                        if (prev) {
+                            console.log('🧡 [Auth] Manteniendo sesión previa tras fallo de sincronización');
+                            return prev;
+                        }
+                        return {
+                            username: session.user.email?.split('@')[0] || 'User',
+                            role: 'user',
+                            name: session.user.email?.split('@')[0] || 'User',
+                        };
                     });
                 }
             } else {
