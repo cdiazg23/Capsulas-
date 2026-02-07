@@ -1,23 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
+import MobileNav from '../components/MobileNav';
 import MarchaBlancaModal from '../components/MarchaBlancaModal';
+import { useAuth, useStats } from '../contexts';
 
 /**
  * Main layout wrapper for authenticated pages
  */
 const MainLayout: React.FC = () => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { user } = useAuth();
+    const { stats } = useStats();
+
     return (
-        <div className="min-h-screen bg-white dark:bg-slate-950">
+        <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col">
             <MarchaBlancaModal />
             <Header />
-            <div className="flex">
-                <Sidebar />
-                <main className="flex-1 p-6 min-w-0 overflow-hidden">
+            <div className="flex flex-1 relative">
+                <Sidebar
+                    isOpen={isSidebarOpen}
+                    onClose={() => setIsSidebarOpen(false)}
+                    stats={stats}
+                    user={user}
+                />
+                <main className="flex-1 p-4 md:p-6 min-w-0 overflow-hidden pb-24 md:pb-6">
                     <Outlet />
                 </main>
             </div>
+
+            <MobileNav onMenuClick={() => setIsSidebarOpen(true)} />
         </div>
     );
 };

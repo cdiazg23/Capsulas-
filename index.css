@@ -424,6 +424,14 @@ body {
     animation: shine 2s infinite;
 }
 
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.pb-safe-area {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* ============================================
    Responsive Breakpoints
    ============================================ */

@@ -34,6 +34,12 @@ const AdminPanel: React.FC = () => {
     return matchesSearch && matchesCategory && matchesSubcategory;
   });
 
+  const filteredProfiles = profiles.filter(p => {
+    const searchLower = searchTerm.toLowerCase();
+    return (p.username || '').toLowerCase().includes(searchLower) ||
+      (p.full_name || '').toLowerCase().includes(searchLower);
+  });
+
   const subcategories = Array.from(new Set(
     concepts
       .filter(c => filterCategory === 'Todas' || c.category === filterCategory)
@@ -321,52 +327,63 @@ const AdminPanel: React.FC = () => {
         ))}
       </div>
 
-      {/* Search and Filter for Conceptos */}
-      {activeTab === 'concepts' && (
+      {/* Search and Filters */}
+      {(activeTab === 'concepts' || activeTab === 'users') && (
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
             <input
               type="text"
-              placeholder="Buscar concepto..."
+              placeholder={activeTab === 'concepts' ? "Buscar concepto..." : "Buscar usuario por nombre o email..."}
               className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl text-sm dark:text-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <select
-              className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm dark:text-white"
-              value={filterCategory}
-              onChange={(e) => {
-                setFilterCategory(e.target.value);
-                setFilterSubcategory('Todas');
-              }}
-            >
-              <option value="Todas">Todas las áreas</option>
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
 
-            <select
-              className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm dark:text-white min-w-[150px]"
-              value={filterSubcategory}
-              onChange={(e) => setFilterSubcategory(e.target.value)}
-            >
-              <option value="Todas">Todas las subáreas</option>
-              {subcategories.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+          {activeTab === 'concepts' && (
+            <div className="flex flex-wrap gap-2">
+              <select
+                className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm dark:text-white"
+                value={filterCategory}
+                onChange={(e) => {
+                  setFilterCategory(e.target.value);
+                  setFilterSubcategory('Todas');
+                }}
+              >
+                <option value="Todas">Todas las áreas</option>
+                {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
 
-            <button
-              onClick={handleDownloadCSV}
-              className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm dark:text-white flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
-              title="Descargar CSV"
-            >
-              <span className="material-symbols-outlined text-xl">download</span>
-              <span className="hidden md:inline">Exportar CSV</span>
-            </button>
-          </div>
+              <select
+                className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm dark:text-white min-w-[150px]"
+                value={filterSubcategory}
+                onChange={(e) => setFilterSubcategory(e.target.value)}
+              >
+                <option value="Todas">Todas las subáreas</option>
+                {subcategories.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+
+              <button
+                onClick={handleDownloadCSV}
+                className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm dark:text-white flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                title="Descargar CSV"
+              >
+                <span className="material-symbols-outlined text-xl">download</span>
+                <span className="hidden md:inline">Exportar CSV</span>
+              </button>
+            </div>
+          )}
+
+          {activeTab === 'users' && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 rounded-xl">
+              <span className="material-symbols-outlined text-amber-500 text-sm">info</span>
+              <p className="text-[10px] text-amber-700 dark:text-amber-400 font-bold">
+                Para donadores de Ko-fi, busca el usuario y asígnale el rol "FOUNDER" manualmente.
+              </p>
+            </div>
+          )}
         </div>
-
       )}
 
       {activeTab === 'concepts' && (
@@ -456,11 +473,11 @@ const AdminPanel: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
-                {profiles.map(p => (
+                {filteredProfiles.map(p => (
                   <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50">
                     <td className="p-4">
                       <p className="text-sm font-bold dark:text-white">{p.username || 'Usuario sin nombre'}</p>
-                      <p className="text-[10px] text-gray-400">{p.full_name}</p>
+                      <p className="text-[10px] text-gray-400">{p.full_name || 'ID: ' + p.id.substring(0, 8)}</p>
                     </td>
                     <td className="p-4">
                       <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${p.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : p.role === 'founder' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'}`}>
@@ -476,6 +493,13 @@ const AdminPanel: React.FC = () => {
                     </td>
                   </tr>
                 ))}
+                {filteredProfiles.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="p-10 text-center text-gray-400 text-xs italic">
+                      No se encontraron usuarios que coincidan con la búsqueda.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
