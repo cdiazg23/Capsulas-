@@ -1,7 +1,19 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import { User } from '../types';
+import { useAuth } from '../contexts';
+
+interface Comment {
+    id: string;
+    post_id: string;
+    user_id: string;
+    content: string;
+    created_at: string;
+    profiles?: {
+        full_name: string;
+        avatar_url: string;
+        role: string;
+    };
+}
 
 interface Feedback {
     id: string;
@@ -11,12 +23,14 @@ interface Feedback {
     country: string;
     city?: string;
     created_at: string;
+    is_reported: boolean;
     profiles?: {
         full_name: string;
         username: string;
         avatar_url: string;
         role: string;
     };
+    comments: Comment[];
 }
 
 const countries = [
@@ -24,9 +38,10 @@ const countries = [
     'Uruguay', 'Paraguay', 'Venezuela', 'Costa Rica', 'Panamá', 'Otros'
 ];
 
-const forbiddenKeywords = ['insulto1', 'ofensa2', 'basura', 'spam']; // Ejemplos de filtro
+const forbiddenKeywords = ['insulto1', 'ofensa2', 'basura', 'spam'];
 
-const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
+const CommunitySpace: React.FC = () => {
+    const { user } = useAuth();
     const [messages, setMessages] = useState<Feedback[]>([]);
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
@@ -34,6 +49,15 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
     const [type, setType] = useState<'query' | 'complaint' | 'suggestion'>('suggestion');
     const [country, setCountry] = useState('Chile');
     const [city, setCity] = useState('');
+
+    // Filters state
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterType, setFilterType] = useState<string>('all');
+    const [filterCountry, setFilterCountry] = useState<string>('all');
+
+    // Comment state
+    const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [commentContent, setCommentContent] = useState('');
 
     useEffect(() => {
         fetchMessages();
@@ -44,7 +68,14 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
             setLoading(true);
             const { data, error } = await supabase
                 .from('community_feedback')
-                .select('*, profiles(full_name, username, avatar_url, role)')
+                .select(`
+                    *,
+                    profiles(full_name, username, avatar_url, role),
+                    comments:community_comments(
+                        *,
+                        profiles(full_name, avatar_url, role)
+                    )
+                `)
                 .eq('status', 'active')
                 .order('created_at', { ascending: false });
 
@@ -54,6 +85,30 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
             console.error('Error fetching feedback:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSendComment = async (postId: string) => {
+        if (!commentContent.trim()) return;
+
+        try {
+            setSending(true);
+            const { error } = await supabase
+                .from('community_comments')
+                .insert({
+                    post_id: postId,
+                    user_id: user?.id,
+                    content: commentContent
+                });
+
+            if (error) throw error;
+            setCommentContent('');
+            setReplyingTo(null);
+            fetchMessages();
+        } catch (error) {
+            console.error('Error sending comment:', error);
+        } finally {
+            setSending(false);
         }
     };
 
@@ -83,7 +138,6 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
             return;
         }
 
-        // Filtro de contenido básico
         const hasForbiddenContent = forbiddenKeywords.some(word =>
             newContent.toLowerCase().includes(word.toLowerCase())
         );
@@ -97,13 +151,10 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
 
         try {
             setSending(true);
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-
             const { error } = await supabase
                 .from('community_feedback')
                 .insert({
-                    user_id: session.user.id,
+                    user_id: user?.id,
                     content: newContent,
                     type,
                     country,
@@ -120,6 +171,16 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
             setSending(false);
         }
     };
+
+    const filteredMessages = useMemo(() => {
+        return messages.filter(msg => {
+            const matchesSearch = msg.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                msg.profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesType = filterType === 'all' || msg.type === filterType;
+            const matchesCountry = filterCountry === 'all' || msg.country === filterCountry;
+            return matchesSearch && matchesType && matchesCountry;
+        });
+    }, [messages, searchTerm, filterType, filterCountry]);
 
     const getTypeLabel = (t: string) => {
         switch (t) {
@@ -140,7 +201,7 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
+        <div className="max-w-4xl mx-auto animate-in fade-in duration-500 pb-20">
             <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="flex items-center gap-3">
                     <div className="size-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
@@ -234,15 +295,48 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
                 </div>
             )}
 
-            {/* Listado de Mensajes */}
+            {/* Listado de Mensajes con Filtros */}
             <div className="space-y-6">
-                <h3 className="text-xl font-black dark:text-white ml-2 mb-4 flex items-center gap-2">
-                    Actividad Reciente
-                    {loading && <div className="size-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>}
-                </h3>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 px-2">
+                    <h3 className="text-xl font-black dark:text-white flex items-center gap-2">
+                        Actividad Reciente
+                        {loading && <div className="size-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>}
+                    </h3>
 
-                {messages.length > 0 ? (
-                    messages.map((msg) => (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="relative">
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                            <input
+                                type="text"
+                                placeholder="Buscar..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs font-bold outline-none focus:border-primary transition-colors dark:text-white"
+                            />
+                        </div>
+                        <select
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-primary transition-colors dark:text-white"
+                        >
+                            <option value="all">Todo tipo</option>
+                            <option value="suggestion">Sugerencias</option>
+                            <option value="query">Inquietudes</option>
+                            <option value="complaint">Descargos</option>
+                        </select>
+                        <select
+                            value={filterCountry}
+                            onChange={(e) => setFilterCountry(e.target.value)}
+                            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-primary transition-colors dark:text-white"
+                        >
+                            <option value="all">País</option>
+                            {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                {filteredMessages.length > 0 ? (
+                    filteredMessages.map((msg) => (
                         <div key={msg.id} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group relative">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-3">
@@ -275,9 +369,76 @@ const CommunitySpace: React.FC<{ user: User | null }> = ({ user }) => {
                                     </button>
                                 </div>
                             </div>
-                            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed ml-1">
+                            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed ml-1 mb-6">
                                 {msg.content}
                             </p>
+
+                            {/* Comments Section */}
+                            <div className="ml-1 border-t border-slate-50 dark:border-slate-800 pt-4">
+                                {msg.comments && msg.comments.length > 0 && (
+                                    <div className="space-y-4 mb-4">
+                                        {msg.comments.map(comment => (
+                                            <div key={comment.id} className="flex gap-3 animate-in slide-in-from-left-2 duration-300">
+                                                <div className="size-8 rounded-lg bg-slate-50 dark:bg-slate-800 bg-center bg-cover flex-shrink-0"
+                                                    style={{ backgroundImage: comment.profiles?.avatar_url ? `url("${comment.profiles.avatar_url}")` : undefined }}>
+                                                    {!comment.profiles?.avatar_url && <span className="material-symbols-outlined text-slate-300 size-full flex items-center justify-center text-sm">person</span>}
+                                                </div>
+                                                <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-2xl px-4 py-2">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-black dark:text-white leading-none">{comment.profiles?.full_name}</span>
+                                                        <span className={`text-[7px] px-1 py-0.5 rounded uppercase font-black tracking-widest ${comment.profiles?.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-primary/10 text-primary'}`}>
+                                                            {comment.profiles?.role}
+                                                        </span>
+                                                        <span className="text-[9px] text-slate-400 ml-auto">{new Date(comment.created_at).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-normal">
+                                                        {comment.content}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {isAuthorized && (
+                                    <div className="flex items-center gap-2">
+                                        {replyingTo === msg.id ? (
+                                            <div className="flex-1 flex gap-2 animate-in zoom-in-95 duration-200">
+                                                <input
+                                                    autoFocus
+                                                    type="text"
+                                                    placeholder="Escribe tu respuesta..."
+                                                    value={commentContent}
+                                                    onChange={(e) => setCommentContent(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleSendComment(msg.id)}
+                                                    className="flex-1 bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2 text-xs font-medium focus:ring-1 focus:ring-primary/20 dark:text-white"
+                                                />
+                                                <button
+                                                    onClick={() => handleSendComment(msg.id)}
+                                                    disabled={sending || !commentContent.trim()}
+                                                    className="bg-primary text-white size-8 rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors disabled:opacity-50"
+                                                >
+                                                    <span className="material-symbols-outlined text-sm">send</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => { setReplyingTo(null); setCommentContent(''); }}
+                                                    className="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+                                                >
+                                                    <span className="material-symbols-outlined text-sm">close</span>
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setReplyingTo(msg.id)}
+                                                className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-dark transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-primary/5"
+                                            >
+                                                <span className="material-symbols-outlined text-sm font-black">reply</span>
+                                                Responder hilo
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     ))
                 ) : !loading && (

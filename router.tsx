@@ -81,7 +81,7 @@ export const router = createBrowserRouter([
                 path: 'community',
                 element: (
                     <ProtectedRoute role="founder">
-                        <CommunitySpace user={null} /> {/* User will be fetched via hook inside layout/context if needed, but the component requires it for now */}
+                        <CommunitySpace />
                     </ProtectedRoute>
                 )
             },
