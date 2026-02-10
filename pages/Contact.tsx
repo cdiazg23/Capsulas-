@@ -44,13 +44,8 @@ const Contact: React.FC = () => {
             // 2. Enviar Correo via EmailJS
             const serviceId = 'service_0as58l3';
             const templateId = 'template_se9bvu7';
+            // Llave corregida (l minúscula en Mlbm5n)
             const publicKey = '5OtmNP2Cco-Mlbm5n';
-
-            console.log('🔍 Debug EmailJS:', {
-                hasServiceId: !!serviceId,
-                hasTemplateId: !!templateId,
-                hasPublicKey: !!publicKey
-            });
 
             if (serviceId && templateId && publicKey) {
                 try {
@@ -69,11 +64,8 @@ const Contact: React.FC = () => {
                     console.log('✅ EmailJS Success:', result.status, result.text);
                 } catch (emailError: any) {
                     console.error('❌ EmailJS Error:', emailError);
-                    // Ahora SÍ bloqueamos y mostramos el error para diagnosticar
                     throw new Error(`EmailJS: ${emailError.text || emailError.message || 'Error al enviar correo'}`);
                 }
-            } else {
-                console.warn('⚠️ EmailJS keys missing.');
             }
 
             setSuccess(true);
@@ -191,24 +183,6 @@ const Contact: React.FC = () => {
                         </div>
                     </form>
                 )}
-            </div>
-
-            <div className="mt-12 grid md:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <span className="material-symbols-outlined text-primary mb-3">alternate_email</span>
-                    <h3 className="font-black dark:text-white text-sm mb-1">Email Directo</h3>
-                    <p className="text-xs text-slate-500">capsulasderecho@gmail.com</p>
-                </div>
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <span className="material-symbols-outlined text-primary mb-3">forum</span>
-                    <h3 className="font-black dark:text-white text-sm mb-1">Comunidad</h3>
-                    <p className="text-xs text-slate-500">Únete a nuestro discord académico</p>
-                </div>
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <span className="material-symbols-outlined text-primary mb-3">help</span>
-                    <h3 className="font-black dark:text-white text-sm mb-1">FAQ</h3>
-                    <p className="text-xs text-slate-500">Revisa las preguntas frecuentes</p>
-                </div>
             </div>
         </div>
     );
