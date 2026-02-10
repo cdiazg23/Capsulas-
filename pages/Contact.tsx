@@ -21,13 +21,20 @@ const Contact: React.FC = () => {
             setSending(true);
             setError(null);
 
+            // Intentar obtener el email de la sesión si no está en el objeto user
+            let userEmail = user.email;
+            if (!userEmail) {
+                const { data: { session } } = await supabase.auth.getSession();
+                userEmail = session?.user?.email || '';
+            }
+
             // 1. Guardar en Supabase para registro/histórico
             const { error: insertError } = await supabase
                 .from('contact_messages')
                 .insert({
                     user_id: user.id,
                     name: user.name,
-                    email: user.email || '',
+                    email: userEmail,
                     subject,
                     message
                 });
@@ -39,6 +46,12 @@ const Contact: React.FC = () => {
             const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
             const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
+            console.log('🔍 Debug EmailJS:', {
+                hasServiceId: !!serviceId,
+                hasTemplateId: !!templateId,
+                hasPublicKey: !!publicKey
+            });
+
             if (serviceId && templateId && publicKey) {
                 try {
                     const result = await emailjs.send(
@@ -46,7 +59,7 @@ const Contact: React.FC = () => {
                         templateId,
                         {
                             from_name: user.name,
-                            from_email: user.email || 'No proporcionado',
+                            from_email: userEmail || 'No proporcionado',
                             subject: subject,
                             message: message,
                             to_email: 'capsulasderecho@gmail.com'
@@ -56,20 +69,18 @@ const Contact: React.FC = () => {
                     console.log('✅ EmailJS Success:', result.status, result.text);
                 } catch (emailError: any) {
                     console.error('❌ EmailJS Error:', emailError);
-                    // No bloqueamos el éxito porque ya se guardó en Supabase, 
-                    // pero informamos en consola para debug
+                    // No bloqueamos el éxito porque ya se guardó en Supabase
                 }
             } else {
-                console.error('❌ EmailJS keys missing or server not restarted.');
-                // Si faltan las llaves, es probable que no se haya reiniciado el servidor
+                console.warn('⚠️ EmailJS keys missing.');
             }
 
             setSuccess(true);
             setSubject('');
             setMessage('');
         } catch (err: any) {
-            console.error('Error saving to database:', err);
-            setError('Hubo un error al procesar tu solicitud. Por favor, intenta nuevamente.');
+            console.error('Error detallado:', err);
+            setError(`Error al procesar: ${err.message || 'Error desconocido'}`);
         } finally {
             setSending(false);
         }
