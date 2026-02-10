@@ -35,35 +35,41 @@ const Contact: React.FC = () => {
             if (insertError) throw insertError;
 
             // 2. Enviar Correo via EmailJS
-            // NOTA: Estas credenciales deben configurarse en .env.local
             const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
             const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
             const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
             if (serviceId && templateId && publicKey) {
-                await emailjs.send(
-                    serviceId,
-                    templateId,
-                    {
-                        from_name: user.name,
-                        from_email: user.email || 'No proporcionado',
-                        subject: subject,
-                        message: message,
-                        to_email: 'capsulasderecho@gmail.com'
-                    },
-                    publicKey
-                );
+                try {
+                    const result = await emailjs.send(
+                        serviceId,
+                        templateId,
+                        {
+                            from_name: user.name,
+                            from_email: user.email || 'No proporcionado',
+                            subject: subject,
+                            message: message,
+                            to_email: 'capsulasderecho@gmail.com'
+                        },
+                        publicKey
+                    );
+                    console.log('✅ EmailJS Success:', result.status, result.text);
+                } catch (emailError: any) {
+                    console.error('❌ EmailJS Error:', emailError);
+                    // No bloqueamos el éxito porque ya se guardó en Supabase, 
+                    // pero informamos en consola para debug
+                }
             } else {
-                console.warn('EmailJS keys missing in environment variables.');
-                // Si no hay llaves, igual marcamos como éxito porque ya se guardó en Supabase
+                console.error('❌ EmailJS keys missing or server not restarted.');
+                // Si faltan las llaves, es probable que no se haya reiniciado el servidor
             }
 
             setSuccess(true);
             setSubject('');
             setMessage('');
         } catch (err: any) {
-            console.error('Error sending message:', err);
-            setError('Hubo un error al enviar tu mensaje. Por favor, intenta nuevamente.');
+            console.error('Error saving to database:', err);
+            setError('Hubo un error al procesar tu solicitud. Por favor, intenta nuevamente.');
         } finally {
             setSending(false);
         }
