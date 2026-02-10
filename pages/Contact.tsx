@@ -42,9 +42,9 @@ const Contact: React.FC = () => {
             if (insertError) throw insertError;
 
             // 2. Enviar Correo via EmailJS
-            const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_0as58l3';
-            const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_se9bvu7';
-            const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '5OtmNP2Cco-Mlbm5n';
+            const serviceId = 'service_0as58l3';
+            const templateId = 'template_se9bvu7';
+            const publicKey = '5OtmNP2Cco-Mlbm5n';
 
             console.log('🔍 Debug EmailJS:', {
                 hasServiceId: !!serviceId,
