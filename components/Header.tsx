@@ -304,6 +304,16 @@ const Header: React.FC = () => {
                     <span className="text-sm text-slate-900 dark:text-white">Apoyar Academia</span>
                   </button>
                   <button
+                    onClick={() => {
+                      navigate('/app/contact');
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">mail</span>
+                    <span className="text-sm text-slate-900 dark:text-white">Contacto</span>
+                  </button>
+                  <button
                     onClick={toggleDarkMode}
                     className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left md:hidden"
                   >

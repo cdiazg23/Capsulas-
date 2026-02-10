@@ -15,6 +15,7 @@ import Flashcards from './pages/Flashcards';
 import CommunitySpace from './pages/CommunitySpace';
 import MasterClasses from './pages/MasterClasses';
 import AdminPanel from './pages/AdminPanel';
+import Contact from './pages/Contact';
 
 export const router = createBrowserRouter([
     {
@@ -76,6 +77,10 @@ export const router = createBrowserRouter([
             {
                 path: 'masterclasses',
                 element: <MasterClasses />
+            },
+            {
+                path: 'contact',
+                element: <Contact />
             },
             {
                 path: 'community',
