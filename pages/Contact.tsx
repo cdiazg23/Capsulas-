@@ -69,7 +69,8 @@ const Contact: React.FC = () => {
                     console.log('✅ EmailJS Success:', result.status, result.text);
                 } catch (emailError: any) {
                     console.error('❌ EmailJS Error:', emailError);
-                    // No bloqueamos el éxito porque ya se guardó en Supabase
+                    // Ahora SÍ bloqueamos y mostramos el error para diagnosticar
+                    throw new Error(`EmailJS: ${emailError.text || emailError.message || 'Error al enviar correo'}`);
                 }
             } else {
                 console.warn('⚠️ EmailJS keys missing.');
