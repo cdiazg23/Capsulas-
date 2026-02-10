@@ -48,6 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             username: session.user.email?.split('@')[0] || 'User',
                             role: (profile.role as any) || 'user',
                             name: profile.full_name || session.user.email?.split('@')[0] || 'User',
+                            email: session.user.email,
                             avatarUrl: profile.avatar_url
                         });
                     } else {
@@ -58,6 +59,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             username: session.user.email?.split('@')[0] || 'User',
                             role: 'user',
                             name: session.user.email?.split('@')[0] || 'User',
+                            email: session.user.email
                         });
                     }
                 } catch (err) {
@@ -74,6 +76,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             username: session.user.email?.split('@')[0] || 'User',
                             role: 'user',
                             name: session.user.email?.split('@')[0] || 'User',
+                            email: session.user.email
                         };
                     });
                 }

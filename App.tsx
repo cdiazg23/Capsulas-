@@ -132,9 +132,11 @@ const App: React.FC = () => {
         if (logs) setActivityLogs(logs);
 
         return {
+          id: session.user.id,
           username: session.user.email?.split('@')[0] || 'User',
           role: (profile?.role as any) || 'user',
           name: profile?.full_name || session.user.email?.split('@')[0] || 'User',
+          email: session.user.email,
           avatarUrl: profile?.avatar_url
         };
       } catch (e) {

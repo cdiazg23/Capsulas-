@@ -70,7 +70,7 @@ const Contact: React.FC = () => {
                         </div>
                         <h2 className="text-2xl font-black dark:text-white mb-2">¡Mensaje Enviado!</h2>
                         <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto">
-                            Gracias por contactarnos. Hemos recibido tu mensaje y te responderemos a la brevedad posible.
+                            Gracias por contactarnos. Hemos recibido tu mensaje y te responderemos a la brevedad posible a tu correo <strong>{user?.email}</strong>.
                         </p>
                         <button
                             onClick={() => navigate('/app/dashboard')}
@@ -81,17 +81,11 @@ const Contact: React.FC = () => {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="relative z-10">
-                        <div className="grid md:grid-cols-2 gap-6 mb-8">
+                        <div className="mb-8">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block ml-1">Tu Nombre</label>
-                                <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl p-3 text-sm font-bold text-slate-400">
+                                <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-white">
                                     {user?.name}
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block ml-1">Tu Correo</label>
-                                <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl p-3 text-sm font-bold text-slate-400">
-                                    {user?.email || 'No disponible'}
                                 </div>
                             </div>
                         </div>
