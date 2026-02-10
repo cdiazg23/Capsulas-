@@ -124,13 +124,12 @@ const Contact: React.FC = () => {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="relative z-10">
-                        <div className="mb-8">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block ml-1">Tu Nombre</label>
-                                <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-white">
-                                    {user?.name}
-                                </div>
-                            </div>
+                        <div className="flex justify-between items-center mb-6">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block ml-1">Tu Nombre</label>
+                            <span className="text-[9px] font-bold text-primary/40 bg-primary/5 px-2 py-0.5 rounded-full">v3.0 - Sistema Directo</span>
+                        </div>
+                        <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-white mb-8">
+                            {user?.name}
                         </div>
 
                         <div className="space-y-2 mb-6">
@@ -158,9 +157,12 @@ const Contact: React.FC = () => {
                         </div>
 
                         {error && (
-                            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm">
-                                <span className="material-symbols-outlined text-lg font-bold">error</span>
-                                {error}
+                            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl flex flex-col gap-1 text-red-600 dark:text-red-400 text-sm">
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-lg font-bold">error</span>
+                                    <span className="font-bold">Error en el proceso</span>
+                                </div>
+                                <p className="ml-8 text-xs opacity-80">{error}</p>
                             </div>
                         )}
 
