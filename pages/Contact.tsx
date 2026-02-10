@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts';
 import { useNavigate } from 'react-router-dom';
+import emailjs from '@emailjs/browser';
 
 const Contact: React.FC = () => {
     const { user } = useAuth();
@@ -20,6 +21,7 @@ const Contact: React.FC = () => {
             setSending(true);
             setError(null);
 
+            // 1. Guardar en Supabase para registro/histórico
             const { error: insertError } = await supabase
                 .from('contact_messages')
                 .insert({
@@ -31,6 +33,30 @@ const Contact: React.FC = () => {
                 });
 
             if (insertError) throw insertError;
+
+            // 2. Enviar Correo via EmailJS
+            // NOTA: Estas credenciales deben configurarse en .env.local
+            const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+            const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+            const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+            if (serviceId && templateId && publicKey) {
+                await emailjs.send(
+                    serviceId,
+                    templateId,
+                    {
+                        from_name: user.name,
+                        from_email: user.email || 'No proporcionado',
+                        subject: subject,
+                        message: message,
+                        to_email: 'capsulasderecho@gmail.com'
+                    },
+                    publicKey
+                );
+            } else {
+                console.warn('EmailJS keys missing in environment variables.');
+                // Si no hay llaves, igual marcamos como éxito porque ya se guardó en Supabase
+            }
 
             setSuccess(true);
             setSubject('');
