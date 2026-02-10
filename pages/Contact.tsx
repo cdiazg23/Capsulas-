@@ -58,11 +58,11 @@ const Contact: React.FC = () => {
                         serviceId,
                         templateId,
                         {
-                            from_name: user.name,
-                            from_email: userEmail || 'No proporcionado',
-                            subject: subject,
+                            name: user.name,
+                            email: userEmail || 'No proporcionado',
+                            title: subject,
                             message: message,
-                            to_email: 'capsulasderecho@gmail.com'
+                            time: new Date().toLocaleString()
                         },
                         publicKey
                     );
