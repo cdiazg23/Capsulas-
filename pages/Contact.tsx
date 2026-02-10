@@ -45,7 +45,7 @@ const Contact: React.FC = () => {
             const serviceId = 'service_0as58l3';
             const templateId = 'template_se9bvu7';
             // Llave corregida (l minúscula en Mlbm5n)
-            const publicKey = '5OtmNP2Cco-Mlbm5n';
+            const publicKey = '5OtmNP2Cco-MIbm5n';
 
             if (serviceId && templateId && publicKey) {
                 try {
