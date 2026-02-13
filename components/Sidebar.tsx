@@ -30,12 +30,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
     {
       name: 'Derecho Civil',
       icon: 'book_2',
-      items: ['Teoría de la Ley', 'Acto Jurídico', 'Bienes', 'Obligaciones', 'Contratos', 'Familia']
+      items: ['Teoría de la Ley', 'Acto Jurídico', 'Bienes', 'Obligaciones', 'Contratos', 'Familia', 'Responsabilidad Civil']
+    },
+    {
+      name: 'Derecho Comercial',
+      icon: 'storefront',
+      items: ['Insolvencia']
     },
     {
       name: 'Derecho Procesal',
       icon: 'contract',
-      items: ['Orgánico', 'Reglas Comunes', 'Juicio Ordinario', 'Recursos', 'Insolvencia']
+      items: ['Orgánico', 'Reglas Comunes', 'Juicio Ordinario', 'Recursos']
     },
     {
       name: 'Derecho Constitucional',
