@@ -90,7 +90,6 @@ const AdminPanel: React.FC = () => {
         definitionSimple: '',
         realExample: '',
         regulation: '',
-        jurisprudence: '',
         videoUrl: '',
         keyPoints: []
       });
@@ -117,7 +116,6 @@ const AdminPanel: React.FC = () => {
       definition_simple: conceptToSave.definitionSimple,
       real_example: conceptToSave.realExample,
       regulation: conceptToSave.regulation,
-      jurisprudence: conceptToSave.jurisprudence,
       video_url: conceptToSave.videoUrl,
       key_points: conceptToSave.keyPoints || []
     };
@@ -140,7 +138,7 @@ const AdminPanel: React.FC = () => {
       if (rows.length === 0) return;
 
       const conceptsToSave = rows.map(row => {
-        const [concept, category, subcategory, definition, example, regulation, jurisprudence, keyPointsStr] = row.split(';').map(s => s?.trim());
+        const [concept, category, subcategory, definition, example, regulation, keyPointsStr] = row.split(';').map(s => s?.trim());
 
         if (!concept) return null;
 
@@ -152,7 +150,6 @@ const AdminPanel: React.FC = () => {
           definition_simple: definition || '',
           real_example: example || '',
           regulation: regulation || '',
-          jurisprudence: jurisprudence || '',
           video_url: '', // Video removed as requested
           key_points: keyPointsStr ? keyPointsStr.split('|').map(kp => kp.trim()) : []
         };
@@ -181,7 +178,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleDownloadCSV = () => {
-    const headers = ['Concepto', 'Categoría', 'Subcategoría', 'Definición', 'Ejemplo', 'Regulación', 'Jurisprudencia', 'Sintesis Tecnica'];
+    const headers = ['Concepto', 'Categoría', 'Subcategoría', 'Definición', 'Ejemplo', 'Regulación', 'Sintesis Tecnica'];
     const rows = concepts.map(c => [
       c.concept || '',
       c.category || '',
@@ -189,7 +186,6 @@ const AdminPanel: React.FC = () => {
       (c.definitionSimple || '').replace(/;/g, ','),
       (c.realExample || '').replace(/;/g, ','),
       (c.regulation || '').replace(/;/g, ','),
-      (c.jurisprudence || '').replace(/;/g, ','),
       (c.keyPoints || []).join('|')
     ]);
 
@@ -554,10 +550,6 @@ const AdminPanel: React.FC = () => {
                   <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Regulación / Base Legal</label>
                   <input className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" value={formData.regulation} onChange={e => setFormData({ ...formData, regulation: e.target.value })} />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Jurisprudencia / Referencia</label>
-                  <input className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm dark:text-white" value={formData.jurisprudence} onChange={e => setFormData({ ...formData, jurisprudence: e.target.value })} />
-                </div>
               </div>
 
               <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl">
@@ -644,7 +636,7 @@ const AdminPanel: React.FC = () => {
               <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl">
                 <p className="text-[10px] font-black uppercase text-primary mb-2">Formato Requerido:</p>
                 <code className="text-[10px] dark:text-gray-300 break-all">
-                  Concepto;Categoría;Subcategoría;Definición;Ejemplo;Regulación;Jurisprudencia;SintesisTecnica
+                  Concepto;Categoría;Subcategoría;Definición;Ejemplo;Regulación;SintesisTecnica
                 </code>
                 <p className="text-[9px] text-gray-400 mt-2 italic">* Usa el símbolo "|" para separar múltiples puntos en la Síntesis Técnica.</p>
               </div>

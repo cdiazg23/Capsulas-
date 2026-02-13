@@ -20,9 +20,17 @@ export interface LegalConcept {
   definitionSimple: string;
   realExample: string;
   regulation: string;
-  jurisprudence: string;
   videoUrl: string;
   keyPoints?: string[];
+}
+
+export interface RevisedJurisprudence {
+  id: string;
+  concept_id: string;
+  concept_name: string;
+  report: string;
+  analysis: string;
+  created_at: string;
 }
 
 export interface MasterClass {

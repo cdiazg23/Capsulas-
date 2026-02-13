@@ -33,7 +33,6 @@ export const fetchLegalConcepts = async (): Promise<LegalConcept[]> => {
       definitionSimple: item.definition_simple || '',
       realExample: item.real_example || '',
       regulation: item.regulation || '',
-      jurisprudence: item.jurisprudence || '',
       videoUrl: item.video_url || '',
       keyPoints: Array.isArray(item.key_points) ? item.key_points : []
     }));
@@ -234,7 +233,6 @@ export const legalConcepts: LegalConcept[] = rawDataLegacy.split('\n').filter(li
     definitionSimple: parts[4] || '',
     realExample: parts[5] || '',
     regulation: parts[6] || '',
-    jurisprudence: parts[7] || '',
     videoUrl: parts[8] || ''
   };
 });

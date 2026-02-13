@@ -16,6 +16,7 @@ import CommunitySpace from './pages/CommunitySpace';
 import MasterClasses from './pages/MasterClasses';
 import AdminPanel from './pages/AdminPanel';
 import Contact from './pages/Contact';
+import RevisedJurisprudence from './pages/RevisedJurisprudence';
 
 export const router = createBrowserRouter([
     {
@@ -87,6 +88,14 @@ export const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute role="founder">
                         <CommunitySpace />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: 'revised-jurisprudence',
+                element: (
+                    <ProtectedRoute role="founder">
+                        <RevisedJurisprudence />
                     </ProtectedRoute>
                 )
             },

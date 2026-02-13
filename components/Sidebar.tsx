@@ -145,15 +145,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
 
             <div className="p-2 space-y-1">
               {(user?.role === 'founder' || user?.role === 'admin') && (
-                <button
-                  onClick={() => handleNavigate('/app/community')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/community' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}
-                >
-                  <span className="material-symbols-outlined text-[20px]">forum</span>
-                  <span>Espacio Fundadores</span>
-                </button>
+                <>
+                  <button
+                    onClick={() => handleNavigate('/app/community')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/community' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">forum</span>
+                    <span>Espacio Fundadores</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigate('/app/revised-jurisprudence')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/revised-jurisprudence' ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">fact_check</span>
+                    <span>Jurisprudencia Pro</span>
+                  </button>
+                </>
               )}
-
               <button
                 onClick={() => handleNavigate('/app/masterclasses')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/masterclasses' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}

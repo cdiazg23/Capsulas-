@@ -243,23 +243,13 @@ const ConceptDetail: React.FC = () => {
             </p>
           </section>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <section className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="material-symbols-outlined text-red-500 text-xl">scale</span>
-                <h3 className="font-black uppercase tracking-widest text-xs dark:text-slate-400">Normativa (Chile)</h3>
-              </div>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{concept.regulation}</p>
-            </section>
-
-            <section className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="material-symbols-outlined text-purple-500 text-xl">balance</span>
-                <h3 className="font-black uppercase tracking-widest text-xs dark:text-slate-400">Jurisprudencia</h3>
-              </div>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{concept.jurisprudence}</p>
-            </section>
-          </div>
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="material-symbols-outlined text-red-500 text-xl">scale</span>
+              <h3 className="font-black uppercase tracking-widest text-xs dark:text-slate-400">Normativa (Chile)</h3>
+            </div>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{concept.regulation}</p>
+          </section>
         </div>
 
         <div className="lg:col-span-4 space-y-6">
