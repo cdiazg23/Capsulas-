@@ -38,6 +38,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
       items: ['Insolvencia']
     },
     {
+      name: 'Derecho Penal',
+      icon: 'policy',
+      items: ['Teoria del delito y la Pena', 'Formas de Aparicion del Delito', 'Penal Especial']
+    },
+    {
       name: 'Derecho Procesal',
       icon: 'contract',
       items: ['Orgánico', 'Reglas Comunes', 'Juicio Ordinario', 'Recursos']
