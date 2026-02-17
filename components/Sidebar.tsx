@@ -87,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
         fixed inset-y-0 left-0 z-[70] w-72 bg-white dark:bg-slate-900 p-6 
         transform transition-transform duration-300 ease-in-out
         border-r border-[#e7ebf3] dark:border-slate-800
-        lg:translate-x-0 lg:static lg:z-0 lg:h-[calc(100vh-64px)] lg:top-16
+        lg:translate-x-0 lg:sticky lg:top-16 lg:z-0 lg:h-[calc(100vh-64px)]
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="flex items-center justify-between lg:hidden mb-6">
@@ -155,25 +155,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
 
             <div className="p-2 space-y-1">
               {(user?.role === 'founder' || user?.role === 'admin') && (
-                <>
-                  <button
-                    onClick={() => handleNavigate('/app/community')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/community' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}
-                  >
-                    <span className="material-symbols-outlined text-[20px]">forum</span>
-                    <span>Espacio Fundadores</span>
-                  </button>
-                  <button
-                    disabled
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold opacity-60 cursor-not-allowed text-slate-400"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[20px]">fact_check</span>
-                      <span>Jurisprudencia Pro</span>
-                    </div>
-                    <span className="text-[9px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full text-slate-500 font-black tracking-widest uppercase">Pronto</span>
-                  </button>
-                </>
+                <button
+                  onClick={() => handleNavigate('/app/community')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/community' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}
+                >
+                  <span className="material-symbols-outlined text-[20px]">forum</span>
+                  <span>Espacio Fundadores</span>
+                </button>
               )}
               <button
                 onClick={() => handleNavigate('/app/masterclasses')}
