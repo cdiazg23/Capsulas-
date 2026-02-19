@@ -19,11 +19,14 @@ const Dashboard: React.FC = () => {
   const categories = useMemo(() => {
     const getCategoryCount = (catName: string) => {
       return safeConcepts.filter(c => {
-        const conceptCat = c.category?.toLowerCase() || '';
-        const targetCat = catName.toLowerCase();
-        if (targetCat === 'derecho de familia') {
-          return conceptCat.includes('familia');
+        const conceptCat = (c.category || '').trim().toLowerCase();
+        const targetCat = catName.trim().toLowerCase();
+
+        // Match exact or flexible for Family law
+        if (targetCat === 'derecho de familia' || targetCat === 'familia') {
+          return conceptCat === 'derecho de familia' || conceptCat === 'familia' || conceptCat.includes('familia');
         }
+
         return conceptCat === targetCat;
       }).length;
     };
