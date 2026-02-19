@@ -29,19 +29,26 @@ const AdminPanel: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  const filteredConcepts = concepts.filter(c => {
-    const matchesSearch = c.concept.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === 'Todas' || c.category === filterCategory;
-    const matchesSubcategory = filterSubcategory === 'Todas' || (c.subcategory || '') === filterSubcategory;
-    return matchesSearch && matchesCategory && matchesSubcategory;
-  });
+  const filteredConcepts = React.useMemo(() => {
+    return concepts.filter(c => {
+      const matchesSearch = (c.concept || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.id || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = filterCategory === 'Todas' || c.category === filterCategory;
+      const matchesSubcategory = filterSubcategory === 'Todas' || (c.subcategory || '') === filterSubcategory;
+      return matchesSearch && matchesCategory && matchesSubcategory;
+    });
+  }, [concepts, searchTerm, filterCategory, filterSubcategory]);
 
-  const totalPages = Math.ceil(filteredConcepts.length / itemsPerPage);
-  const paginatedConcepts = filteredConcepts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const totalPages = React.useMemo(() =>
+    Math.ceil(filteredConcepts.length / itemsPerPage),
+    [filteredConcepts.length]);
+
+  const paginatedConcepts = React.useMemo(() => {
+    return filteredConcepts.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredConcepts, currentPage]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -429,7 +436,7 @@ const AdminPanel: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
-                  {paginatedConcepts.map((c) => (
+                  {(paginatedConcepts || []).map((c) => (
                     <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
