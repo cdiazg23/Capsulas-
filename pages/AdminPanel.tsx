@@ -26,6 +26,9 @@ const AdminPanel: React.FC = () => {
   const [mcFormData, setMcFormData] = useState<Partial<MasterClass>>({});
   const [newKeyPoint, setNewKeyPoint] = useState('');
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
   const filteredConcepts = concepts.filter(c => {
     const matchesSearch = c.concept.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -33,6 +36,17 @@ const AdminPanel: React.FC = () => {
     const matchesSubcategory = filterSubcategory === 'Todas' || (c.subcategory || '') === filterSubcategory;
     return matchesSearch && matchesCategory && matchesSubcategory;
   });
+
+  const totalPages = Math.ceil(filteredConcepts.length / itemsPerPage);
+  const paginatedConcepts = filteredConcepts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterCategory, filterSubcategory]);
 
   const filteredProfiles = profiles.filter(p => {
     const searchLower = searchTerm.toLowerCase();
@@ -402,58 +416,83 @@ const AdminPanel: React.FC = () => {
       )}
 
       {activeTab === 'concepts' && (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-gray-50 dark:bg-slate-800/50 border-b dark:border-slate-800">
-                <tr>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Concepto</th>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Área</th>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Subárea</th>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right w-32">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
-                {filteredConcepts.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary font-black text-xs">
-                          {c.concept.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold dark:text-white line-clamp-1">{c.concept}</p>
-                          <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{c.id}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className="px-2.5 py-1 rounded-lg bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 text-[10px] font-black uppercase">
-                        {c.category}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span className="text-xs text-slate-600 dark:text-slate-400 font-bold">{c.subcategory}</span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => {
-                            if (window.confirm(`¿Estás seguro de que deseas eliminar "${c.concept}"? Esta acción no se puede deshacer.`)) {
-                              handleDeleteConcept(c.id);
-                            }
-                          }}
-                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-xl">delete</span>
-                        </button>
-                      </div>
-                    </td>
+        <div className="space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 dark:bg-slate-800/50 border-b dark:border-slate-800">
+                  <tr>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400">Concepto</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400">Área</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400">Subárea</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right w-32">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
+                  {paginatedConcepts.map((c) => (
+                    <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="size-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary font-black text-xs">
+                            {c.concept.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold dark:text-white line-clamp-1">{c.concept}</p>
+                            <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{c.id}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <span className="px-2.5 py-1 rounded-lg bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 text-[10px] font-black uppercase">
+                          {c.category}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className="text-xs text-slate-600 dark:text-slate-400 font-bold">{c.subcategory}</span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`¿Estás seguro de que deseas eliminar "${c.concept}"? Esta acción no se puede deshacer.`)) {
+                                handleDeleteConcept(c.id);
+                              }
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-xl">delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 py-4">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg bg-white dark:bg-slate-900 border dark:border-slate-800 disabled:opacity-30"
+              >
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              <span className="text-xs font-bold text-gray-500">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg bg-white dark:bg-slate-900 border dark:border-slate-800 disabled:opacity-30"
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 

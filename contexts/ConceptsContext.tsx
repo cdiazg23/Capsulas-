@@ -17,14 +17,31 @@ export const ConceptsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
+    useEffect(() => {
+        const cached = localStorage.getItem('iuris_concepts_cache');
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setConcepts(parsed);
+                    setLoading(false); // Immediate load from cache
+                }
+            } catch (e) {
+                console.error('Error parsing cache:', e);
+            }
+        }
+        loadConcepts();
+    }, []);
+
     const loadConcepts = async () => {
         try {
-            setLoading(true);
+            if (concepts.length === 0) setLoading(true); // Only show spinner if no cache
             setError(null);
             console.log('🔄 Cargando conceptos...');
             const data = await fetchLegalConcepts();
             console.log('✅ Conceptos cargados:', data.length);
             setConcepts(data);
+            localStorage.setItem('iuris_concepts_cache', JSON.stringify(data));
         } catch (err) {
             console.error('❌ Error cargando conceptos:', err);
             setError(err instanceof Error ? err : new Error('Failed to fetch concepts'));
@@ -35,9 +52,6 @@ export const ConceptsProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
     };
 
-    useEffect(() => {
-        loadConcepts();
-    }, []);
 
     const refreshConcepts = async () => {
         await loadConcepts();
