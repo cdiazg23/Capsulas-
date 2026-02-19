@@ -7,8 +7,8 @@ const Explorer: React.FC = () => {
   const { category: urlCategory, subcategory: urlSubcategory } = useParams();
   const { concepts } = useConcepts();
 
-  const safeСoncepts = concepts || [];
-  const categories = Array.from(new Set(safeСoncepts.map(c => c.category)));
+  const safeConcepts = concepts || [];
+  const categories = Array.from(new Set(safeConcepts.map(c => c.category)));
 
   const [activeCategory, setActiveCategory] = useState(urlCategory || categories[0] || 'Derecho Civil');
   const [searchTerm, setSearchTerm] = useState(urlSubcategory || '');
@@ -24,7 +24,7 @@ const Explorer: React.FC = () => {
     }
   }, [urlCategory, urlSubcategory]);
 
-  const filteredConcepts = safeСoncepts.filter(c => {
+  const filteredConcepts = safeConcepts.filter((c: any) => {
     const conceptCat = (c.category || '').trim();
     const activeCat = activeCategory.trim();
     const subCat = (c.subcategory || '').trim().toLowerCase();

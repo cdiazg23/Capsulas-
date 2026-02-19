@@ -414,7 +414,7 @@ const AdminPanel: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
-                {paginatedConcepts.map((c) => (
+                {filteredConcepts.map((c) => (
                   <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
