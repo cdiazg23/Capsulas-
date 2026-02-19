@@ -34,6 +34,11 @@ const Dashboard: React.FC = () => {
       { name: 'Derecho Constitucional', icon: 'auto_stories', color: 'amber', count: getCategoryCount('Derecho Constitucional') },
       { name: 'Derecho de Familia', icon: 'family_restroom', color: 'rose', count: getCategoryCount('Derecho de Familia') },
       { name: 'Derecho Penal', icon: 'security', color: 'emerald', count: getCategoryCount('Derecho Penal') },
+      { name: 'Derecho Administrativo', icon: 'assured_workload', color: 'cyan', count: getCategoryCount('Derecho Administrativo') },
+      { name: 'Derecho Laboral', icon: 'work', color: 'orange', count: getCategoryCount('Derecho Laboral') },
+      { name: 'Derecho Comercial', icon: 'payments', color: 'violet', count: getCategoryCount('Derecho Comercial') },
+      { name: 'Derecho Procesal Administrativo', icon: 'balance', color: 'sky', count: getCategoryCount('Derecho Procesal Administrativo') },
+      { name: 'Derecho Laboral Administrativo', icon: 'engineering', color: 'slate', count: getCategoryCount('Derecho Laboral Administrativo') },
     ];
   }, [safeConcepts]);
 

@@ -254,6 +254,8 @@ export const categories = [
   'Derecho Procesal',
   'Derecho Comercial',
   'Derecho de Familia',
+  'Derecho Procesal Administrativo',
+  'Derecho Laboral Administrativo',
   'Derecho Tributario',
   'Derecho Internacional'
 ];
