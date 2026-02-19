@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useConcepts } from '../contexts';
+import { useMastery } from '../hooks';
 
 const Flashcards: React.FC = () => {
     const { concepts } = useConcepts();
@@ -12,13 +13,21 @@ const Flashcards: React.FC = () => {
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [cardLimit, setCardLimit] = useState<number | 'all'>('all');
+    const [excludeMastered, setExcludeMastered] = useState(true);
     const [isStudying, setIsStudying] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
 
+    const { masteredConceptIds } = useMastery();
+
     const studySet = useMemo(() => {
         if (selectedCategories.length === 0) return [];
         let filtered = safeConcepts.filter(c => selectedCategories.includes(c.category));
+
+        // Filtro de conceptos dominados
+        if (excludeMastered) {
+            filtered = filtered.filter(c => !masteredConceptIds.includes(c.id));
+        }
 
         // Barajar aleatoriamente
         filtered = [...filtered].sort(() => Math.random() - 0.5);
@@ -28,7 +37,7 @@ const Flashcards: React.FC = () => {
             return filtered.slice(0, cardLimit);
         }
         return filtered;
-    }, [safeConcepts, selectedCategories, cardLimit]);
+    }, [safeConcepts, selectedCategories, cardLimit, excludeMastered, masteredConceptIds]);
 
     const toggleCategory = (category: string) => {
         setSelectedCategories(prev =>
@@ -225,26 +234,54 @@ const Flashcards: React.FC = () => {
                     </div>
 
                     {/* Quantity Selection */}
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 p-8 shadow-sm">
-                        <h2 className="text-xl font-black mb-6 dark:text-white flex items-center gap-3">
-                            <div className="size-10 rounded-xl bg-accent-gold/10 flex items-center justify-center text-accent-gold">
-                                <span className="material-symbols-outlined">list_alt</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 p-8 shadow-sm">
+                            <h2 className="text-xl font-black mb-6 dark:text-white flex items-center gap-3">
+                                <div className="size-10 rounded-xl bg-accent-gold/10 flex items-center justify-center text-accent-gold">
+                                    <span className="material-symbols-outlined">list_alt</span>
+                                </div>
+                                2. Cantidad
+                            </h2>
+                            <div className="flex gap-2">
+                                {[5, 10, 20, 'all'].map((limit) => (
+                                    <button
+                                        key={limit}
+                                        onClick={() => setCardLimit(limit as number | 'all')}
+                                        className={`flex-1 py-3 rounded-xl font-black transition-all border-2 text-xs ${cardLimit === limit
+                                            ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
+                                            : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-100 dark:border-slate-800'
+                                            }`}
+                                    >
+                                        {limit === 'all' ? 'Todos' : limit}
+                                    </button>
+                                ))}
                             </div>
-                            2. Cantidad por Sesión
-                        </h2>
-                        <div className="flex gap-4">
-                            {[5, 10, 20, 'all'].map((limit) => (
-                                <button
-                                    key={limit}
-                                    onClick={() => setCardLimit(limit as number | 'all')}
-                                    className={`flex-1 py-4 rounded-2xl font-black transition-all border-2 ${cardLimit === limit
-                                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xl'
-                                        : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-100 dark:border-slate-800 hover:border-primary/50'
-                                        }`}
-                                >
-                                    {limit === 'all' ? 'Todos' : limit}
-                                </button>
-                            ))}
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 p-8 shadow-sm">
+                            <h2 className="text-xl font-black mb-6 dark:text-white flex items-center gap-3">
+                                <div className="size-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                    <span className="material-symbols-outlined">verified</span>
+                                </div>
+                                3. Filtro de Maestría
+                            </h2>
+                            <button
+                                onClick={() => setExcludeMastered(!excludeMastered)}
+                                className={`w-full py-3 px-4 rounded-xl font-black transition-all border-2 flex items-center justify-between text-xs ${excludeMastered
+                                    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                                    : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-100 dark:border-slate-800'
+                                    }`}
+                            >
+                                <span>Excluir ya dominados</span>
+                                <span className="material-symbols-outlined">
+                                    {excludeMastered ? 'toggle_on' : 'toggle_off'}
+                                </span>
+                            </button>
+                            <p className="text-[10px] text-gray-400 mt-3 font-medium">
+                                {excludeMastered
+                                    ? 'Solo verás conceptos nuevos o por reforzar.'
+                                    : 'Verás todos los conceptos, incluidos los ya dominados.'}
+                            </p>
                         </div>
                     </div>
                 </div>

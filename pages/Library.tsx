@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConcepts, useAuth } from '../contexts';
 import { supabase } from '../lib/supabase';
@@ -9,6 +9,7 @@ const Library: React.FC = () => {
   const { user } = useAuth();
   const [savedConcepts, setSavedConcepts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadData();
@@ -68,7 +69,20 @@ const Library: React.FC = () => {
     }
   };
 
-  const savedConceptsList = concepts?.filter(c => savedConcepts.includes(c.id)) || [];
+  const savedConceptsList = useMemo(() => {
+    const list = concepts?.filter(c => savedConcepts.includes(c.id)) || [];
+    if (!searchTerm.trim()) return list;
+
+    const term = searchTerm.toLowerCase();
+    return list.filter(c =>
+      c.concept.toLowerCase().includes(term) ||
+      c.subcategory.toLowerCase().includes(term) ||
+      c.definitionSimple.toLowerCase().includes(term) ||
+      c.category.toLowerCase().includes(term)
+    );
+  }, [concepts, savedConcepts, searchTerm]);
+
+  const totalSaved = concepts?.filter(c => savedConcepts.includes(c.id)).length || 0;
 
   if (loading) {
     return (
@@ -90,9 +104,22 @@ const Library: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex gap-4 mb-8">
-        <div className="px-6 py-2 rounded-xl text-xs font-black bg-primary text-white">
-          Conceptos ({savedConceptsList.length})
+      <div className="flex flex-col md:flex-row gap-4 mb-8 justify-between items-start md:items-center">
+        <div className="flex gap-4">
+          <div className="px-6 py-2 rounded-xl text-xs font-black bg-primary text-white">
+            Conceptos ({totalSaved})
+          </div>
+        </div>
+
+        <div className="relative w-full md:w-64">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+          <input
+            type="text"
+            placeholder="Buscar en mi biblioteca..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all dark:text-white"
+          />
         </div>
       </div>
 
@@ -104,10 +131,13 @@ const Library: React.FC = () => {
             Guarda tus conceptos favoritos para acceder a ellos rápidamente desde aquí
           </p>
           <button
-            onClick={() => navigate('/app/explorer')}
+            onClick={() => {
+              navigate('/app/explorer');
+              setSearchTerm('');
+            }}
             className="px-8 py-4 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
           >
-            Explorar Conceptos
+            {searchTerm ? 'Limpiar Búsqueda' : 'Explorar Conceptos'}
           </button>
         </div>
       ) : (

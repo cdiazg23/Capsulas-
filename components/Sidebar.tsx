@@ -154,21 +154,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
             </div>
 
             <div className="p-2 space-y-1">
-              {(user?.role === 'founder' || user?.role === 'admin') && (
-                <button
-                  onClick={() => handleNavigate('/app/community')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/community' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}
-                >
+              <button
+                onClick={() => {
+                  if (user?.role === 'founder' || user?.role === 'admin') {
+                    handleNavigate('/app/community');
+                  } else {
+                    handleNavigate('/app/pricing');
+                  }
+                }}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/community' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900 focus:bg-primary/5 focus:text-primary'}`}
+              >
+                <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-[20px]">forum</span>
                   <span>Espacio Fundadores</span>
-                </button>
-              )}
+                </div>
+                {user?.role !== 'founder' && user?.role !== 'admin' && (
+                  <span className="material-symbols-outlined text-xs text-amber-500">lock</span>
+                )}
+              </button>
+
               <button
-                onClick={() => handleNavigate('/app/masterclasses')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/masterclasses' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900'}`}
+                onClick={() => {
+                  if (user?.role === 'founder' || user?.role === 'admin') {
+                    handleNavigate('/app/masterclasses');
+                  } else {
+                    handleNavigate('/app/pricing');
+                  }
+                }}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/masterclasses' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900 focus:bg-indigo-50/50 focus:text-indigo-600'}`}
               >
-                <span className="material-symbols-outlined text-[20px]">school</span>
-                <span>Aula Iuris</span>
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[20px]">school</span>
+                  <span>Aula Iuris</span>
+                </div>
+                {user?.role !== 'founder' && user?.role !== 'admin' && (
+                  <span className="material-symbols-outlined text-xs text-amber-500">lock</span>
+                )}
               </button>
             </div>
           </div>

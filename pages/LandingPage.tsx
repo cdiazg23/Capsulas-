@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
-const LandingPage: React.FC = () => {
+const LandingPage: React.FC<{ onStart?: () => void; onLogin?: () => void; onViewPricing?: () => void }> = ({ onStart, onLogin, onViewPricing }) => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
 
@@ -14,34 +15,17 @@ const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 font-sans selection:bg-primary/20">
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        .glass {
-          background: rgba(255, 255, 255, 0.7);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        @keyframes scroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-scroll {
-          animation: scroll 30s linear infinite;
-        }
-      `}</style>
+    <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-primary/10 selection:text-primary">
+      <Helmet>
+        <title>IurisAcademy | Domina el Derecho con Inteligencia Artificial</title>
+        <meta name="description" content="La plataforma educativa definitiva para estudiantes de Derecho. Domina conceptos legales con gamificación, flashcards y resúmenes técnicos." />
+        <meta name="keywords" content="derecho, academia legal, estudio juridico, chile, iurisacademy, flashcards legales" />
+      </Helmet>
 
       {/* Navigation */}
-      <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'py-3' : 'py-6'}`}>
+      <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'py-3' : 'py-6'} `}>
         <div className="max-w-7xl mx-auto px-6">
-          <nav className={`flex items-center justify-between px-6 py-3 rounded-2xl transition-all duration-300 ${scrolled ? 'glass shadow-lg border-slate-200' : 'bg-transparent border-transparent'}`}>
+          <nav className={`flex items-center justify-between px-6 py-3 rounded-2xl transition-all duration-300 ${scrolled ? 'glass shadow-lg border-slate-200' : 'bg-transparent border-transparent'} `}>
             <div className="flex items-center gap-2 group cursor-pointer">
               <div className="bg-primary text-white size-10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:rotate-12 transition-transform">
                 <span className="material-symbols-outlined text-2xl">balance</span>
@@ -63,7 +47,10 @@ const LandingPage: React.FC = () => {
               <button onClick={() => navigate('/login')} className="hidden sm:block text-sm font-bold text-slate-700 hover:bg-slate-100 px-5 py-2.5 rounded-xl transition-all">
                 Iniciar Sesión
               </button>
-              <button onClick={() => navigate('/login')} className="bg-primary text-white px-6 py-3 rounded-xl text-sm font-bold shadow-xl shadow-primary/25 hover:scale-105 active:scale-95 transition-all">
+              <button
+                onClick={() => navigate('/login', { state: { mode: 'signup' } })}
+                className="bg-primary text-white px-6 py-3 rounded-xl text-sm font-bold shadow-xl shadow-primary/25 hover:scale-105 active:scale-95 transition-all"
+              >
                 Prueba Gratis
               </button>
             </div>
@@ -116,7 +103,10 @@ const LandingPage: React.FC = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
-                  <button onClick={() => navigate('/login')} className="w-full sm:w-auto bg-primary text-white px-10 py-5 rounded-2xl text-lg font-bold shadow-2xl shadow-primary/20 hover:scale-[1.03] active:scale-95 transition-all">
+                  <button
+                    onClick={() => navigate('/login', { state: { mode: 'signup' } })}
+                    className="group relative bg-primary text-white px-10 py-5 rounded-[2rem] text-lg font-black shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-all overflow-hidden"
+                  >
                     Empezar a Estudiar
                   </button>
                   <button onClick={() => navigate('/pricing')} className="w-full sm:w-auto flex items-center justify-center gap-3 border-2 border-slate-200 px-10 py-5 rounded-2xl text-lg font-bold text-slate-700 hover:bg-slate-50 transition-all group">
@@ -130,13 +120,13 @@ const LandingPage: React.FC = () => {
                     {[1, 2, 3].map(i => (
                       <img key={i} src={`https://i.pravatar.cc/100?img=${i + 20}`} className="size-10 rounded-full border-2 border-white" alt="User" />
                     ))}
-                  </div>
+                  </div >
                   <div>
                     <p className="text-sm font-bold text-slate-900">Impulsado por la comunidad</p>
                     <p className="text-xs text-slate-500">Sé parte de los socios fundadores</p>
                   </div>
-                </div>
-              </div>
+                </div >
+              </div >
 
               <div className="relative">
                 <div className="bg-white p-4 rounded-[3rem] shadow-2xl border border-white rotate-2 animate-float">
@@ -159,12 +149,12 @@ const LandingPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
+            </div >
+          </div >
+        </section >
 
         {/* Sección de Propósito */}
-        <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
+        < section className="py-24 bg-slate-900 text-white relative overflow-hidden" >
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
             <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary rounded-full blur-[120px]"></div>
           </div>
@@ -197,10 +187,10 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* CTA TikTok / Comunidad */}
-        <section id="comunidad" className="py-32 bg-white">
+        < section id="comunidad" className="py-32 bg-white" >
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div className="order-2 lg:order-1">
@@ -238,10 +228,10 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* Footer */}
-        <footer className="bg-slate-50 py-16 border-t border-slate-100">
+        < footer className="bg-slate-50 py-16 border-t border-slate-100" >
           <div className="max-w-7xl mx-auto px-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-8">
               <span className="material-symbols-outlined text-primary text-3xl">balance</span>
@@ -250,19 +240,22 @@ const LandingPage: React.FC = () => {
             <p className="text-slate-500 text-sm max-w-lg mx-auto mb-8">
               Un proyecto creado con ❤️ para la comunidad de derecho en Chile y Latinoamérica.
             </p>
-            <div className="flex justify-center gap-6 text-slate-400 mb-8">
-              <a href="https://www.tiktok.com/@capsulasdederecho" target="_blank" className="hover:text-primary transition-colors flex items-center gap-2 font-bold">
-                <span className="material-symbols-outlined">brand_awareness</span>
-                TikTok @capsulasdederecho
+            <div className="flex justify-center gap-6 text-slate-400 mb-8 font-bold text-xs uppercase tracking-widest">
+              <a href="https://www.tiktok.com/@capsulasdederecho" target="_blank" className="hover:text-primary transition-colors flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg">brand_awareness</span>
+                TikTok
               </a>
+              <button onClick={() => navigate('/terms')} className="hover:text-primary transition-colors">
+                Términos y Condiciones
+              </button>
             </div>
             <div className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">
-              © 2025 Capsulas de Derecho. Todos los derechos reservados.
+              © 2026 Capsulas de Derecho. Todos los derechos reservados.
             </div>
           </div>
-        </footer>
-      </main>
-    </div>
+        </footer >
+      </main >
+    </div >
   );
 };
 

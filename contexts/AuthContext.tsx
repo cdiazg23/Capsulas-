@@ -20,7 +20,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Un solo responsable para la sesión: onAuthStateChange maneja tanto el inicio como los cambios
+        // Cargar perfil desde caché para respuesta instantánea
+        const cachedUser = localStorage.getItem('iuris_user_cache');
+        if (cachedUser) {
+            try {
+                const parsedUser = JSON.parse(cachedUser);
+                console.log('📦 [Auth] Perfil cargado desde caché:', parsedUser.email);
+                setUser(parsedUser);
+                setLoading(false); // Ya podemos dejar de mostrar el loading global
+            } catch (e) {
+                console.warn('⚠️ [Auth] Error parseando caché:', e);
+            }
+        }
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log(`🔐 [Auth] Evento: ${event}`);
 
@@ -28,7 +40,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 try {
                     console.log('🔄 [Auth] Sincronizando perfil para:', session.user.email);
 
-                    // Timeout para la consulta del perfil (30s)
                     const profilePromise = supabase
                         .from('profiles')
                         .select('*')
@@ -36,55 +47,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         .maybeSingle();
 
                     const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Profile sync timeout')), 30000)
+                        setTimeout(() => reject(new Error('Profile sync timeout')), 10000) // Reducido a 10s para ser más ágil
                     );
 
                     const { data: profile } = await Promise.race([profilePromise, timeoutPromise]) as any;
 
                     if (profile) {
-                        console.log('✅ [Auth] Perfil sincronizado. Rol:', profile.role);
-                        setUser({
+                        const newUser = {
                             id: session.user.id,
                             username: session.user.email?.split('@')[0] || 'User',
                             role: (profile.role as any) || 'user',
                             name: profile.full_name || session.user.email?.split('@')[0] || 'User',
                             email: session.user.email,
                             avatarUrl: profile.avatar_url
-                        });
+                        };
+
+                        console.log('✅ [Auth] Perfil sincronizado. Rol:', profile.role);
+                        setUser(newUser);
+                        localStorage.setItem('iuris_user_cache', JSON.stringify(newUser));
                     } else {
-                        console.warn('⚠️ [Auth] No se encontró perfil en DB, asignando rol por defecto');
-                        // Fail-safe: Si no hay perfil aún, permitir entrada con datos de sesión
-                        setUser(prev => prev || {
-                            id: session.user.id,
-                            username: session.user.email?.split('@')[0] || 'User',
-                            role: 'user',
-                            name: session.user.email?.split('@')[0] || 'User',
-                            email: session.user.email
-                        });
-                    }
-                } catch (err) {
-                    console.error('❌ [Auth] Error o timeout sincronizando perfil:', err);
-                    // IMPORTANTE: Si ya tenemos un usuario cargado, NO lo sobrescribimos con 'user' por defecto
-                    // Esto evita que el admin sea expulsado si la DB está saturada momentáneamente
-                    setUser(prev => {
-                        if (prev) {
-                            console.log('🧡 [Auth] Manteniendo sesión previa tras fallo de sincronización');
-                            return prev;
-                        }
-                        return {
+                        console.warn('⚠️ [Auth] No se encontró perfil en DB');
+                        const fallbackUser = {
                             id: session.user.id,
                             username: session.user.email?.split('@')[0] || 'User',
                             role: 'user',
                             name: session.user.email?.split('@')[0] || 'User',
                             email: session.user.email
                         };
-                    });
+                        setUser(fallbackUser);
+                        localStorage.setItem('iuris_user_cache', JSON.stringify(fallbackUser));
+                    }
+                } catch (err) {
+                    console.error('❌ [Auth] Error sincronizando perfil:', err);
                 }
             } else {
                 setUser(null);
+                localStorage.removeItem('iuris_user_cache');
             }
 
-            // Garantizamos que tras el primer evento exitoso de sesión o fallo, loading sea false
             setLoading(false);
         });
 

@@ -16,7 +16,10 @@ const ConceptDetail: React.FC = () => {
   const [isSaved, setIsSaved] = useState(false);
 
   // Find concept by ID
-  const concept = concepts?.find(c => c.id === id);
+  const conceptIndex = concepts?.findIndex(c => c.id === id) ?? -1;
+  const concept = concepts?.[conceptIndex];
+  const prevConcept = conceptIndex > 0 ? concepts?.[conceptIndex - 1] : null;
+  const nextConcept = concepts && conceptIndex < concepts.length - 1 ? concepts[conceptIndex + 1] : null;
 
   useEffect(() => {
     if (user && id) {
@@ -199,11 +202,23 @@ const ConceptDetail: React.FC = () => {
           </button>
           <div>
             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500">
-              <span>{concept.category}</span>
+              <button
+                onClick={() => navigate('/app/explorer')}
+                className="hover:text-primary transition-colors"
+              >
+                Explorer
+              </button>
+              <span className="size-1 bg-gray-200 dark:bg-slate-800 rounded-full"></span>
+              <button
+                onClick={() => navigate(`/app/explorer/${encodeURIComponent(concept.category)}`)}
+                className="hover:text-primary transition-colors"
+              >
+                {concept.category}
+              </button>
               <span className="size-1 bg-gray-200 dark:bg-slate-800 rounded-full"></span>
               <span>{concept.subcategory}</span>
             </div>
-            <h1 className="text-4xl font-black dark:text-white">{concept.concept}</h1>
+            <h1 className="text-4xl font-black dark:text-white mt-1">{concept.concept}</h1>
           </div>
         </div>
         <button
@@ -332,31 +347,48 @@ const ConceptDetail: React.FC = () => {
       )}
 
       {/* Floating Action Bar - Improved Layout */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-2xl lg:left-[calc(50%+144px)] transition-all z-40">
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 p-4 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-between gap-6">
-          <div className="flex-1 hidden sm:block pl-2">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary">
-                Progreso del Concepto
-              </span>
-              <span className="text-xs font-black text-primary">{isMastered ? '100%' : '0%'}</span>
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-3xl lg:left-[calc(50%+144px)] transition-all z-40">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 p-3 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-between gap-4">
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => prevConcept && navigate(`/app/concept/${prevConcept.id}`)}
+              disabled={!prevConcept}
+              className="size-12 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-primary disabled:opacity-30 disabled:hover:text-slate-400 transition-all border border-gray-100 dark:border-slate-700"
+              title={prevConcept ? `Anterior: ${prevConcept.concept}` : 'No hay más conceptos'}
+            >
+              <span className="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button
+              onClick={() => nextConcept && navigate(`/app/concept/${nextConcept.id}`)}
+              disabled={!nextConcept}
+              className="size-12 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-primary disabled:opacity-30 disabled:hover:text-slate-400 transition-all border border-gray-100 dark:border-slate-700"
+              title={nextConcept ? `Siguiente: ${nextConcept.concept}` : 'No hay más conceptos'}
+            >
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+
+          <div className="flex-1 hidden md:block px-4">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[9px] font-black uppercase tracking-widest text-primary">Progreso</span>
+              <span className="text-[10px] font-black text-primary">{isMastered ? '100%' : '0%'}</span>
             </div>
-            <div className="h-1.5 bg-gray-100 dark:bg-slate-800/50 rounded-full overflow-hidden">
-              <div
-                className={`h-full bg-primary transition-all duration-1000 ease-out ${isMastered ? 'w-full' : 'w-0'}`}
-              />
+            <div className="h-1 bg-gray-100 dark:bg-slate-800/50 rounded-full overflow-hidden">
+              <div className={`h-full bg-primary transition-all duration-1000 ${isMastered ? 'w-full' : 'w-0'}`} />
             </div>
           </div>
 
           <button
             onClick={handleToggleMastery}
-            className={`flex items-center justify-center gap-3 px-8 py-3.5 rounded-2xl text-sm font-black transition-all transform active:scale-95 shadow-lg ${isMastered
+            className={`flex items-center justify-center gap-3 px-6 py-3 rounded-2xl text-xs font-black transition-all transform active:scale-95 shadow-lg ${isMastered
               ? 'bg-green-500 text-white shadow-green-500/20'
               : 'bg-primary text-white shadow-primary/30 hover:shadow-primary/50'
               }`}
           >
-            <span className="material-symbols-outlined text-xl">{isMastered ? 'verified' : 'bolt'}</span>
-            <span>{isMastered ? 'DOMINADO' : 'MARCAR COMO APRENDIDO'}</span>
+            <span className="material-symbols-outlined text-lg">{isMastered ? 'verified' : 'bolt'}</span>
+            <span className="hidden sm:inline">{isMastered ? 'DOMINADO' : 'MARCAR COMO APRENDIDO'}</span>
+            <span className="sm:hidden">{isMastered ? 'OK' : 'LISTO'}</span>
           </button>
         </div>
       </div>

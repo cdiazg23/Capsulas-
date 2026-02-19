@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts';
 import { supabase } from '../lib/supabase';
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading, signIn, signUp, resetPassword, updatePassword } = useAuth();
   const [isResetMode, setIsResetMode] = useState(false);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
@@ -13,7 +14,10 @@ const Auth: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(() => {
+    // Si venimos de la landing con mode: 'signup', abrimos registro por defecto
+    return location.state?.mode === 'signup';
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -172,7 +176,7 @@ const Auth: React.FC = () => {
                 : isResetMode
                   ? 'Te enviaremos un correo con las instrucciones para crear una nueva contraseña.'
                   : isSignUp
-                    ? 'Crea tu cuenta gratuita y empieza a dominar el código hoy mismo.'
+                    ? 'Crea tu cuenta gratuita y empieza a dominar el Derecho hoy mismo.'
                     : 'Ingresa tus credenciales para continuar con tu progreso de aprendizaje.'}
             </p>
           </div>

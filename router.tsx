@@ -17,6 +17,7 @@ import MasterClasses from './pages/MasterClasses';
 import AdminPanel from './pages/AdminPanel';
 import Contact from './pages/Contact';
 import RevisedJurisprudence from './pages/RevisedJurisprudence';
+import Terms from './pages/Terms';
 
 export const router = createBrowserRouter([
     {
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
     {
         path: '/pricing',
         element: <Pricing />
+    },
+    {
+        path: '/terms',
+        element: <Terms />
     },
     {
         path: '/app',
