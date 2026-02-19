@@ -5,27 +5,35 @@ import { supabase } from './lib/supabase';
 // Data from Supabase with safety timeout
 export const fetchLegalConcepts = async (): Promise<LegalConcept[]> => {
   try {
-    const fetchPromise = supabase
-      .from('legal_concepts')
-      .select('*')
-      .order('created_at', { ascending: true });
+    let allData: any[] = [];
+    let from = 0;
+    const step = 1000;
+    let hasMore = true;
 
-    // Timeout after 45 seconds to match auth timeout
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Fetch timeout')), 45000)
-    );
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('legal_concepts')
+        .select('*')
+        .order('created_at', { ascending: true })
+        .range(from, from + step - 1);
 
-    const result = await Promise.race([fetchPromise, timeoutPromise]) as any;
-    const { data, error } = result;
+      if (error) throw error;
 
-    if (error) throw error;
+      if (data && data.length > 0) {
+        allData = [...allData, ...data];
+        from += step;
+        if (data.length < step) hasMore = false;
+      } else {
+        hasMore = false;
+      }
+    }
 
-    if (!data || data.length === 0) {
+    if (allData.length === 0) {
       console.log('Using legacy data because Supabase returned 0 results');
       return legalConcepts;
     }
 
-    return data.map((item: any) => ({
+    return allData.map((item: any) => ({
       id: item.id || '',
       concept: item.concept || '',
       category: item.category || '',
