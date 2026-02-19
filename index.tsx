@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, StatsProvider, ThemeProvider, ConceptsProvider } from './contexts';
 import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
@@ -19,7 +20,9 @@ root.render(
         <AuthProvider>
           <StatsProvider>
             <ConceptsProvider>
-              <RouterProvider router={router} />
+              <HelmetProvider>
+                <RouterProvider router={router} />
+              </HelmetProvider>
             </ConceptsProvider>
           </StatsProvider>
         </AuthProvider>

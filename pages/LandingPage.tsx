@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
-const LandingPage: React.FC<{ onStart?: () => void; onLogin?: () => void; onViewPricing?: () => void }> = ({ onStart, onLogin, onViewPricing }) => {
+const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
 
