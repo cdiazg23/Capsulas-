@@ -155,8 +155,18 @@ const AdminPanel: React.FC = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const rows = bulkText.trim().split('\n');
-      if (rows.length === 0) return;
+      const rawRows = bulkText.trim().split('\n');
+      if (rawRows.length === 0) return;
+
+      // Deduplicación semántica inicial dentro del mismo lote
+      const seenInBatch = new Set();
+      const rows = rawRows.filter(row => {
+        const [name, , sub] = row.split(';').map(s => s?.trim().toLowerCase());
+        const key = `${name}|${sub}`;
+        if (seenInBatch.has(key)) return false;
+        seenInBatch.add(key);
+        return true;
+      });
 
       const conceptsToSave = await Promise.all(rows.map(async row => {
         const [conceptName, category, subcategory, definition, example, regulation, keyPointsStr] = row.split(';').map(s => s?.trim());
@@ -193,7 +203,14 @@ const AdminPanel: React.FC = () => {
         }
       }));
 
-      const finalConcepts = conceptsToSave.filter(Boolean);
+      const uniqueConceptsMap = new Map();
+      conceptsToSave.forEach(concept => {
+        if (concept) {
+          uniqueConceptsMap.set(concept.id, concept);
+        }
+      });
+
+      const finalConcepts = Array.from(uniqueConceptsMap.values());
 
       if (finalConcepts.length === 0) {
         alert('No se encontraron conceptos válidos.');
