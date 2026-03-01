@@ -30,42 +30,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
     {
       name: 'Derecho Civil',
       icon: 'book_2',
-      items: ['Teoría de la Ley', 'Acto Jurídico', 'Bienes', 'Obligaciones', 'Contratos', 'Familia', 'Responsabilidad Civil']
+      items: ['Teoría de la Ley', 'Acto Jurídico', 'Bienes', 'Obligaciones', 'Contratos', 'Responsabilidad Civil', 'Sucesorio']
     },
     {
       name: 'Derecho Comercial',
       icon: 'storefront',
-      items: ['Insolvencia']
+      items: ['Insolvencia', 'Títulos de Crédito', 'Sociedades']
     },
     {
       name: 'Derecho Penal',
       icon: 'policy',
-      items: ['Teoria del delito y la Pena', 'Formas de Aparicion del Delito', 'Penal Especial']
+      items: ['Teoría del Delito y la Pena', 'Formas de Aparición del Delito', 'Penal Especial']
     },
     {
       name: 'Derecho Procesal',
       icon: 'contract',
-      items: ['Orgánico', 'Reglas Comunes', 'Juicio Ordinario', 'Recursos']
+      items: ['Orgánico', 'Reglas Comunes', 'Juicio Ordinario', 'Recursos', 'MASC']
     },
     {
       name: 'Derecho Constitucional',
       icon: 'account_balance',
-      items: ['Orgánico', 'Derechos Fundamentales']
+      items: ['Orgánico', 'Derechos Fundamentales', 'Justicia Electoral']
+    },
+    {
+      name: 'Derecho de Familia',
+      icon: 'family_restroom',
+      items: ['General', 'Matrimonio y Uniones', 'Filiación y Patria Potestad', 'Alimentos y Pensiones', 'Protección de Menores e Incapacitados']
     },
     {
       name: 'Derecho Laboral',
       icon: 'work',
-      items: ['Individual', 'Colectivo']
+      items: ['Individual', 'Colectivo', 'Seguridad Social']
     },
     {
       name: 'Derecho Administrativo',
       icon: 'corporate_fare',
-      items: ['General']
-    },
-    {
-      name: 'Procedimientos Especiales',
-      icon: 'gavel',
-      items: ['Policía Local']
+      items: ['General', 'Sumarios', 'Responsabilidad del Estado']
     }
   ];
 

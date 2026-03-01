@@ -253,8 +253,6 @@ export const categories = [
   'Derecho Constitucional',
   'Derecho Procesal',
   'Derecho Comercial',
-  'Derecho de Familia',
-  'Derecho Tributario',
-  'Derecho Internacional'
+  'Derecho de Familia'
 ];
 
