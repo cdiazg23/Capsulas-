@@ -21,12 +21,6 @@ const Dashboard: React.FC = () => {
       return safeConcepts.filter(c => {
         const conceptCat = (c.category || '').trim().toLowerCase();
         const targetCat = catName.trim().toLowerCase();
-
-        // Match exact or flexible for Family law
-        if (targetCat === 'derecho de familia' || targetCat === 'familia') {
-          return conceptCat === 'derecho de familia' || conceptCat === 'familia' || conceptCat.includes('familia');
-        }
-
         return conceptCat === targetCat;
       }).length;
     };
@@ -35,7 +29,6 @@ const Dashboard: React.FC = () => {
       { name: 'Derecho Civil', icon: 'gavel', color: 'indigo', count: getCategoryCount('Derecho Civil') },
       { name: 'Derecho Procesal', icon: 'account_balance', color: 'blue', count: getCategoryCount('Derecho Procesal') },
       { name: 'Derecho Constitucional', icon: 'auto_stories', color: 'amber', count: getCategoryCount('Derecho Constitucional') },
-      { name: 'Derecho de Familia', icon: 'family_restroom', color: 'rose', count: getCategoryCount('Derecho de Familia') },
       { name: 'Derecho Penal', icon: 'security', color: 'emerald', count: getCategoryCount('Derecho Penal') },
       { name: 'Derecho Administrativo', icon: 'assured_workload', color: 'cyan', count: getCategoryCount('Derecho Administrativo') },
       { name: 'Derecho Laboral', icon: 'work', color: 'orange', count: getCategoryCount('Derecho Laboral') },

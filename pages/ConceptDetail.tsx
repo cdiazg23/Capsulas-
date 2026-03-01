@@ -296,10 +296,6 @@ const ConceptDetail: React.FC = () => {
               )}
             </div>
 
-            <div className="mt-8 pt-6 border-t border-white/10 relative">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Dato Clave</p>
-              <p className="text-xs text-primary font-bold">{concept.subcategory} es fundamental en {concept.category}</p>
-            </div>
           </section>
 
           <div className="bg-accent-gold/5 dark:bg-accent-gold/10 border border-accent-gold/20 dark:border-accent-gold/30 rounded-[2rem] p-8">
