@@ -177,7 +177,7 @@ const Header: React.FC = () => {
           </div>
 
           {/* Concept Limit Counter for Free Users */}
-          {user.role === 'user' && (
+          {user.role === 'user' && user.subscription_status !== 'active' && user.subscription_status !== 'trialing' && (
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
               <span className="material-symbols-outlined text-sm text-primary">visibility</span>
               <span className={`text-[10px] font-black uppercase tracking-widest ${stats.consultationsToday >= 10 ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>
