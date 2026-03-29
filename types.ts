@@ -1,5 +1,7 @@
 
-export type UserRole = 'admin' | 'founder' | 'user';
+export type UserRole = 'admin' | 'user';
+export type SubscriptionStatus = 'trialing' | 'active' | 'expired' | 'canceled';
+
 
 export interface User {
   id: string;
@@ -10,7 +12,12 @@ export interface User {
   university?: string;
   studentLevel?: string;
   avatarUrl?: string;
+  subscription_status?: SubscriptionStatus;
+  trial_ends_at?: string;
+  current_period_end?: string;
+  plan_id?: string;
 }
+
 
 export interface LegalConcept {
   id: string;
@@ -87,6 +94,10 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   role: UserRole;
+  subscription_status: SubscriptionStatus;
+  trial_ends_at: string | null;
+  current_period_end: string | null;
+  plan_id: string | null;
   level: number;
   xp: number;
   next_level_xp: number;
@@ -100,6 +111,7 @@ export interface Profile {
   created_at: string;
   updated_at: string;
 }
+
 
 export interface CommunitySubmission {
   id: string;

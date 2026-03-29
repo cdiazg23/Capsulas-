@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts';
+import { useNavigate } from 'react-router-dom';
+
 
 interface Comment {
     id: string;
@@ -42,7 +44,9 @@ const forbiddenKeywords = ['insulto1', 'ofensa2', 'basura', 'spam'];
 
 const CommunitySpace: React.FC = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [messages, setMessages] = useState<Feedback[]>([]);
+
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [newContent, setNewContent] = useState('');
@@ -128,13 +132,14 @@ const CommunitySpace: React.FC = () => {
         }
     };
 
-    const isAuthorized = user?.role === 'founder' || user?.role === 'admin';
+    const isAuthorized = user?.role === 'admin' || user?.subscription_status === 'active' || user?.subscription_status === 'trialing';
+
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!isAuthorized) {
-            alert('Solo los Socios Fundadores y Administradores pueden publicar mensajes.');
+            alert('Solo los usuarios con un plan activo o en prueba gratuita pueden publicar mensajes.');
             return;
         }
 
@@ -209,8 +214,9 @@ const CommunitySpace: React.FC = () => {
                     </div>
                     <div>
                         <h1 className="text-3xl font-black dark:text-white tracking-tight">Espacio de la Comunidad</h1>
-                        <p className="text-sm text-slate-500 font-medium">Solo para Socios Fundadores y Administradores</p>
+                        <p className="text-sm text-slate-500 font-medium">Disponible para usuarios con prueba activa o plan vigente</p>
                     </div>
+
                 </div>
 
                 <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 p-4 rounded-2xl max-w-sm">
@@ -288,12 +294,19 @@ const CommunitySpace: React.FC = () => {
             ) : (
                 <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-slate-700 text-center mb-12">
                     <span className="material-symbols-outlined text-4xl text-primary/40 mb-3">lock</span>
-                    <h3 className="text-lg font-bold dark:text-white mb-2">Función Exclusiva</h3>
+                    <h3 className="text-lg font-bold dark:text-white mb-2">Función Full</h3>
                     <p className="text-sm text-slate-500 dark:text-gray-400 max-w-sm mx-auto leading-relaxed">
-                        Este espacio de interacción está habilitado únicamente para nuestros <strong>Socios Fundadores</strong> como beneficio por su apoyo inicial.
+                        Este espacio de interacción está habilitado únicamente para usuarios con una <strong>membresía activa</strong> o durante tu periodo de prueba de 3 días.
                     </p>
+                    <button 
+                        onClick={() => navigate('/pricing')}
+                        className="mt-6 text-xs font-black uppercase tracking-widest text-primary hover:underline"
+                    >
+                        Ver planes disponibles
+                    </button>
                 </div>
             )}
+
 
             {/* Listado de Mensajes con Filtros */}
             <div className="space-y-6">
@@ -348,9 +361,10 @@ const CommunitySpace: React.FC = () => {
                                         <div className="flex items-center gap-2">
                                             <p className="text-sm font-black dark:text-white">{msg.profiles?.full_name || 'Usuario'}</p>
                                             <span className={`text-[8px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest ${msg.profiles?.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-primary/10 text-primary'}`}>
-                                                {msg.profiles?.role}
+                                                {msg.profiles?.role === 'admin' ? 'Admin' : 'Miembro'}
                                             </span>
                                         </div>
+
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                                             {msg.city ? `${msg.city}, ` : ''}{msg.country} • {new Date(msg.created_at).toLocaleDateString()}
                                         </p>
@@ -387,9 +401,10 @@ const CommunitySpace: React.FC = () => {
                                                     <div className="flex items-center gap-2 mb-1">
                                                         <span className="text-xs font-black dark:text-white leading-none">{comment.profiles?.full_name}</span>
                                                         <span className={`text-[7px] px-1 py-0.5 rounded uppercase font-black tracking-widest ${comment.profiles?.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-primary/10 text-primary'}`}>
-                                                            {comment.profiles?.role}
+                                                            {comment.profiles?.role === 'admin' ? 'Admin' : 'Miembro'}
                                                         </span>
                                                         <span className="text-[9px] text-slate-400 ml-auto">{new Date(comment.created_at).toLocaleDateString()}</span>
+
                                                     </div>
                                                     <p className="text-xs text-slate-600 dark:text-slate-300 leading-normal">
                                                         {comment.content}

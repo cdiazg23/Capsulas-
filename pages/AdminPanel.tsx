@@ -429,10 +429,10 @@ const AdminPanel: React.FC = () => {
           )}
 
           {activeTab === 'users' && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 rounded-xl">
-              <span className="material-symbols-outlined text-amber-500 text-sm">info</span>
-              <p className="text-[10px] text-amber-700 dark:text-amber-400 font-bold">
-                Para donadores de Ko-fi, busca el usuario y asígnale el rol "FOUNDER" manualmente.
+            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-xl">
+              <span className="material-symbols-outlined text-blue-500 text-sm">info</span>
+              <p className="text-[10px] text-blue-700 dark:text-blue-400 font-bold">
+                Gestión de usuarios y niveles de acceso. Los permisos Premium dependen del 'subscription_status'.
               </p>
             </div>
           )}
@@ -557,8 +557,9 @@ const AdminPanel: React.FC = () => {
               <thead className="bg-gray-50 dark:bg-slate-800/50 border-b dark:border-slate-800">
                 <tr>
                   <th className="p-4 text-[10px] font-black uppercase text-gray-400">Usuario</th>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Rol Actual</th>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right">Asignar Rol</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Estado Suscripción</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Rol</th>
+                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
@@ -569,14 +570,22 @@ const AdminPanel: React.FC = () => {
                       <p className="text-[10px] text-gray-400">{p.full_name || 'ID: ' + p.id.substring(0, 8)}</p>
                     </td>
                     <td className="p-4">
-                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${p.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : p.role === 'founder' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'}`}>
+                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
+                        p.subscription_status === 'active' ? 'bg-emerald-100 text-emerald-700' : 
+                        p.subscription_status === 'trialing' ? 'bg-blue-100 text-blue-700' : 
+                        'bg-gray-100 text-gray-500'
+                      }`}>
+                        {p.subscription_status || 'Sin plan'}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${p.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'}`}>
                         {p.role}
                       </span>
                     </td>
                     <td className="p-4 text-right">
                       <div className="inline-flex rounded-lg border dark:border-slate-800 overflow-hidden text-[9px] font-bold">
                         <button onClick={() => updateUserRole(p.id, 'user')} className={`px-2 py-1.5 ${p.role === 'user' ? 'bg-gray-200 dark:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>USER</button>
-                        <button onClick={() => updateUserRole(p.id, 'founder')} className={`px-2 py-1.5 border-l dark:border-slate-800 ${p.role === 'founder' ? 'bg-primary text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>FOUNDER</button>
                         <button onClick={() => updateUserRole(p.id, 'admin')} className={`px-2 py-1.5 border-l dark:border-slate-800 ${p.role === 'admin' ? 'bg-indigo-600 text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>ADMIN</button>
                       </div>
                     </td>

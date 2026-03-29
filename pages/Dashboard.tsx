@@ -102,13 +102,16 @@ const Dashboard: React.FC = () => {
         </div>
         <div className="flex items-center gap-3 bg-white dark:bg-slate-900 px-6 py-4 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-sm">
           <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined fill-1">verified</span>
+            <span className="material-symbols-outlined fill-1">verified_user</span>
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Estado de Membresía</p>
-            <p className="text-sm font-bold dark:text-white uppercase">{user?.role === 'admin' ? 'Administrador' : user?.role === 'founder' ? 'Socio Fundador' : 'Plan Gratuito'}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tu Membresía</p>
+            <p className="text-sm font-bold dark:text-white uppercase">
+              {user?.role === 'admin' ? 'Administrador' : user?.subscription_status === 'active' ? 'Plan Activo' : user?.subscription_status === 'trialing' ? 'Prueba Gratis' : 'Plan Expirado'}
+            </p>
           </div>
         </div>
+
       </div>
 
       {/* Stats Grid */}
@@ -137,37 +140,48 @@ const Dashboard: React.FC = () => {
                   style={{ width: `${(stats.xp / stats.nextLevelXp) * 100}%` }}></div>
               </div>
             </div>
-            <p className="text-primary text-[9px] font-black uppercase tracking-[0.2em] animate-pulse">
-              Faltan {stats.nextLevelXp - stats.xp} XP para el siguiente grado
+            <p className="text-primary text-[9px] font-black uppercase tracking-[0.2em]">
+              Sigue estudiando para subir de rango
             </p>
           </div>
         </div>
 
-        <div className="p-8 bg-slate-900 dark:bg-slate-900 rounded-[2rem] border border-slate-800 shadow-2xl flex flex-col justify-between group hover:scale-[1.02] transition-all overflow-hidden relative">
+
+        <div className="p-8 bg-slate-900 dark:bg-slate-900 rounded-[2rem] border border-slate-800 shadow-2xl flex flex-col justify-between group hover:scale-[1.02] transition-all overflow-hidden relative" onClick={() => navigate('/app/billing')}>
           <div className="absolute -top-10 -right-10 size-40 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-colors"></div>
           <div className="relative z-10 h-full flex flex-col justify-between">
             <div>
-              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-4">Puntos de Prestigio</p>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-accent-gold shadow-inner">
-                  <span className="material-symbols-outlined text-3xl fill-1 animate-float">generating_tokens</span>
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-4">Estado de Cuenta</p>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary shadow-inner">
+                  <span className="material-symbols-outlined text-3xl fill-1 animate-float">verified_user</span>
                 </div>
-                <p className="text-4xl font-black text-white tracking-tight">{stats.points.toLocaleString()}</p>
+                <div>
+                   <p className="text-2xl font-black text-white tracking-tight">
+                    {user?.subscription_status === 'trialing' ? 'Prueba Activa' : user?.subscription_status === 'active' ? 'Acceso Full' : 'Cuenta Expirada'}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                    {user?.subscription_status === 'trialing' ? '3 días de regalo' : 'Suscripción vigente'}
+                  </p>
+                </div>
               </div>
             </div>
             <div className="space-y-3">
-              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Insignias por Desbloquear</p>
-              <div className="flex gap-2">
-                {['cognition', 'workspace_premium', 'history_edu'].map((icon, i) => (
-                  <div key={i} className={`size-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 opacity-30 hover:opacity-100 transition-opacity cursor-help`}>
-                    <span className="material-symbols-outlined text-sm">{icon}</span>
-                  </div>
-                ))}
-                <div className="size-8 rounded-lg bg-white/5 border border-dashed border-white/10 flex items-center justify-center text-slate-600 text-[8px] font-black">+12</div>
-              </div>
+              {user?.subscription_status === 'trialing' && user?.trial_ends_at && (
+                <div className="bg-white/5 border border-white/10 p-3 rounded-xl">
+                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Tu prueba termina en</p>
+                   <p className="text-xs font-black text-white">
+                    {Math.max(0, Math.ceil((new Date(user.trial_ends_at).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} días
+                   </p>
+                </div>
+              )}
+              <button className="text-[9px] font-black uppercase tracking-widest text-primary hover:text-white transition-all">
+                Gestionar Suscripción →
+              </button>
             </div>
           </div>
         </div>
+
 
         <div className="p-8 bg-white dark:bg-slate-900 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col justify-between group hover:scale-[1.02] transition-all overflow-hidden relative">
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:rotate-12 transition-transform">
@@ -186,7 +200,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
             </div>
-            {user?.role === 'user' && (
+            {user?.role === 'user' && user?.subscription_status !== 'active' && user?.subscription_status !== 'trialing' && (
               <div className="mt-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
                 <span>Límite Diario</span>
                 <span className={stats.consultationsToday >= 10 ? 'text-red-500' : 'text-primary'}>
@@ -194,6 +208,12 @@ const Dashboard: React.FC = () => {
                 </span>
               </div>
             )}
+            {user?.subscription_status === 'trialing' && (
+               <div className="mt-2 text-[9px] font-black uppercase tracking-widest text-primary animate-pulse">
+                  Modo Prueba: Sin límites hoy
+               </div>
+            )}
+
           </div>
         </div>
       </div>

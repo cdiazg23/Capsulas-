@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth, useStats } from '../contexts';
+import { useNavigate } from 'react-router-dom';
+
 
 const JUDICIAL_CAREER = [
   { level: 1, name: 'Estudiante de Derecho', icon: 'auto_stories' },
@@ -15,7 +17,9 @@ const JUDICIAL_CAREER = [
 const Profile: React.FC = () => {
   const { user, updateUser } = useAuth();
   const { stats } = useStats();
+  const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<'edit' | 'ranking' | 'badges' | null>(null);
+
   const [editData, setEditData] = useState({
     name: user?.name || 'Usuario',
     university: user?.university || '',
@@ -40,8 +44,9 @@ const Profile: React.FC = () => {
     { icon: 'history_edu', color: 'orange', label: 'Escribano', desc: 'Aprende 100 conceptos', active: stats.learnedConcepts >= 100 },
     { icon: 'local_fire_department', color: 'purple', label: 'Constancia', desc: 'Racha de 7 días', active: stats.streak >= 7 },
     { icon: 'stars', color: 'emerald', label: 'Ley de Acero', desc: 'Racha de 30 días', active: stats.streak >= 30 },
-    { icon: 'military_tech', color: 'indigo', label: 'Fundador', desc: 'Socio IurisAcademy', active: user?.role === 'founder' || user?.role === 'admin' },
-  ], [stats.learnedConcepts, stats.streak, user?.role]);
+    { icon: 'military_tech', color: 'indigo', label: 'Premium', desc: 'Membresía Activa', active: user?.role === 'admin' || user?.subscription_status === 'active' || user?.subscription_status === 'trialing' },
+  ], [stats.learnedConcepts, stats.streak, user?.role, user?.subscription_status]);
+
 
   const handleSaveProfile = () => {
     if (user) {
@@ -143,8 +148,9 @@ const Profile: React.FC = () => {
             <h1 className="text-2xl md:text-4xl font-black mb-2">{user?.name || 'Invitado'}</h1>
             <div className="flex flex-col gap-1 mb-4">
               <p className="text-gray-400 font-medium">
-                {user?.role === 'admin' ? 'Administrador del Sistema' : (user?.role === 'founder' ? 'Socio Fundador' : 'Estudiante de Derecho')}
+                {user?.role === 'admin' ? 'Administrador del Sistema' : (user?.subscription_status === 'active' ? 'Plan Premium' : user?.subscription_status === 'trialing' ? 'Prueba Gratuita' : 'Estudiante de Derecho')}
               </p>
+
               {user?.university && (
                 <p className="text-primary text-sm font-bold flex items-center justify-center md:justify-start gap-1">
                   <span className="material-symbols-outlined text-sm">school</span>
@@ -159,16 +165,17 @@ const Profile: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-              {(user?.role === 'admin' || user?.role === 'founder') ? (
-                <div className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-accent-gold/20 to-amber-500/20 text-accent-gold rounded-2xl border border-accent-gold/30 shadow-lg shadow-accent-gold/10 relative overflow-hidden group">
+              {(user?.role === 'admin' || user?.subscription_status === 'active' || user?.subscription_status === 'trialing') ? (
+                <div className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary/20 to-indigo-500/20 text-primary rounded-2xl border border-primary/30 shadow-lg shadow-primary/10 relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shine transition-transform duration-1000"></div>
                   <span className="material-symbols-outlined text-xl fill-1 animate-float">
                     {user?.role === 'admin' ? 'military_tech' : 'workspace_premium'}
                   </span>
                   <span className="text-[10px] font-black uppercase tracking-[0.25em]">
-                    {user?.role === 'admin' ? 'CONSEJO SUPERIOR' : 'SOCIO FUNDADOR'}
+                    {user?.role === 'admin' ? 'CONSEJO SUPERIOR' : (user?.subscription_status === 'active' ? 'ACCESSO PREMIUM' : 'PRUEBA GRATUITA')}
                   </span>
                 </div>
+
               ) : (
                 <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
                   <span className="material-symbols-outlined text-lg fill-1 text-primary">{currentRank.icon}</span>
@@ -184,20 +191,29 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              setEditData({
-                name: user?.name || 'Usuario',
-                university: user?.university || '',
-                studentLevel: user?.studentLevel || '',
-                avatarUrl: user?.avatarUrl || 'https://picsum.photos/seed/lawyer/200/200'
-              });
-              setActiveModal('edit');
-            }}
-            className="px-8 py-3 bg-primary text-white rounded-2xl font-black text-sm shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all"
-          >
-            Editar Perfil
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => {
+                setEditData({
+                  name: user?.name || 'Usuario',
+                  university: user?.university || '',
+                  studentLevel: user?.studentLevel || '',
+                  avatarUrl: user?.avatarUrl || 'https://picsum.photos/seed/lawyer/200/200'
+                });
+                setActiveModal('edit');
+              }}
+              className="px-8 py-3 bg-primary text-white rounded-2xl font-black text-sm shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all"
+            >
+              Editar Perfil
+            </button>
+            <button
+              onClick={() => navigate('/app/billing')}
+              className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl shadow-slate-900/10 hover:bg-slate-800 transition-all"
+            >
+              Gestionar Suscripción
+            </button>
+          </div>
+
         </div>
       </div>
 

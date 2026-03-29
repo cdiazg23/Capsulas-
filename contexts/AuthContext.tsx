@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '../types';
+import { User, UserRole, SubscriptionStatus } from '../types';
+
 import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
@@ -59,24 +60,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             role: (profile.role as any) || 'user',
                             name: profile.full_name || session.user.email?.split('@')[0] || 'User',
                             email: session.user.email,
-                            avatarUrl: profile.avatar_url
+                            avatarUrl: profile.avatar_url,
+                            subscription_status: profile.subscription_status || 'trialing',
+                            trial_ends_at: profile.trial_ends_at,
+                            current_period_end: profile.current_period_end,
+                            plan_id: profile.plan_id
                         };
 
-                        console.log('✅ [Auth] Perfil sincronizado. Rol:', profile.role);
+                        console.log('✅ [Auth] Perfil sincronizado. Status:', profile.subscription_status);
                         setUser(newUser);
                         localStorage.setItem('iuris_user_cache', JSON.stringify(newUser));
                     } else {
                         console.warn('⚠️ [Auth] No se encontró perfil en DB');
-                        const fallbackUser = {
+                        const fallbackUser: User = {
                             id: session.user.id,
                             username: session.user.email?.split('@')[0] || 'User',
-                            role: 'user',
+                            role: 'user' as UserRole,
                             name: session.user.email?.split('@')[0] || 'User',
-                            email: session.user.email
+                            email: session.user.email,
+                            subscription_status: 'trialing' as SubscriptionStatus
                         };
                         setUser(fallbackUser);
                         localStorage.setItem('iuris_user_cache', JSON.stringify(fallbackUser));
                     }
+
                 } catch (err) {
                     console.error('❌ [Auth] Error sincronizando perfil:', err);
                 }

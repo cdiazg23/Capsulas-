@@ -109,8 +109,7 @@ const ConceptDetail: React.FC = () => {
     );
   }
 
-  const isFreeUser = user?.role !== 'founder' && user?.role !== 'admin';
-
+  const isAuthorized = user?.role === 'admin' || user?.subscription_status === 'active' || user?.subscription_status === 'trialing';
 
   const handleToggleMastery = async () => {
     if (!user || !id) return;
@@ -156,8 +155,8 @@ const ConceptDetail: React.FC = () => {
     const today = new Date().toDateString();
     const lastDate = stats.lastConsultationAt ? new Date(stats.lastConsultationAt).toDateString() : '';
 
-    // Only "user" role has consultation limits
-    if (user.role === 'user') {
+    // Users WITHOUT active subscription or trial have consultation limits
+    if (!isAuthorized) {
       let currentDaily = stats.consultationsToday;
 
       if (today !== lastDate) {
@@ -175,15 +174,14 @@ const ConceptDetail: React.FC = () => {
         lastConsultationAt: new Date().toISOString()
       });
     } else {
-      // Admins and Founders: Just update last activity for streak purposes
-      // No need to update consultationsToday if they are unlimited
+      // Authorized users: Just update last activity for streak purposes
       if (today !== lastDate) {
         updateStats({
           lastConsultationAt: new Date().toISOString()
         });
       }
     }
-  }, [id, user?.role]);
+  }, [id, user, isAuthorized]);
 
   return (
     <div className="max-w-4xl mx-auto pb-32 animate-in fade-in zoom-in duration-300 relative">
@@ -303,11 +301,11 @@ const ConceptDetail: React.FC = () => {
               <div className="size-10 rounded-xl bg-accent-gold/20 flex items-center justify-center text-accent-gold">
                 <span className="material-symbols-outlined text-2xl">quiz</span>
               </div>
-              <h3 className="font-black text-slate-900 dark:text-white">{isFreeUser ? 'Función Premium' : '¿Listo para el desafío?'}</h3>
+              <h3 className="font-black text-slate-900 dark:text-white">{!isAuthorized ? 'Función Premium' : '¿Listo para el desafío?'}</h3>
             </div>
-            {isFreeUser ? (
+            {!isAuthorized ? (
               <>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">Los quizzes son exclusivos para socios fundadores. ¡Apoya el proyecto para desbloquear todo tu potencial!</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">Los quizzes son exclusivos para usuarios del Plan Premium. ¡Suscríbete para desbloquear todo tu potencial!</p>
                 <div className="p-4 bg-white dark:bg-slate-950 rounded-xl border border-dashed border-accent-gold/50 text-center">
                   <span className="text-[10px] font-black text-accent-gold uppercase tracking-widest">Contenido Bloqueado</span>
                 </div>

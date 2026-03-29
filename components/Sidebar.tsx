@@ -155,42 +155,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
 
             <div className="p-2 space-y-1">
               <button
-                onClick={() => {
-                  if (user?.role === 'founder' || user?.role === 'admin') {
-                    handleNavigate('/app/community');
-                  } else {
-                    handleNavigate('/app/pricing');
-                  }
-                }}
+                onClick={() => handleNavigate('/app/community')}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/community' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900 focus:bg-primary/5 focus:text-primary'}`}
               >
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-[20px]">forum</span>
-                  <span>Espacio Fundadores</span>
+                  <span>Comunidad</span>
                 </div>
-                {user?.role !== 'founder' && user?.role !== 'admin' && (
+                {user?.role !== 'admin' && user?.subscription_status !== 'active' && user?.subscription_status !== 'trialing' && (
                   <span className="material-symbols-outlined text-xs text-amber-500">lock</span>
                 )}
               </button>
 
+
               <button
-                onClick={() => {
-                  if (user?.role === 'founder' || user?.role === 'admin') {
-                    handleNavigate('/app/masterclasses');
-                  } else {
-                    handleNavigate('/app/pricing');
-                  }
-                }}
+                onClick={() => handleNavigate('/app/masterclasses')}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/masterclasses' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900 focus:bg-indigo-50/50 focus:text-indigo-600'}`}
               >
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-[20px]">school</span>
                   <span>Aula Iuris</span>
                 </div>
-                {user?.role !== 'founder' && user?.role !== 'admin' && (
+                {user?.role !== 'admin' && user?.subscription_status !== 'active' && user?.subscription_status !== 'trialing' && (
                   <span className="material-symbols-outlined text-xs text-amber-500">lock</span>
                 )}
               </button>
+
+              <button
+                onClick={() => handleNavigate('/app/billing')}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/billing' ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' : 'text-slate-500 dark:text-slate-500 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[20px]">credit_card</span>
+                  <span>Mi Plan</span>
+                </div>
+              </button>
+
             </div>
           </div>
         </div>

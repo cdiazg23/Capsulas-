@@ -3,8 +3,8 @@ import { Outlet } from 'react-router-dom';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import MobileNav from '../components/MobileNav';
-import MarchaBlancaModal from '../components/MarchaBlancaModal';
 import { useAuth, useStats } from '../contexts';
+
 
 /**
  * Main layout wrapper for authenticated pages
@@ -16,8 +16,8 @@ const MainLayout: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col">
-            <MarchaBlancaModal />
             <Header />
+
             <div className="flex flex-1 relative">
                 <Sidebar
                     isOpen={isSidebarOpen}

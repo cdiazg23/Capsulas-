@@ -44,87 +44,73 @@ const Terms: React.FC = () => {
                         </h1>
                         <p className="text-primary font-bold uppercase tracking-widest text-sm mb-12 flex items-center gap-2">
                             <span className="size-2 bg-primary rounded-full"></span>
-                            Última actualización: Febrero de 2026
+                            Última actualización: Marzo de 2026
                         </p>
 
                         <div className="prose prose-slate dark:prose-invert max-w-none space-y-8 text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
                             <section>
                                 <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">Información General</h2>
                                 <p>
-                                    El presente sitio web <a href="https://www.iurisacademy.cl" className="text-primary font-bold hover:underline">www.iurisacademy.cl</a> (en adelante, "la Plataforma") es operado por Cápsulas de Derecho (en adelante, "IurisAcademy", "nosotros" o "nuestro"). IurisAcademy es una plataforma educacional independiente destinada a estudiantes de Derecho, egresados y todo aquel interesado en reforzar sus conocimientos jurídicos en el sistema chileno.
+                                    El presente sitio web <a href="https://www.iurisacademy.cl" className="text-primary font-bold hover:underline">www.iurisacademy.cl</a> (en adelante, "la Plataforma") es operado por Cápsulas de Derecho (en adelante, "IurisAcademy", "nosotros" o "nuestro"). IurisAcademy es una plataforma SaaS educacional destinada a estudiantes de Derecho y profesionales jurídicos en Chile.
                                 </p>
                                 <p>
-                                    Al visitar, registrarse o utilizar cualquier servicio de la Plataforma, el usuario ("usted", "tú") acepta íntegramente los presentes Términos y Condiciones ("T&C"). Si no está de acuerdo con alguno de estos términos, le pedimos que no utilice la Plataforma.
+                                    Al visitar, registrarse o contratar cualquier plan de la Plataforma, el usuario acepta íntegramente los presentes Términos y Condiciones ("T&C").
                                 </p>
                             </section>
 
                             <section>
                                 <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">1. Aceptación de los Términos</h2>
-                                <p>Estos T&C constituyen un acuerdo legalmente vinculante entre usted e IurisAcademy. Al acceder o utilizar la Plataforma, usted declara:</p>
-                                <ul className="list-disc pl-6 space-y-2">
-                                    <li>Tener al menos 18 años de edad, o contar con la autorización de su representante legal si es menor de edad;</li>
-                                    <li>Poseer la capacidad legal para aceptar este acuerdo;</li>
-                                    <li>Haber leído y comprendido los presentes T&C en su totalidad.</li>
-                                </ul>
-                                <p>
-                                    Cualquier nueva funcionalidad, herramienta o servicio que se agregue a la Plataforma quedará también sujeto a estos T&C. IurisAcademy se reserva el derecho de actualizar estos términos en cualquier momento, publicando la versión actualizada en esta misma página. El uso continuado de la Plataforma tras la publicación de cambios implica su aceptación.
-                                </p>
+                                <p>Estos T&C constituyen un acuerdo legalmente vinculante. Al acceder o utilizar la Plataforma, usted declara tener plena capacidad legal para contratar servicios digitales bajo la normativa chilena.</p>
                             </section>
 
                             <section>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">2. Registro y Cuentas de Usuario</h2>
-                                <p>Para acceder a los servicios de la Plataforma, usted deberá crear una cuenta personal. Al registrarse, usted se compromete a:</p>
-                                <ul className="list-disc pl-6 space-y-2">
-                                    <li>Proporcionar información verídica, completa y actualizada;</li>
-                                    <li>Mantener la confidencialidad de su contraseña y datos de acceso;</li>
-                                    <li>Notificar a IurisAcademy de inmediato ante cualquier uso no autorizado de su cuenta;</li>
-                                    <li>Ser el único responsable de toda actividad realizada desde su cuenta.</li>
-                                </ul>
-                                <p>
-                                    Queda estrictamente prohibido compartir su cuenta con terceros. La cuenta es de uso personal e intransferible. La detección de uso compartido o de múltiples accesos simultáneos desde distintos dispositivos o ubicaciones facultará a IurisAcademy para suspender o cancelar el acceso de manera inmediata y sin previo aviso.
-                                </p>
+                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">2. Registro y Cuentas</h2>
+                                <p>El acceso es personal e intransferible. Queda prohibido compartir credenciales. La detección de accesos simultáneos anómalos facultará la suspensión de la cuenta sin derecho a reembolso.</p>
                             </section>
 
                             <section>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">3. Descripción de los Servicios</h2>
-                                <p>IurisAcademy ofrece los siguientes servicios a través de la Plataforma:</p>
+                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">3. Descripción de los Servicios Premium</h2>
+                                <p>IurisAcademy ofrece planes de suscripción que incluyen:</p>
                                 <ul className="list-disc pl-6 space-y-4">
-                                    <li><strong>Glosario Jurídico Gratuito:</strong> Acceso a más de 1.000 conceptos jurídicos organizados por rama del Derecho, con definiciones, ejemplos prácticos y normativa chilena.</li>
-                                    <li><strong>Flashcards de Estudio:</strong> Sistema de tarjetas interactivas para memorización de conceptos legales.</li>
-                                    <li><strong>Gamificación:</strong> Sistema de niveles, XP, puntos de prestigio y rachas de estudio.</li>
-                                    <li><strong>Aula Iuris:</strong> Clases en formato video (masterclasses) para usuarios Fundadores.</li>
+                                    <li><strong>Glosario Jurídico Ilimitado:</strong> Acceso total a la base de datos de conceptos con ejemplos y normativa.</li>
+                                    <li><strong>Jurisprudencia Revisada:</strong> Informes de análisis de fallos recientes de tribunales superiores.</li>
+                                    <li><strong>Quizzes Dinámicos:</strong> Herramientas de autoevaluación avanzada.</li>
+                                    <li><strong>Comunidad Pro:</strong> Espacio de interacción y consultas entre usuarios activos.</li>
                                 </ul>
-                                <p>
-                                    Los servicios están disponibles exclusivamente en línea. No se permite la descarga, grabación ni reproducción de contenidos en ningún formato ajeno a la Plataforma.
-                                </p>
                             </section>
 
                             <section>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">4. Plan Fundador y Donaciones</h2>
-                                <p>IurisAcademy opera como un proyecto educativo independiente financiado voluntariamente por su comunidad a través de Ko-fi. Las donaciones:</p>
+                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">4. Suscripciones y Facturación</h2>
+                                <p>La Plataforma opera bajo un modelo de suscripción prepagada con tres modalidades:</p>
                                 <ul className="list-disc pl-6 space-y-2">
-                                    <li>No constituyen una compraventa ni contrato de suscripción bajo el Código Civil;</li>
-                                    <li>Son contribuciones voluntarias para cubrir costos operativos;</li>
-                                    <li>No generan derecho a reembolso.</li>
+                                    <li><strong>Plan Trimestral:</strong> Acceso por 3 meses (24.900 CLP).</li>
+                                    <li><strong>Plan Semestral:</strong> Acceso por 6 meses (49.900 CLP).</li>
+                                    <li><strong>Plan Anual:</strong> Acceso por 12 meses (90.000 CLP).</li>
                                 </ul>
+                                <p className="mt-4">
+                                    <strong>Prueba Gratuita:</strong> Los nuevos usuarios acceden a una prueba gratuita de 3 días con acceso total. Tras finalizar, el acceso será restringido hasta la contratación de un plan pagado.
+                                </p>
+                                <p>
+                                    Los pagos se procesan a través de pasarelas externas seguras. IurisAcademy no almacena información de tarjetas de crédito o débito.
+                                </p>
                             </section>
 
                             <section>
                                 <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">5. Propiedad Intelectual</h2>
                                 <p>
-                                    Todo el contenido disponible en la Plataforma es de propiedad de IurisAcademy / Cápsulas de Derecho. Queda estrictamente prohibido reproducir, copiar, vender o extraer masivamente datos (scraping) de la Plataforma.
+                                    Todo el contenido es propiedad intelectual protegida. El scraping o extracción masiva de datos está estrictamente prohibido y será perseguido legalmente bajo la Ley N° 17.336.
                                 </p>
+                            </section>
+
+                            <section>
+                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">6. Limitación de Responsabilidad</h2>
                                 <p>
-                                    El uso del contenido se otorga como licencia personal, no exclusiva, intransferible y revocable, exclusivamente para fines de estudio individual. Cualquier infracción facultará a IurisAcademy para ejercer las acciones legales correspondientes bajo la Ley N° 17.336.
+                                    El contenido es pedagógico y no constituye asesoría legal ni garantiza aprobación en exámenes de grado o similares.
                                 </p>
                             </section>
 
                             <section>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">6. Conducta del Usuario</h2>
-                                <p>Queda prohibido utilizar la Plataforma para fines ilícitos, transmitir malware, intentar accesos no autorizados o manipular el sistema de gamificación.</p>
-                            </section>
 
-                            <section>
                                 <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">7. Limitación Pedagógica</h2>
                                 <p>
                                     <strong>IMPORTANTE:</strong> El contenido tiene finalidad exclusivamente educativa. No constituye asesoría jurídica ni reemplaza la consulta a un abogado habilitado. IurisAcademy no garantiza éxito en exámenes o evaluaciones.

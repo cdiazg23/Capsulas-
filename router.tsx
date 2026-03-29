@@ -18,6 +18,9 @@ import AdminPanel from './pages/AdminPanel';
 import Contact from './pages/Contact';
 import RevisedJurisprudence from './pages/RevisedJurisprudence';
 import Terms from './pages/Terms';
+import Billing from './pages/Billing';
+import PaymentStatus from './pages/PaymentStatus';
+
 
 export const router = createBrowserRouter([
     {
@@ -36,6 +39,11 @@ export const router = createBrowserRouter([
         path: '/terms',
         element: <Terms />
     },
+    {
+        path: '/payment-status',
+        element: <PaymentStatus />
+    },
+
     {
         path: '/app',
         element: (
@@ -89,21 +97,18 @@ export const router = createBrowserRouter([
                 element: <Contact />
             },
             {
+                path: 'billing',
+                element: <Billing />
+            },
+            {
                 path: 'community',
-                element: (
-                    <ProtectedRoute role="founder">
-                        <CommunitySpace />
-                    </ProtectedRoute>
-                )
+                element: <CommunitySpace />
             },
             {
                 path: 'revised-jurisprudence',
-                element: (
-                    <ProtectedRoute role="founder">
-                        <RevisedJurisprudence />
-                    </ProtectedRoute>
-                )
+                element: <RevisedJurisprudence />
             },
+
             {
                 path: 'admin',
                 element: (

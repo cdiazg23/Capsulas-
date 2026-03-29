@@ -40,11 +40,12 @@ const LandingPage: React.FC = () => {
 
             <div className="hidden md:flex items-center gap-8">
               <button onClick={() => navigate('/pricing')} className="text-sm font-bold text-slate-600 hover:text-primary transition-colors flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg text-accent-gold">favorite</span>
-                Apoyar Proyecto
+                <span className="material-symbols-outlined text-lg text-primary">credit_card</span>
+                Ver Planes
               </button>
               <a href="#comunidad" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">Comunidad</a>
             </div>
+
 
             <div className="flex items-center gap-3">
               <button onClick={() => navigate('/login')} className="hidden sm:block text-sm font-bold text-slate-700 hover:bg-slate-100 px-5 py-2.5 rounded-xl transition-all">
@@ -74,12 +75,13 @@ const LandingPage: React.FC = () => {
                   </span>
                   <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
                     <span className="size-1.5 bg-primary rounded-full"></span>
-                    Educación Legal Independiente
+                    Academia Legal 2.0
                   </span>
                   <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
                     <span className="size-1.5 bg-emerald-500 rounded-full"></span>
                     IA Hecha por Abogados para Estudiantes
                   </span>
+
                 </div>
               ))}
             </div>
@@ -91,32 +93,34 @@ const LandingPage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-gold/5 border border-accent-gold/10 mb-8">
-                  <span className="material-symbols-outlined text-sm text-accent-gold">volunteer_activism</span>
-                  <span className="text-[12px] font-bold text-accent-gold uppercase tracking-wider">Proyecto 100% Independiente</span>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 mb-8">
+                  <span className="material-symbols-outlined text-sm text-primary">verified</span>
+                  <span className="text-[12px] font-bold text-primary uppercase tracking-wider">Acceso Premium Ilimitado</span>
                 </div>
 
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.05] mb-8">
-                  Aprende Derecho <br />
-                  <span className="text-primary italic">Impulsado por ti</span>
+                  Prueba IurisAcademy <br />
+                  <span className="text-primary italic">Gratis por 3 días</span>
                 </h1>
 
                 <p className="text-xl text-slate-600 leading-relaxed mb-10 max-w-xl">
-                  IurisAcademy no es una gran corporación. Somos una comunidad. Tu apoyo nos permite mantener los servidores, mejorar nuestra IA y mantener la educación legal accesible para todos.
+                  Accede sin límites a materias, biblioteca, flashcards, aula y comunidad en una sola plataforma diseñada para dominar el Derecho.
                 </p>
+
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
                   <button
                     onClick={() => navigate('/login', { state: { mode: 'signup' } })}
                     className="group relative bg-primary text-white px-10 py-5 rounded-[2rem] text-lg font-black shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-all overflow-hidden"
                   >
-                    Empezar a Estudiar
+                    Activar Prueba Gratis
                   </button>
                   <button onClick={() => navigate('/pricing')} className="w-full sm:w-auto flex items-center justify-center gap-3 border-2 border-slate-200 px-10 py-5 rounded-2xl text-lg font-bold text-slate-700 hover:bg-slate-50 transition-all group">
-                    <span className="material-symbols-outlined text-accent-gold group-hover:scale-125 transition-transform">favorite</span>
-                    Apoyar Proyecto
+                    <span className="material-symbols-outlined text-primary group-hover:scale-125 transition-transform">credit_card</span>
+                    Ver Planes
                   </button>
                 </div>
+
 
                 <div className="flex items-center gap-6 p-4 bg-white/60 rounded-2xl border border-white max-w-max">
                   <div className="flex -space-x-3">
@@ -125,10 +129,11 @@ const LandingPage: React.FC = () => {
                     ))}
                   </div >
                   <div>
-                    <p className="text-sm font-bold text-slate-900">Impulsado por la comunidad</p>
-                    <p className="text-xs text-slate-500">Sé parte de los socios fundadores</p>
+                    <p className="text-sm font-bold text-slate-900">100% de los módulos abiertos</p>
+                    <p className="text-xs text-slate-500">Únete a cientos de estudiantes premium</p>
                   </div>
                 </div >
+
               </div >
 
               <div className="relative">
@@ -146,8 +151,9 @@ const LandingPage: React.FC = () => {
                         <span className="material-symbols-outlined text-xl">chat</span>
                       </div>
                       <p className="text-xs font-medium text-slate-700 leading-tight">
-                        "Gracias por el aporte de hoy, ¡hemos subido 50 conceptos más!"
+                        "El Glosario me salvó en el examen de Civil, ¡lo recomiendo 100%!"
                       </p>
+
                     </div>
                   </div>
                 </div>
@@ -301,50 +307,52 @@ const LandingPage: React.FC = () => {
                 </div>
 
                 {/* Tooltip Overlay */}
-                <div className="absolute -bottom-6 -left-6 bg-accent-gold text-white p-4 rounded-3xl shadow-xl animate-float">
-                  <p className="text-xs font-black uppercase tracking-widest">¡Beta Lanzada!</p>
-                  <p className="text-[10px] font-medium opacity-80">Únete a la fase de marcha blanca</p>
+                <div className="absolute -bottom-6 -left-6 bg-primary text-white p-4 rounded-3xl shadow-xl animate-float">
+                  <p className="text-xs font-black uppercase tracking-widest">Acceso Inmediato</p>
+                  <p className="text-[10px] font-medium opacity-80">3 días de prueba full sin compromiso</p>
                 </div>
+
               </div>
             </div>
           </div>
         </section>
 
-        {/* Sección de Propósito */}
+        {/* Sección de Beneficios Detallada */}
         < section className="py-24 bg-slate-900 text-white relative overflow-hidden" >
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
             <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary rounded-full blur-[120px]"></div>
           </div>
 
           <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-            <h2 className="text-accent-gold font-bold uppercase tracking-[0.2em] text-sm mb-6">Nuestro Compromiso</h2>
-            <h3 className="text-4xl md:text-5xl font-black mb-16">Transparencia y Crecimiento</h3>
+            <h2 className="text-primary font-bold uppercase tracking-[0.2em] text-sm mb-6">Experiencia de Estudio Completa</h2>
+            <h3 className="text-4xl md:text-5xl font-black mb-16">Todo lo que necesitas en un solo lugar</h3>
 
             <div className="grid md:grid-cols-3 gap-12">
               <div>
                 <div className="text-primary text-5xl mb-6 flex justify-center">
-                  <span className="material-symbols-outlined text-6xl">storage</span>
+                  <span className="material-symbols-outlined text-6xl">library_books</span>
                 </div>
-                <h4 className="text-xl font-bold mb-4">Servidores e IA</h4>
-                <p className="text-slate-400 leading-relaxed">Las donaciones cubren los costos operativos de mantener nuestra IA inteligente y rápida 24/7.</p>
+                <h4 className="text-xl font-bold mb-4">Módulos Jurídicos</h4>
+                <p className="text-slate-400 leading-relaxed">Taxonomía jurídica ordenada por materias: Civil, Procesal, Constitucional y más.</p>
               </div>
               <div>
                 <div className="text-primary text-5xl mb-6 flex justify-center">
-                  <span className="material-symbols-outlined text-6xl">school</span>
+                  <span className="material-symbols-outlined text-6xl">style</span>
                 </div>
-                <h4 className="text-xl font-bold mb-4">Contenido Gratuito</h4>
-                <p className="text-slate-400 leading-relaxed">Tu apoyo permite que miles de estudiantes accedan al glosario jurídico sin costo.</p>
+                <h4 className="text-xl font-bold mb-4">Flashcards IA</h4>
+                <p className="text-slate-400 leading-relaxed">Memoriza conceptos clave con nuestro sistema de repetición espaciada inteligente.</p>
               </div>
               <div>
                 <div className="text-primary text-5xl mb-6 flex justify-center">
-                  <span className="material-symbols-outlined text-6xl">update</span>
+                  <span className="material-symbols-outlined text-6xl">forum</span>
                 </div>
-                <h4 className="text-xl font-bold mb-4">Escalabilidad</h4>
-                <p className="text-slate-400 leading-relaxed">Cada café en Ko-fi se traduce en nuevas funcionalidades para preparar tu grado.</p>
+                <h4 className="text-xl font-bold mb-4">Comunidad Exclusiva</h4>
+                <p className="text-slate-400 leading-relaxed">Resuelve dudas y conecta con otros estudiantes en un entorno académico moderado.</p>
               </div>
             </div>
           </div>
         </section >
+
 
         {/* CTA TikTok / Comunidad */}
         < section id="comunidad" className="py-32 bg-white" >
@@ -374,14 +382,15 @@ const LandingPage: React.FC = () => {
               </div>
               <div className="order-1 lg:order-2">
                 <h2 className="text-primary font-bold uppercase tracking-[0.2em] text-sm mb-4">Únete a la Revolución</h2>
-                <h3 className="text-4xl md:text-5xl font-black text-slate-900 mb-8">De TikTok a tu Escritorio</h3>
+                <h3 className="text-4xl md:text-5xl font-black text-slate-900 mb-8">De TikTok a tu Grado</h3>
                 <p className="text-xl text-slate-600 leading-relaxed mb-10">
-                  Lo que empezó como cápsulas informativas hoy es una plataforma completa. Al donar, no solo pagas un servidor; estás validando que la educación legal puede ser diferente.
+                  Lo que empezó como cápsulas informativas hoy es una plataforma completa. Únete a la comunidad líder en preparación jurídica en Chile.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <a href="https://ko-fi.com/capsulasdederecho" target="_blank" className="bg-[#13c3ff] text-white px-8 py-4 rounded-2xl font-bold text-center shadow-lg shadow-blue-200">Visitar mi Ko-fi</a>
-                  <button onClick={() => navigate('/login')} className="text-slate-900 px-8 py-4 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all text-center">Registrarme Gratis</button>
+                  <button onClick={() => navigate('/login', { state: { mode: 'signup' } })} className="bg-primary text-white px-8 py-4 rounded-2xl font-bold text-center shadow-lg shadow-primary/20 hover:scale-105 transition-all">Empezar Prueba Gratis</button>
+                  <button onClick={() => navigate('/login')} className="text-slate-900 px-8 py-4 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all text-center">Acceso Miembros</button>
                 </div>
+
               </div>
             </div>
           </div>
@@ -395,8 +404,9 @@ const LandingPage: React.FC = () => {
               <span className="text-2xl font-black text-slate-900 tracking-tighter">IurisAcademy</span>
             </div>
             <p className="text-slate-500 text-sm max-w-lg mx-auto mb-8">
-              Un proyecto creado con ❤️ para la comunidad de derecho en Chile y Latinoamérica.
+              La plataforma definitiva para el estudio del Derecho en Chile.
             </p>
+
             <div className="flex justify-center gap-6 text-slate-400 mb-8 font-bold text-xs uppercase tracking-widest">
               <a href="https://www.tiktok.com/@capsulasdederecho" target="_blank" className="hover:text-primary transition-colors flex items-center gap-2">
                 <span className="material-symbols-outlined text-lg">brand_awareness</span>
