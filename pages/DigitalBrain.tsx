@@ -111,11 +111,38 @@ const DigitalBrain: React.FC = () => {
 
   if (loading) return <LoadingState />;
 
+  useEffect(() => {
+    // Basic force to stabilize
+    if (graphRef.current) {
+      graphRef.current.d3Force('charge').strength(-150);
+      graphRef.current.d3Force('link').distance(80);
+    }
+  }, [dimensions]);
+
+  const testData = useMemo(() => ({
+    nodes: [
+      { id: 'root', name: 'Derecho' },
+      { id: 'civil', name: 'Derecho Civil' },
+      { id: 'proce', name: 'Derecho Procesal' }
+    ],
+    links: [
+      { source: 'root', target: 'civil' },
+      { source: 'root', target: 'proce' }
+    ]
+  }), []);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  if (loading) return <LoadingState />;
+
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] md:h-[calc(100vh-100px)]">
       <Helmet>
         <title>Cerebro Digital | Iuris Academy</title>
-        <meta name="description" content="Visualización interactiva de conceptos legales." />
       </Helmet>
 
       <div className="flex flex-col md:flex-row gap-4 mb-6 items-start md:items-center justify-between">
@@ -124,7 +151,7 @@ const DigitalBrain: React.FC = () => {
             <span className="material-symbols-outlined text-amber-500 fill-1">hub</span>
             Cerebro Digital
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Explora las interconexiones del Derecho en tiempo real.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Explora las interconexiones del Derecho.</p>
         </div>
 
         <div className="flex flex-wrap gap-2 max-w-2xl justify-end">
@@ -132,75 +159,40 @@ const DigitalBrain: React.FC = () => {
             <button
               key={tag}
               onClick={() => toggleTag(tag)}
-              className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${
+              className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                 selectedTags.includes(tag)
-                  ? 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-200'
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-amber-300'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-white dark:bg-slate-900 text-slate-600'
               }`}
             >
               {tag}
             </button>
           ))}
-          {selectedTags.length > 0 && (
-            <button 
-              onClick={() => setSelectedTags([])}
-              className="text-[10px] text-slate-400 hover:text-red-500 font-bold uppercase px-2"
-            >
-              Limpiar
-            </button>
-          )}
         </div>
       </div>
 
       <div 
         ref={containerRef}
-        className="flex-1 bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden relative min-h-[400px]"
+        className="flex-1 bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden relative"
+        style={{ minHeight: '500px' }}
       >
+        <div className="absolute top-2 left-2 z-10 text-[10px] text-slate-400">
+          W: {dimensions.width} H: {dimensions.height} Nodes: {graphData.nodes.length}
+        </div>
+        
         {dimensions.width > 0 && (
           <ForceGraph2D
             ref={graphRef}
-            graphData={graphData}
+            graphData={graphData.nodes.length > 0 ? graphData : testData}
             width={dimensions.width}
             height={dimensions.height}
             nodeLabel="name"
-            nodeColor={n => (n as any).color}
-            nodeRelSize={6}
-            linkColor={() => 'rgba(148, 163, 184, 0.3)'}
-            linkDirectionalParticles={2}
+            nodeAutoColorBy="type"
+            nodeRelSize={8}
+            linkWidth={1.5}
+            linkColor={() => 'rgba(148, 163, 184, 0.5)'}
+            linkDirectionalParticles={1}
             linkDirectionalParticleSpeed={0.005}
-            d3AlphaDecay={0.02}
-            d3VelocityDecay={0.3}
-            nodeCanvasObject={(node: any, ctx, globalScale) => {
-              const label = node.name;
-              const fontSize = 14 / globalScale;
-              ctx.font = `${fontSize}px Inter, sans-serif`;
-              
-              // Draw node circle
-              ctx.beginPath();
-              ctx.arc(node.x, node.y, node.val / 2, 0, 2 * Math.PI, false);
-              ctx.fillStyle = node.color;
-              ctx.fill();
-
-              // Border for root
-              if (node.type === 'root') {
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2 / globalScale;
-                ctx.stroke();
-              }
-
-              // Text label
-              if (globalScale > 1.2 || node.type !== 'concept') {
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = node.type === 'root' ? '#b45309' : (node.type === 'category' ? '#1e40af' : '#475569');
-                ctx.fillText(label, node.x, node.y + (node.val + 2));
-              }
-            }}
-            onNodeClick={(node: any) => {
-              if (node.data) {
-                window.open(`/app/concept/${node.data.id}`, '_blank');
-              }
-            }}
           />
         )}
 
