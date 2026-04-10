@@ -453,7 +453,7 @@ const DigitalBrain: React.FC = () => {
       </Helmet>
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row gap-4 mb-4 items-start md:items-center justify-between shrink-0">
+      <div className="flex items-center gap-3 mb-4 shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <span className="material-symbols-outlined text-amber-500 fill-1">hub</span>
@@ -463,39 +463,17 @@ const DigitalBrain: React.FC = () => {
             Explora las interconexiones del Derecho · {filteredConcepts.length} conceptos
           </p>
         </div>
-
-        {/* Tag filters */}
-        <div className="flex flex-wrap gap-1.5 max-w-3xl justify-end">
-          {allSubcategories.map(tag => (
-            <button
-              key={tag}
-              onClick={() => toggleTag(tag)}
-              className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${
-                selectedTags.includes(tag)
-                  ? 'bg-amber-500 border-amber-500 text-white shadow-md shadow-amber-200/50'
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-amber-300 hover:text-amber-600'
-              }`}
-            >
-              {tag}
-            </button>
-          ))}
-          {selectedTags.length > 0 && (
-            <button
-              onClick={() => setSelectedTags([])}
-              className="text-[10px] text-red-400 hover:text-red-600 font-bold uppercase px-2 transition-colors"
-            >
-              ✕ Limpiar
-            </button>
-          )}
-        </div>
       </div>
 
-      {/* Graph Canvas */}
-      <div
-        ref={containerRef}
-        className="flex-1 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden relative bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950"
-        style={{ minHeight: '400px' }}
-      >
+      {/* Main content: Canvas + Sidebar */}
+      <div className="flex-1 flex gap-4 min-h-0">
+        {/* Graph Canvas */}
+        <div
+          ref={containerRef}
+          className="flex-1 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden relative bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950"
+          style={{ minHeight: '400px' }}
+        >
+
         <canvas
           ref={canvasRef}
           style={{ width: canvasSize.w, height: canvasSize.h, display: 'block', cursor: 'grab' }}
@@ -543,9 +521,46 @@ const DigitalBrain: React.FC = () => {
         <div className="absolute top-4 left-4 p-2.5 bg-indigo-50/80 dark:bg-indigo-950/30 backdrop-blur-sm rounded-lg border border-indigo-100/60 dark:border-indigo-900/40 pointer-events-none">
           <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Arrastra nodos · Scroll = Zoom · Click = Definición</p>
         </div>
+        </div>
+
+        {/* Right Sidebar - Tag Filters */}
+        <div className="w-52 shrink-0 hidden md:flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="material-symbols-outlined text-amber-500 text-[18px]">filter_list</span>
+              <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Filtros</h3>
+            </div>
+            {selectedTags.length > 0 && (
+              <button
+                onClick={() => setSelectedTags([])}
+                className="text-[10px] text-red-400 hover:text-red-600 font-bold uppercase transition-colors flex items-center gap-1 mt-1"
+              >
+                <span className="material-symbols-outlined text-[12px]">close</span>
+                Limpiar ({selectedTags.length})
+              </button>
+            )}
+          </div>
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1.5">
+            {allSubcategories.map(tag => (
+              <button
+                key={tag}
+                onClick={() => toggleTag(tag)}
+                className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-semibold transition-all ${
+                  selectedTags.includes(tag)
+                    ? 'bg-amber-500 text-white shadow-md shadow-amber-200/30'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-amber-600'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${selectedTags.includes(tag) ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600'}`}></span>
+                  {tag}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Concept Popup Modal */}
       {selectedConcept && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
