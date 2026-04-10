@@ -57,25 +57,27 @@ const DigitalBrain: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
         setDimensions({
-          width: containerRef.current.clientWidth,
-          height: containerRef.current.clientHeight
+          width: entry.contentRect.width,
+          height: entry.contentRect.height
         });
       }
-    };
+    });
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
   }, []);
 
   const graphData = useMemo(() => {
+    // Base nodes that should ALWAYS appear
     const nodes: Node[] = [
-      { id: 'root', name: 'Derecho', val: 20, color: '#f59e0b', type: 'root' },
-      { id: 'cat-civil', name: 'Derecho Civil', val: 15, color: '#3b82f6', type: 'category' },
-      { id: 'cat-procesal', name: 'Derecho Procesal', val: 15, color: '#10b981', type: 'category' }
+      { id: 'root', name: 'Derecho', val: 24, color: '#f59e0b', type: 'root' },
+      { id: 'cat-civil', name: 'Derecho Civil', val: 18, color: '#3b82f6', type: 'category' },
+      { id: 'cat-procesal', name: 'Derecho Procesal', val: 18, color: '#10b981', type: 'category' }
     ];
 
     const links: Link[] = [
@@ -83,12 +85,13 @@ const DigitalBrain: React.FC = () => {
       { source: 'root', target: 'cat-procesal' }
     ];
 
+    // Add concepts
     filteredConcepts.forEach(concept => {
       const categoryId = concept.category === 'Derecho Civil' ? 'cat-civil' : 'cat-procesal';
       nodes.push({
         id: concept.id,
         name: concept.concept,
-        val: 8,
+        val: 10,
         color: concept.category === 'Derecho Civil' ? '#93c5fd' : '#a7f3d0',
         type: 'concept',
         data: concept
@@ -96,6 +99,7 @@ const DigitalBrain: React.FC = () => {
       links.push({ source: categoryId, target: concept.id });
     });
 
+    console.log('Graph Data:', { nodes: nodes.length, links: links.length });
     return { nodes, links };
   }, [filteredConcepts]);
 
@@ -150,7 +154,7 @@ const DigitalBrain: React.FC = () => {
 
       <div 
         ref={containerRef}
-        className="flex-1 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden relative"
+        className="flex-1 bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden relative min-h-[400px]"
       >
         {dimensions.width > 0 && (
           <ForceGraph2D
@@ -159,27 +163,33 @@ const DigitalBrain: React.FC = () => {
             width={dimensions.width}
             height={dimensions.height}
             nodeLabel="name"
-            nodeColor={(n: any) => n.color}
+            nodeColor={n => (n as any).color}
             nodeRelSize={6}
-            linkColor={() => 'rgba(148, 163, 184, 0.2)'}
+            linkColor={() => 'rgba(148, 163, 184, 0.3)'}
             linkDirectionalParticles={2}
-            linkDirectionalParticleSpeed={d => 0.005}
+            linkDirectionalParticleSpeed={0.005}
+            d3AlphaDecay={0.02}
+            d3VelocityDecay={0.3}
             nodeCanvasObject={(node: any, ctx, globalScale) => {
               const label = node.name;
-              const fontSize = 12 / globalScale;
+              const fontSize = 14 / globalScale;
               ctx.font = `${fontSize}px Inter, sans-serif`;
-              const textWidth = ctx.measureText(label).width;
-              const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2);
-
-              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              
+              // Draw node circle
               ctx.beginPath();
-              // Node dot
               ctx.arc(node.x, node.y, node.val / 2, 0, 2 * Math.PI, false);
               ctx.fillStyle = node.color;
               ctx.fill();
 
-              // Node text label
-              if (globalScale > 1.5 || node.type !== 'concept') {
+              // Border for root
+              if (node.type === 'root') {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2 / globalScale;
+                ctx.stroke();
+              }
+
+              // Text label
+              if (globalScale > 1.2 || node.type !== 'concept') {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = node.type === 'root' ? '#b45309' : (node.type === 'category' ? '#1e40af' : '#475569');
