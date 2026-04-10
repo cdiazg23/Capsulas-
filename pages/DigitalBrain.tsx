@@ -57,6 +57,7 @@ const DigitalBrain: React.FC = () => {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [selectedConcept, setSelectedConcept] = useState<LegalConcept | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -426,7 +427,7 @@ const DigitalBrain: React.FC = () => {
   const handleClick = useCallback((e: React.MouseEvent) => {
     const node = getNodeAt(e.clientX, e.clientY);
     if (node?.data) {
-      window.open(`/app/concept/${node.data.id}`, '_blank');
+      setSelectedConcept(node.data);
     }
   }, [getNodeAt]);
 
@@ -540,9 +541,112 @@ const DigitalBrain: React.FC = () => {
 
         {/* Hint */}
         <div className="absolute top-4 left-4 p-2.5 bg-indigo-50/80 dark:bg-indigo-950/30 backdrop-blur-sm rounded-lg border border-indigo-100/60 dark:border-indigo-900/40 pointer-events-none">
-          <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Arrastra nodos · Scroll = Zoom · Click = Detalle</p>
+          <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Arrastra nodos · Scroll = Zoom · Click = Definición</p>
         </div>
       </div>
+
+      {/* Concept Popup Modal */}
+      {selectedConcept && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onClick={() => setSelectedConcept(null)}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in" />
+
+          {/* Modal Card */}
+          <div
+            className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg max-h-[80vh] overflow-hidden animate-fade-in"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                      selectedConcept.category === 'Derecho Civil'
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                        : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                    }`}>
+                      {selectedConcept.category}
+                    </span>
+                    <span className="text-[9px] text-slate-400 font-medium">{selectedConcept.subcategory}</span>
+                  </div>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">{selectedConcept.concept}</h2>
+                </div>
+                <button
+                  onClick={() => setSelectedConcept(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+                >
+                  <span className="material-symbols-outlined text-xl">close</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-5 overflow-y-auto max-h-[60vh] custom-scrollbar space-y-4">
+              {/* Definition */}
+              <div>
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Definición</h3>
+                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{selectedConcept.definitionSimple}</p>
+              </div>
+
+              {/* Example */}
+              {selectedConcept.realExample && (
+                <div>
+                  <h3 className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-2">Ejemplo</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed bg-amber-50/50 dark:bg-amber-950/20 p-3 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                    {selectedConcept.realExample}
+                  </p>
+                </div>
+              )}
+
+              {/* Regulation */}
+              {selectedConcept.regulation && (
+                <div>
+                  <h3 className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-2">Regulación</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{selectedConcept.regulation}</p>
+                </div>
+              )}
+
+              {/* Key Points */}
+              {selectedConcept.keyPoints && selectedConcept.keyPoints.length > 0 && (
+                <div>
+                  <h3 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">Puntos Clave</h3>
+                  <ul className="space-y-1.5">
+                    {selectedConcept.keyPoints.map((point, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+                        <span className="text-emerald-500 mt-0.5">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <a
+                href={`/app/concept/${selectedConcept.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-sm">open_in_new</span>
+                Ver detalle completo
+              </a>
+              <button
+                onClick={() => setSelectedConcept(null)}
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
