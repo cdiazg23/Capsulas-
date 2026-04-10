@@ -20,6 +20,7 @@ import RevisedJurisprudence from './pages/RevisedJurisprudence';
 import Terms from './pages/Terms';
 import Billing from './pages/Billing';
 import PaymentStatus from './pages/PaymentStatus';
+import DigitalBrain from './pages/DigitalBrain';
 
 
 export const router = createBrowserRouter([
@@ -114,6 +115,14 @@ export const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute role="admin">
                         <AdminPanel />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: 'digital-brain',
+                element: (
+                    <ProtectedRoute role="admin">
+                        <DigitalBrain />
                     </ProtectedRoute>
                 )
             }

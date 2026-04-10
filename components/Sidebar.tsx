@@ -191,6 +191,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
                 </div>
               </button>
 
+              {user?.role === 'admin' && (
+                <button
+                  onClick={() => handleNavigate('/app/digital-brain')}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/digital-brain' ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900 focus:bg-amber-50/50 focus:text-amber-600'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[20px]">hub</span>
+                    <span>Cerebro Digital</span>
+                  </div>
+                  <span className="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Beta</span>
+                </button>
+              )}
+
             </div>
           </div>
         </div>
