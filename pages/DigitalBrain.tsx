@@ -72,8 +72,15 @@ const DigitalBrain: React.FC = () => {
     return () => resizeObserver.disconnect();
   }, []);
 
+  useEffect(() => {
+    // Force stabilization
+    if (graphRef.current) {
+      graphRef.current.d3Force('charge').strength(-150);
+      graphRef.current.d3Force('link').distance(100);
+    }
+  }, [dimensions, loading]);
+
   const graphData = useMemo(() => {
-    // Base nodes that should ALWAYS appear
     const nodes: Node[] = [
       { id: 'root', name: 'Derecho', val: 24, color: '#f59e0b', type: 'root' },
       { id: 'cat-civil', name: 'Derecho Civil', val: 18, color: '#3b82f6', type: 'category' },
@@ -85,7 +92,6 @@ const DigitalBrain: React.FC = () => {
       { source: 'root', target: 'cat-procesal' }
     ];
 
-    // Add concepts
     filteredConcepts.forEach(concept => {
       const categoryId = concept.category === 'Derecho Civil' ? 'cat-civil' : 'cat-procesal';
       nodes.push({
@@ -99,37 +105,20 @@ const DigitalBrain: React.FC = () => {
       links.push({ source: categoryId, target: concept.id });
     });
 
-    console.log('Graph Data:', { nodes: nodes.length, links: links.length });
     return { nodes, links };
   }, [filteredConcepts]);
 
-  const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-    );
-  };
-
-  if (loading) return <LoadingState />;
-
-  useEffect(() => {
-    // Basic force to stabilize
-    if (graphRef.current) {
-      graphRef.current.d3Force('charge').strength(-150);
-      graphRef.current.d3Force('link').distance(80);
-    }
-  }, [dimensions]);
-
-  const testData = useMemo(() => ({
+  const testData = {
     nodes: [
       { id: 'root', name: 'Derecho' },
-      { id: 'civil', name: 'Derecho Civil' },
-      { id: 'proce', name: 'Derecho Procesal' }
+      { id: 'cat-civil', name: 'Derecho Civil' },
+      { id: 'cat-procesal', name: 'Derecho Procesal' }
     ],
     links: [
-      { source: 'root', target: 'civil' },
-      { source: 'root', target: 'proce' }
+      { source: 'root', target: 'cat-civil' },
+      { source: 'root', target: 'cat-procesal' }
     ]
-  }), []);
+  };
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => 
@@ -159,15 +148,23 @@ const DigitalBrain: React.FC = () => {
             <button
               key={tag}
               onClick={() => toggleTag(tag)}
-              className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+              className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all ${
                 selectedTags.includes(tag)
-                  ? 'bg-amber-500 text-white'
-                  : 'bg-white dark:bg-slate-900 text-slate-600'
+                  ? 'bg-amber-500 text-white shadow-lg'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'
               }`}
             >
               {tag}
             </button>
           ))}
+          {selectedTags.length > 0 && (
+            <button 
+              onClick={() => setSelectedTags([])}
+              className="text-[10px] text-slate-400 font-bold uppercase hover:text-red-500 ml-2"
+            >
+              Limpiar
+            </button>
+          )}
         </div>
       </div>
 
@@ -176,32 +173,32 @@ const DigitalBrain: React.FC = () => {
         className="flex-1 bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden relative"
         style={{ minHeight: '500px' }}
       >
-        <div className="absolute top-2 left-2 z-10 text-[10px] text-slate-400">
-          W: {dimensions.width} H: {dimensions.height} Nodes: {graphData.nodes.length}
-        </div>
-        
         {dimensions.width > 0 && (
           <ForceGraph2D
             ref={graphRef}
-            graphData={graphData.nodes.length > 0 ? graphData : testData}
+            graphData={graphData.nodes.length > 3 ? graphData : testData}
             width={dimensions.width}
             height={dimensions.height}
             nodeLabel="name"
-            nodeAutoColorBy="type"
             nodeRelSize={8}
-            linkWidth={1.5}
-            linkColor={() => 'rgba(148, 163, 184, 0.5)'}
+            nodeAutoColorBy="type"
             linkDirectionalParticles={1}
             linkDirectionalParticleSpeed={0.005}
+            linkColor={() => 'rgba(148, 163, 184, 0.4)'}
+            onNodeClick={(node: any) => {
+              if (node.data?.id) {
+                window.open(`/app/concept/${node.data.id}`, '_blank');
+              }
+            }}
           />
         )}
 
         {/* Legend */}
-        <div className="absolute bottom-6 left-6 flex flex-col gap-2 p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-xl pointer-events-none">
+        <div className="absolute bottom-6 left-6 flex flex-col gap-2 p-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-xl pointer-events-none">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Leyenda</p>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-            <span className="text-xs text-slate-700 dark:text-slate-300">Núcleo (Derecho)</span>
+            <span className="text-xs text-slate-700 dark:text-slate-300">Núcleo</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500"></div>
@@ -213,12 +210,9 @@ const DigitalBrain: React.FC = () => {
           </div>
         </div>
 
-        {/* Help Tip */}
-        <div className="absolute top-6 right-6 p-4 bg-primary/10 dark:bg-primary/20 backdrop-blur-md rounded-2xl border border-primary/20 shadow-sm pointer-events-none">
-          <div className="flex items-center gap-2 text-primary">
-            <span className="material-symbols-outlined text-sm">info</span>
-            <span className="text-[10px] font-bold uppercase">Arrastra para explorar · Scroll para zoom</span>
-          </div>
+        {/* Debug (invisible but present) */}
+        <div className="absolute top-2 left-2 opacity-0">
+          State: {graphData.nodes.length} nodes
         </div>
       </div>
     </div>
