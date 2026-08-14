@@ -396,33 +396,177 @@ const LandingPage: React.FC = () => {
           </div>
         </section >
 
-        {/* Footer */}
-        < footer className="bg-slate-50 py-16 border-t border-slate-100" >
-          <div className="max-w-7xl mx-auto px-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-8">
-              <span className="material-symbols-outlined text-primary text-3xl">balance</span>
-              <span className="text-2xl font-black text-slate-900 tracking-tighter">IurisAcademy</span>
+        {/* Ecosistema Legal Seis */}
+        <section className="py-20 bg-slate-900 text-white border-t border-slate-800">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <span className="text-primary text-xs font-black uppercase tracking-[0.3em] block mb-3">Suite LegalTech Chile</span>
+              <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">El Ecosistema Legal Seis</h2>
+              <p className="text-slate-400 text-base leading-relaxed">
+                Herramientas creadas por <strong className="text-white">Carlos Díaz</strong> y diseñadas con la máxima rigurosidad jurídica para optimizar la consulta normativa y el estudio del Derecho.
+              </p>
             </div>
-            <p className="text-slate-500 text-sm max-w-lg mx-auto mb-8">
-              La plataforma definitiva para el estudio del Derecho en Chile.
-            </p>
 
-            <div className="flex justify-center gap-6 text-slate-400 mb-8 font-bold text-xs uppercase tracking-widest">
-              <a href="https://www.tiktok.com/@capsulasdederecho" target="_blank" className="hover:text-primary transition-colors flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg">brand_awareness</span>
-                TikTok
-              </a>
-              <button onClick={() => navigate('/terms')} className="hover:text-primary transition-colors">
-                Términos y Condiciones
-              </button>
-            </div>
-            <div className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">
-              © 2026 Capsulas de Derecho. Todos los derechos reservados.
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="bg-slate-800/60 border border-slate-700/60 rounded-3xl p-8 hover:border-primary/50 transition-all group flex flex-col justify-between">
+                <div>
+                  <div className="size-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-6">
+                    <span className="material-symbols-outlined text-2xl">menu_book</span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-white">Códigos de Chile</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                    Consulta rápida de los 9 códigos de la República de Chile con snapshots oficiales LeyChile BCN y cuadernos organizados por materia.
+                  </p>
+                </div>
+                <a
+                  href="https://www.codigosdechile.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 text-xs font-black text-amber-400 hover:text-amber-300 uppercase tracking-wider"
+                >
+                  <span>Visitar codigosdechile.com</span>
+                  <span className="material-symbols-outlined text-sm">open_in_new</span>
+                </a>
+              </div>
+
+              <div className="bg-primary/10 border-2 border-primary/40 rounded-3xl p-8 relative flex flex-col justify-between shadow-2xl shadow-primary/10">
+                <div className="absolute -top-3 right-6 bg-primary text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow">
+                  Estudio y Grado
+                </div>
+                <div>
+                  <div className="size-12 rounded-2xl bg-primary text-white flex items-center justify-center mb-6 shadow-lg shadow-primary/30">
+                    <span className="material-symbols-outlined text-2xl">school</span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-white">IurisAcademy</h3>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                    Plataforma inteligente de conceptos jurídicos, flashcards de repetición espaciada, jurisprudencia y preparación integral de examen de grado.
+                  </p>
+                </div>
+                <div className="inline-flex items-center gap-2 text-xs font-black text-primary uppercase tracking-wider">
+                  <span>Plataforma Actual</span>
+                  <span className="material-symbols-outlined text-sm">check_circle</span>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/60 border border-slate-700/60 rounded-3xl p-8 hover:border-slate-500 transition-all group flex flex-col justify-between">
+                <div>
+                  <div className="size-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-6">
+                    <span className="material-symbols-outlined text-2xl">balance</span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-white">Legal Seis</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                    Matriz de innovación tecnológica y legal dedicada a democratizar y modernizar el ejercicio y estudio del Derecho.
+                  </p>
+                </div>
+                <a
+                  href="https://www.legalseis.cl"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 text-xs font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-wider"
+                >
+                  <span>Conocer Legal Seis</span>
+                  <span className="material-symbols-outlined text-sm">open_in_new</span>
+                </a>
+              </div>
             </div>
           </div>
-        </footer >
-      </main >
-    </div >
+        </section>
+
+        {/* Footer Legal Seis */}
+        <footer className="bg-slate-950 text-slate-400 py-16 border-t border-slate-800 text-sm">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16 pb-12 border-b border-slate-800/80">
+              {/* Brand & Slogan */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="bg-primary text-white size-9 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                    <span className="material-symbols-outlined text-xl">balance</span>
+                  </div>
+                  <span className="text-xl font-black text-white tracking-tight">
+                    Iuris<span className="text-primary">Academy</span>
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Plataforma de educación e investigación jurídica integral para estudiantes y egresados de Derecho.
+                </p>
+                <div className="inline-block bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-300">
+                  Producto de <strong className="text-white">Legal Seis</strong>
+                </div>
+              </div>
+
+              {/* Dirección */}
+              <div className="space-y-3">
+                <p className="text-xs font-black uppercase tracking-widest text-white">Sede Central</p>
+                <p className="text-xs text-slate-300 font-bold leading-relaxed">
+                  Legal Seis · Edificio Amunátegui<br />
+                  <span className="text-slate-400 font-normal">Rosa Rodríguez 1375, Oficina 511<br />Santiago Centro, Chile</span>
+                </p>
+              </div>
+
+              {/* Contacto Directo */}
+              <div className="space-y-3">
+                <p className="text-xs font-black uppercase tracking-widest text-white">Contacto y Atención</p>
+                <ul className="space-y-2 text-xs">
+                  <li>
+                    <span className="text-slate-500 block text-[10px] font-bold uppercase">Teléfono</span>
+                    <a href="tel:+56224229863" className="text-slate-300 hover:text-primary transition-colors font-medium">2 2422 9863</a>
+                  </li>
+                  <li>
+                    <span className="text-slate-500 block text-[10px] font-bold uppercase">Email de Atención</span>
+                    <a href="mailto:contacto@legalseis.cl" className="text-slate-300 hover:text-primary transition-colors font-medium">contacto@legalseis.cl</a>
+                  </li>
+                  <li>
+                    <span className="text-slate-500 block text-[10px] font-bold uppercase">Sitio Institucional</span>
+                    <a href="https://www.legalseis.cl" target="_blank" rel="noreferrer" className="text-primary hover:underline font-bold inline-flex items-center gap-1">
+                      www.legalseis.cl <span className="material-symbols-outlined text-xs">open_in_new</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Ecosistema y Enlaces */}
+              <div className="space-y-3">
+                <p className="text-xs font-black uppercase tracking-widest text-white">Ecosistema & Legal</p>
+                <ul className="space-y-2 text-xs">
+                  <li>
+                    <a href="https://www.codigosdechile.com" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors flex items-center gap-1">
+                      <span>Códigos de Chile</span>
+                      <span className="material-symbols-outlined text-[10px]">open_in_new</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.tiktok.com/@capsulasdederecho" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors flex items-center gap-1">
+                      <span>Comunidad @capsulasdederecho</span>
+                      <span className="material-symbols-outlined text-[10px]">open_in_new</span>
+                    </a>
+                  </li>
+                  <li>
+                    <button onClick={() => navigate('/pricing')} className="hover:text-primary transition-colors">Planes y Precios</button>
+                  </li>
+                  <li>
+                    <button onClick={() => navigate('/terms')} className="hover:text-primary transition-colors">Términos y Condiciones</button>
+                  </li>
+                  <li>
+                    <button onClick={() => navigate('/contact')} className="hover:text-primary transition-colors">Mesa de Ayuda</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Bar */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500">
+              <p className="text-[11px] text-slate-500 max-w-xl text-center md:text-left leading-relaxed">
+                Herramienta pedagógica independiente de estudio y consulta jurídica. No reemplaza la publicación oficial ni constituye asesoría legal formal.
+              </p>
+              <div className="text-center md:text-right shrink-0">
+                <p className="font-bold text-slate-300 mb-0.5">Desarrollado por Carlos Díaz.</p>
+                <p className="text-[10px] text-slate-600">© 2026 Legal Seis. Todos los derechos reservados.</p>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </main>
+    </div>
   );
 };
 

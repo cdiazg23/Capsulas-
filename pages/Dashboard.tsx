@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useStats, useConcepts, useAuth } from '../contexts';
 import { useActivityLog } from '../hooks';
+import { getUserRank } from '../utils/ranks';
 import { LegalConcept } from '../types';
 
 const Dashboard: React.FC = () => {
@@ -14,7 +16,13 @@ const Dashboard: React.FC = () => {
   // Safety check: ensure concepts is always an array
   const safeConcepts = useMemo(() => concepts || [], [concepts]);
 
-  const conceptOfTheDay = useMemo(() => safeConcepts[0] || {} as LegalConcept, [safeConcepts]);
+  const conceptOfTheDay = useMemo(() => {
+    if (safeConcepts.length === 0) return {} as LegalConcept;
+    const now = new Date();
+    const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+    const index = Math.abs(dayOfYear) % safeConcepts.length;
+    return safeConcepts[index] || safeConcepts[0];
+  }, [safeConcepts]);
 
   const categories = useMemo(() => {
     const getCategoryCount = (catName: string) => {
@@ -37,10 +45,14 @@ const Dashboard: React.FC = () => {
   }, [safeConcepts]);
 
   const userRank = useMemo(() => {
-    if (stats.level >= 13) return { name: 'Magistrado de la Corte', color: 'text-indigo-600', bg: 'bg-indigo-50', icon: 'gavel', border: 'border-indigo-100' };
-    if (stats.level >= 8) return { name: 'Abogado de la República', color: 'text-primary', bg: 'bg-primary/5', icon: 'balance', border: 'border-primary/20' };
-    if (stats.level >= 4) return { name: 'Licenciado en Derecho', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'school', border: 'border-emerald-100' };
-    return { name: 'Estudiante de Derecho', color: 'text-slate-600', bg: 'bg-slate-50', icon: 'history_edu', border: 'border-slate-200' };
+    const rank = getUserRank(stats.level);
+    return {
+      name: rank.name,
+      icon: rank.icon,
+      color: rank.textColorClass,
+      bg: rank.bgClass,
+      border: rank.borderClass
+    };
   }, [stats.level]);
 
   const getActivityIcon = (type: string) => {
@@ -90,6 +102,11 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Helmet>
+        <title>Dashboard | IurisAcademy</title>
+        <meta name="description" content="Tu panel de estudio legal personalizado: metas diarias, conceptos aprendidos, racha de estudio y ranking." />
+      </Helmet>
+
       {/* Header info */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
         <div>

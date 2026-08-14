@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '../lib/supabase';
 import { useConcepts, useAuth } from '../contexts';
 import { useNavigate } from 'react-router-dom';
@@ -99,6 +100,11 @@ const RevisedJurisprudence: React.FC = () => {
 
     return (
         <div className="max-w-5xl mx-auto pb-20 animate-in fade-in duration-500">
+            <Helmet>
+                <title>Jurisprudencia Relevante | IurisAcademy</title>
+                <meta name="description" content="Informes y análisis de fallos relevantes y tendencias jurisprudenciales de la Corte Suprema y Cortes de Apelaciones." />
+            </Helmet>
+
             <div className="mb-10">
                 <div className="flex items-center gap-3 mb-2">
                     <div className="size-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">

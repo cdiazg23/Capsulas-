@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts';
 import { useNavigate } from 'react-router-dom';
@@ -206,7 +207,12 @@ const CommunitySpace: React.FC = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto animate-in fade-in duration-500 pb-20">
+        <div className="max-w-5xl mx-auto pb-20 animate-in fade-in duration-500">
+            <Helmet>
+                <title>Comunidad de Estudiantes de Derecho | IurisAcademy</title>
+                <meta name="description" content="Comparte inquietudes, sugerencias y experiencias de estudio con estudiantes y egresados de Derecho de toda Latinoamérica." />
+            </Helmet>
+
             <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="flex items-center gap-3">
                     <div className="size-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">

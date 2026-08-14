@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useConcepts, useStats, useAuth } from '../contexts';
 import { supabase } from '../lib/supabase';
 import Quiz from '../components/Quiz';
@@ -56,7 +57,7 @@ const ConceptDetail: React.FC = () => {
         .select('id')
         .eq('user_id', session.user.id)
         .eq('concept_id', id)
-        .single();
+        .maybeSingle();
 
       setIsSaved(!!data);
     } catch (error) {
@@ -185,6 +186,11 @@ const ConceptDetail: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto pb-32 animate-in fade-in zoom-in duration-300 relative">
+      <Helmet>
+        <title>{`${concept.concept} (${concept.category}) | IurisAcademy`}</title>
+        <meta name="description" content={concept.definitionSimple || `Definición y regulación de ${concept.concept} en Derecho Chileno.`} />
+      </Helmet>
+
       {showXPFeedback && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] pointer-events-none animate-in slide-in-from-bottom-8 fade-in duration-500">
           <div className="bg-primary text-white px-6 py-3 rounded-2xl font-black shadow-2xl flex items-center gap-3">
@@ -341,7 +347,7 @@ const ConceptDetail: React.FC = () => {
       )}
 
       {/* Floating Action Bar - Improved Layout */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-3xl lg:left-[calc(50%+144px)] transition-all z-40">
+      <div className="fixed bottom-20 lg:bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-3xl lg:left-[calc(50%+144px)] transition-all z-40">
         <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 p-3 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-between gap-4">
 
           <div className="flex items-center gap-2">

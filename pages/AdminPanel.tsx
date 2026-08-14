@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { LegalConcept, MasterClass } from '../types';
 import { categories, fetchLegalConcepts, fetchMasterClasses } from '../data';
 import { supabase } from '../lib/supabase';
@@ -320,6 +321,12 @@ const AdminPanel: React.FC = () => {
     else await loadData();
   };
 
+  const updateUserSubscription = async (userId: string, newStatus: string) => {
+    const { error } = await supabase.from('profiles').update({ subscription_status: newStatus }).eq('id', userId);
+    if (error) alert(error.message);
+    else await loadData();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -330,6 +337,11 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto animate-in slide-in-from-right duration-500">
+      <Helmet>
+        <title>Panel de Administración | IurisAcademy</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
         <div>
           <h1 className="text-3xl font-black tracking-tight dark:text-white">Gestión del Sistema</h1>
@@ -584,16 +596,44 @@ const AdminPanel: React.FC = () => {
                       </span>
                     </td>
                     <td className="p-4 text-right">
-                      <div className="inline-flex rounded-lg border dark:border-slate-800 overflow-hidden text-[9px] font-bold">
-                        <button onClick={() => updateUserRole(p.id, 'user')} className={`px-2 py-1.5 ${p.role === 'user' ? 'bg-gray-200 dark:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>USER</button>
-                        <button onClick={() => updateUserRole(p.id, 'admin')} className={`px-2 py-1.5 border-l dark:border-slate-800 ${p.role === 'admin' ? 'bg-indigo-600 text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>ADMIN</button>
+                      <div className="flex items-center justify-end gap-2">
+                        {/* Subscriptions */}
+                        <div className="inline-flex rounded-lg border dark:border-slate-800 overflow-hidden text-[9px] font-bold">
+                          <button 
+                            onClick={() => updateUserSubscription(p.id, 'trialing')} 
+                            className={`px-2 py-1.5 ${p.subscription_status === 'trialing' ? 'bg-blue-600 text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}
+                            title="Asignar Trial de 3 días"
+                          >
+                            TRIAL
+                          </button>
+                          <button 
+                            onClick={() => updateUserSubscription(p.id, 'active')} 
+                            className={`px-2 py-1.5 border-l dark:border-slate-800 ${p.subscription_status === 'active' ? 'bg-emerald-600 text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}
+                            title="Activar Suscripción"
+                          >
+                            ACTIVO
+                          </button>
+                          <button 
+                            onClick={() => updateUserSubscription(p.id, 'expired')} 
+                            className={`px-2 py-1.5 border-l dark:border-slate-800 ${p.subscription_status === 'expired' ? 'bg-red-600 text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}
+                            title="Expirar Suscripción"
+                          >
+                            EXPIRADO
+                          </button>
+                        </div>
+
+                        {/* Roles */}
+                        <div className="inline-flex rounded-lg border dark:border-slate-800 overflow-hidden text-[9px] font-bold">
+                          <button onClick={() => updateUserRole(p.id, 'user')} className={`px-2 py-1.5 ${p.role === 'user' ? 'bg-gray-200 dark:bg-slate-700 dark:text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>USER</button>
+                          <button onClick={() => updateUserRole(p.id, 'admin')} className={`px-2 py-1.5 border-l dark:border-slate-800 ${p.role === 'admin' ? 'bg-indigo-600 text-white' : 'hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-400'}`}>ADMIN</button>
+                        </div>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {filteredProfiles.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="p-10 text-center text-gray-400 text-xs italic">
+                    <td colSpan={4} className="p-10 text-center text-gray-400 text-xs italic">
                       No se encontraron usuarios que coincidan con la búsqueda.
                     </td>
                   </tr>

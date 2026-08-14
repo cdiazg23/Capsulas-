@@ -52,9 +52,10 @@ export const formatTimeAgo = (dateString: string): string => {
     for (const [name, secondsInInterval] of Object.entries(intervals)) {
         const interval = Math.floor(seconds / secondsInInterval);
         if (interval >= 1) {
+            const plural = name === 'mes' ? 'meses' : `${name}s`;
             return interval === 1
                 ? `Hace 1 ${name}`
-                : `Hace ${interval} ${name}s`;
+                : `Hace ${interval} ${plural}`;
         }
     }
 

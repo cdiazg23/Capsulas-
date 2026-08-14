@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { MasterClass } from '../types';
 import { fetchMasterClasses } from '../data';
 import { useAuth } from '../contexts';
 
 const MasterClasses: React.FC = () => {
+    const navigate = useNavigate();
     const [masterClasses, setMasterClasses] = useState<MasterClass[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedVideo, setSelectedVideo] = useState<MasterClass | null>(null);
@@ -19,8 +22,7 @@ const MasterClasses: React.FC = () => {
         loadVideos();
     }, []);
 
-    const isFreeUser = user?.role === 'user';
-    const isAdmin = user?.role === 'admin' || user?.role === 'founder';
+    const isAuthorized = user?.role === 'admin' || user?.role === 'founder' || user?.subscription_status === 'active' || user?.subscription_status === 'trialing';
 
 
     const getEmbedUrl = (url: string) => {
@@ -48,6 +50,11 @@ const MasterClasses: React.FC = () => {
 
     return (
         <div className="animate-in fade-in duration-700">
+            <Helmet>
+                <title>Aula Iuris - Clases Magistrales | IurisAcademy</title>
+                <meta name="description" content="Clases magistrales y cápsulas audiovisuales de alta precisión dogmática para profundizar en el estudio del Derecho." />
+            </Helmet>
+
             <div className="mb-10">
                 <div className="flex items-center gap-3 mb-2">
                     <div className="size-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
@@ -72,7 +79,7 @@ const MasterClasses: React.FC = () => {
                     {masterClasses.map((mc) => (
                         <div
                             key={mc.id}
-                            className={`group relative bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-slate-800 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 ${isFreeUser && 'opacity-75'}`}
+                            className={`group relative bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-slate-800 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 ${!isAuthorized && 'opacity-85'}`}
                         >
                             <div className="aspect-video relative overflow-hidden">
                                 <img
@@ -81,12 +88,15 @@ const MasterClasses: React.FC = () => {
                                     alt={mc.title}
                                 />
                                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                                    {isFreeUser && !isAdmin ? (
-                                        <div className="bg-white/10 backdrop-blur-xl p-4 rounded-2xl border border-white/20">
-                                            <span className="material-symbols-outlined text-white text-3xl">lock</span>
-                                        </div>
+                                    {!isAuthorized ? (
+                                        <button
+                                            onClick={() => navigate('/pricing')}
+                                            className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-4 rounded-2xl border border-white/20 text-center transition-all group-hover:scale-105"
+                                        >
+                                            <span className="material-symbols-outlined text-white text-3xl mb-1 block">lock</span>
+                                            <span className="text-[10px] text-white font-bold uppercase tracking-wider">Desbloquear</span>
+                                        </button>
                                     ) : (
-
                                         <button
                                             onClick={() => setSelectedVideo(mc)}
                                             className="size-14 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl scale-0 group-hover:scale-100 transition-transform duration-300 pointer-events-auto"
@@ -108,7 +118,7 @@ const MasterClasses: React.FC = () => {
                                         {mc.category || 'Masterclass'}
                                     </span>
 
-                                    {isFreeUser && !isAdmin && (
+                                    {!isAuthorized && (
                                         <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[9px] font-black uppercase tracking-widest">
                                             Premium
                                         </span>
@@ -126,12 +136,19 @@ const MasterClasses: React.FC = () => {
                                         </div>
                                         <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">{mc.professor || 'Iuris Academy'}</span>
                                     </div>
-                                    {(!isFreeUser || isAdmin) && (
+                                    {isAuthorized ? (
                                         <button
                                             onClick={() => setSelectedVideo(mc)}
                                             className="text-xs font-black text-primary hover:underline"
                                         >
                                             VER AHORA
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => navigate('/pricing')}
+                                            className="text-xs font-black text-amber-600 dark:text-amber-400 hover:underline"
+                                        >
+                                            OBTENER PLAN
                                         </button>
                                     )}
 

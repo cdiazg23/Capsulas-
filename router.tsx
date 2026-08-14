@@ -1,50 +1,56 @@
+import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import LoadingState from './components/LoadingState';
 
-// Pages
-import LandingPage from './pages/LandingPage';
-import Auth from './pages/Auth';
-import Dashboard from './pages/Dashboard';
-import Explorer from './pages/Explorer';
-import ConceptDetail from './pages/ConceptDetail';
-import Profile from './pages/Profile';
-import Library from './pages/Library';
-import Pricing from './pages/Pricing';
-import Flashcards from './pages/Flashcards';
-import CommunitySpace from './pages/CommunitySpace';
-import MasterClasses from './pages/MasterClasses';
-import AdminPanel from './pages/AdminPanel';
-import Contact from './pages/Contact';
-import RevisedJurisprudence from './pages/RevisedJurisprudence';
-import Terms from './pages/Terms';
-import Billing from './pages/Billing';
-import PaymentStatus from './pages/PaymentStatus';
-import DigitalBrain from './pages/DigitalBrain';
+// Lazy Loaded Pages
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const Auth = React.lazy(() => import('./pages/Auth'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Explorer = React.lazy(() => import('./pages/Explorer'));
+const ConceptDetail = React.lazy(() => import('./pages/ConceptDetail'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const Library = React.lazy(() => import('./pages/Library'));
+const Pricing = React.lazy(() => import('./pages/Pricing'));
+const Flashcards = React.lazy(() => import('./pages/Flashcards'));
+const CommunitySpace = React.lazy(() => import('./pages/CommunitySpace'));
+const MasterClasses = React.lazy(() => import('./pages/MasterClasses'));
+const AdminPanel = React.lazy(() => import('./pages/AdminPanel'));
+const Contact = React.lazy(() => import('./pages/Contact'));
+const RevisedJurisprudence = React.lazy(() => import('./pages/RevisedJurisprudence'));
+const Terms = React.lazy(() => import('./pages/Terms'));
+const Billing = React.lazy(() => import('./pages/Billing'));
+const PaymentStatus = React.lazy(() => import('./pages/PaymentStatus'));
+const DigitalBrain = React.lazy(() => import('./pages/DigitalBrain'));
 
+const withSuspense = (Component: React.ComponentType, fullScreen = false) => (
+    <Suspense fallback={<LoadingState fullScreen={fullScreen} />}>
+        <Component />
+    </Suspense>
+);
 
 export const router = createBrowserRouter([
     {
         path: '/',
-        element: <LandingPage />
+        element: withSuspense(LandingPage, true)
     },
     {
         path: '/login',
-        element: <Auth />
+        element: withSuspense(Auth, true)
     },
     {
         path: '/pricing',
-        element: <Pricing />
+        element: withSuspense(Pricing, true)
     },
     {
         path: '/terms',
-        element: <Terms />
+        element: withSuspense(Terms, true)
     },
     {
         path: '/payment-status',
-        element: <PaymentStatus />
+        element: withSuspense(PaymentStatus, true)
     },
-
     {
         path: '/app',
         element: (
@@ -59,62 +65,61 @@ export const router = createBrowserRouter([
             },
             {
                 path: 'dashboard',
-                element: <Dashboard />
+                element: withSuspense(Dashboard)
             },
             {
                 path: 'explorer',
-                element: <Explorer />
+                element: withSuspense(Explorer)
             },
             {
                 path: 'explorer/:category',
-                element: <Explorer />
+                element: withSuspense(Explorer)
             },
             {
                 path: 'explorer/:category/:subcategory',
-                element: <Explorer />
+                element: withSuspense(Explorer)
             },
             {
                 path: 'concept/:id',
-                element: <ConceptDetail />
+                element: withSuspense(ConceptDetail)
             },
             {
                 path: 'profile',
-                element: <Profile />
+                element: withSuspense(Profile)
             },
             {
                 path: 'library',
-                element: <Library />
+                element: withSuspense(Library)
             },
             {
                 path: 'flashcards',
-                element: <Flashcards />
+                element: withSuspense(Flashcards)
             },
             {
                 path: 'masterclasses',
-                element: <MasterClasses />
+                element: withSuspense(MasterClasses)
             },
             {
                 path: 'contact',
-                element: <Contact />
+                element: withSuspense(Contact)
             },
             {
                 path: 'billing',
-                element: <Billing />
+                element: withSuspense(Billing)
             },
             {
                 path: 'community',
-                element: <CommunitySpace />
+                element: withSuspense(CommunitySpace)
             },
             {
                 path: 'revised-jurisprudence',
-                element: <RevisedJurisprudence />
+                element: withSuspense(RevisedJurisprudence)
             },
-
             {
                 path: 'admin',
                 element: (
                     <ProtectedRoute role="admin">
-                        <AdminPanel />
+                        {withSuspense(AdminPanel)}
                     </ProtectedRoute>
                 )
             },
@@ -122,7 +127,7 @@ export const router = createBrowserRouter([
                 path: 'digital-brain',
                 element: (
                     <ProtectedRoute role="admin">
-                        <DigitalBrain />
+                        {withSuspense(DigitalBrain)}
                     </ProtectedRoute>
                 )
             }

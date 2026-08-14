@@ -3,6 +3,7 @@ import { UserStats } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import LevelUpModal from '../components/LevelUpModal';
+import { getUserRank } from '../utils/ranks';
 
 interface StatsContextType {
     stats: UserStats;
@@ -230,16 +231,6 @@ export const StatsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     );
 };
 
-const getUserRank = (level: number) => {
-    if (level >= 16) return { name: 'Ministro de la Corte Suprema', icon: 'account_balance' };
-    if (level >= 13) return { name: 'Magistrado de Corte', icon: 'gavel' };
-    if (level >= 10) return { name: 'Juez de Letras', icon: 'balance' };
-    if (level >= 8) return { name: 'Abogado de la República', icon: 'history_edu' };
-    if (level >= 6) return { name: 'Bachiller en Ciencias Jurídicas', icon: 'school' };
-    if (level >= 4) return { name: 'Licenciado en Derecho', icon: 'verified' };
-    if (level >= 2) return { name: 'Procurador', icon: 'ink_pen' };
-    return { name: 'Estudiante de Derecho', icon: 'auto_stories' };
-};
 
 export const useStats = (): StatsContextType => {
     const context = useContext(StatsContext);

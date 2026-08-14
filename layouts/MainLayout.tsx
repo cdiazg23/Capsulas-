@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import MobileNav from '../components/MobileNav';
-import { useAuth, useStats } from '../contexts';
+import IurisBot from '../components/IurisBot';
+import { useAuth, useStats, useConcepts } from '../contexts';
 
 
 /**
@@ -13,6 +14,8 @@ const MainLayout: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const { user } = useAuth();
     const { stats } = useStats();
+    const { concepts } = useConcepts();
+    const navigate = useNavigate();
 
     return (
         <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col">
@@ -29,6 +32,11 @@ const MainLayout: React.FC = () => {
                     <Outlet />
                 </main>
             </div>
+
+            <IurisBot 
+                concepts={concepts || []} 
+                onSelectConcept={(concept) => navigate(`/app/concept/${concept.id}`)} 
+            />
 
             <MobileNav onMenuClick={() => setIsSidebarOpen(true)} />
         </div>

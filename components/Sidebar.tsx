@@ -155,6 +155,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
 
             <div className="p-2 space-y-1">
               <button
+                onClick={() => handleNavigate('/app/library')}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/library' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900 focus:bg-primary/5 focus:text-primary'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[20px]">bookmark</span>
+                  <span>Mi Biblioteca</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleNavigate('/app/revised-jurisprudence')}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/revised-jurisprudence' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900 focus:bg-primary/5 focus:text-primary'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[20px]">fact_check</span>
+                  <span>Jurisprudencia</span>
+                </div>
+              </button>
+
+              <button
                 onClick={() => handleNavigate('/app/community')}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/community' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900 focus:bg-primary/5 focus:text-primary'}`}
               >
@@ -204,6 +224,37 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
                 </button>
               )}
 
+            </div>
+
+            {/* Legal Seis Ecosystem Footer */}
+            <div className="p-3 mx-2 mb-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 text-[11px]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[9px]">Ecosistema</span>
+                <span className="font-black text-primary text-[10px]">Legal Seis</span>
+              </div>
+              <div className="space-y-0.5">
+                <a
+                  href="https://www.codigosdechile.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between text-slate-600 dark:text-slate-400 hover:text-primary transition-colors py-1 px-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-800 font-semibold"
+                >
+                  <span className="truncate">Códigos de Chile</span>
+                  <span className="material-symbols-outlined text-[13px]">open_in_new</span>
+                </a>
+                <a
+                  href="https://www.legalseis.cl"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between text-slate-600 dark:text-slate-400 hover:text-primary transition-colors py-1 px-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-800 font-semibold"
+                >
+                  <span className="truncate">Legal Seis</span>
+                  <span className="material-symbols-outlined text-[13px]">open_in_new</span>
+                </a>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-slate-200/60 dark:border-slate-800 text-[9px] text-slate-400 text-center font-medium">
+                Desarrollado por Carlos Díaz
+              </div>
             </div>
           </div>
         </div>

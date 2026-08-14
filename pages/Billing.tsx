@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../contexts';
 
 const Billing: React.FC = () => {
@@ -33,6 +34,11 @@ const Billing: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+            <Helmet>
+                <title>Mi Plan y Facturación | IurisAcademy</title>
+                <meta name="description" content="Detalles de tu suscripción actual, días de prueba y gestión de planes en IurisAcademy." />
+            </Helmet>
+
             <div className="mb-10">
                 <h1 className="text-3xl font-black dark:text-white mb-2 tracking-tight">Mi Plan y Facturación</h1>
                 <p className="text-slate-500 font-medium">Gestiona tu suscripción y métodos de pago.</p>

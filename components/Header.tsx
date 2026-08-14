@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, useStats, useTheme, useConcepts } from '../contexts';
+import { getUserRank } from '../utils/ranks';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -57,10 +58,12 @@ const Header: React.FC = () => {
   }, []);
 
   const userRank = useMemo(() => {
-    if (stats.level >= 13) return { name: 'Magistrado', color: 'bg-indigo-600', icon: 'gavel' };
-    if (stats.level >= 8) return { name: 'Abogado', color: 'bg-primary', icon: 'balance' };
-    if (stats.level >= 4) return { name: 'Licenciado', color: 'bg-emerald-600', icon: 'school' };
-    return { name: 'Estudiante', color: 'bg-slate-600', icon: 'history_edu' };
+    const rank = getUserRank(stats.level);
+    return {
+      name: rank.name,
+      color: rank.colorClass,
+      icon: rank.icon
+    };
   }, [stats.level]);
 
   const xpPercentage = useMemo(() => {

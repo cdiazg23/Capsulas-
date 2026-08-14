@@ -147,7 +147,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
     const updateUser = (updates: Partial<User>) => {
-        setUser(prev => prev ? { ...prev, ...updates } : null);
+        setUser(prev => {
+            if (!prev) return null;
+            const updated = { ...prev, ...updates };
+            try {
+                localStorage.setItem('iuris_user_cache', JSON.stringify(updated));
+            } catch (e) {
+                console.warn('Error updating auth cache:', e);
+            }
+            return updated;
+        });
     };
 
     return (

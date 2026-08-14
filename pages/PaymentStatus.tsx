@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const PaymentStatus: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -55,6 +56,11 @@ const PaymentStatus: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+            <Helmet>
+                <title>Estado del Pago | IurisAcademy</title>
+                <meta name="robots" content="noindex, nofollow" />
+            </Helmet>
+
             <div className="max-w-md w-full bg-white rounded-[3rem] p-12 text-center shadow-xl shadow-slate-200/50 animate-in zoom-in-95 duration-500">
                 <div className={`size-24 ${content.bg} ${content.color} rounded-[2rem] flex items-center justify-center mx-auto mb-10`}>
                     <span className="material-symbols-outlined text-5xl fill-0">{content.icon}</span>

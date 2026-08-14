@@ -1,24 +1,17 @@
 import React, { useState, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useAuth, useStats } from '../contexts';
 import { useNavigate } from 'react-router-dom';
+import { JUDICIAL_CAREER, getUserRank } from '../utils/ranks';
+import { supabase } from '../lib/supabase';
 
-
-const JUDICIAL_CAREER = [
-  { level: 1, name: 'Estudiante de Derecho', icon: 'auto_stories' },
-  { level: 2, name: 'Procurador', icon: 'ink_pen' },
-  { level: 4, name: 'Licenciado en Derecho', icon: 'verified' },
-  { level: 6, name: 'Bachiller', icon: 'school' },
-  { level: 8, name: 'Abogado de la República', icon: 'history_edu' },
-  { level: 10, name: 'Juez de Letras', icon: 'balance' },
-  { level: 13, name: 'Magistrado de Corte', icon: 'gavel' },
-  { level: 16, name: 'Ministro Suprema', icon: 'account_balance' },
-];
 
 const Profile: React.FC = () => {
   const { user, updateUser } = useAuth();
   const { stats } = useStats();
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<'edit' | 'ranking' | 'badges' | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const [editData, setEditData] = useState({
     name: user?.name || 'Usuario',
@@ -34,9 +27,8 @@ const Profile: React.FC = () => {
   const [stream, setStream] = useState<MediaStream | null>(null);
 
   const currentRank = React.useMemo(() => {
-    const rank = [...JUDICIAL_CAREER].reverse().find(r => stats.level >= r.level);
-    return rank || JUDICIAL_CAREER[0];
-  }, [stats.level]) as typeof JUDICIAL_CAREER[number];
+    return getUserRank(stats.level);
+  }, [stats.level]);
 
   const allBadges = React.useMemo(() => [
     { icon: 'cognition', color: 'blue', label: 'Iniciado', desc: 'Aprende 10 conceptos', active: stats.learnedConcepts >= 10 },
@@ -48,8 +40,22 @@ const Profile: React.FC = () => {
   ], [stats.learnedConcepts, stats.streak, user?.role, user?.subscription_status]);
 
 
-  const handleSaveProfile = () => {
-    if (user) {
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editData.name,
+          avatar_url: editData.avatarUrl
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving profile to DB:', error);
+      }
+
       updateUser({
         ...user,
         name: editData.name,
@@ -57,8 +63,12 @@ const Profile: React.FC = () => {
         studentLevel: editData.studentLevel,
         avatarUrl: editData.avatarUrl
       });
+      setActiveModal(null);
+    } catch (err) {
+      console.error('Error in handleSaveProfile:', err);
+    } finally {
+      setSaving(false);
     }
-    setActiveModal(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,6 +123,11 @@ const Profile: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 md:space-y-10 animate-in slide-in-from-right-4 duration-500">
+      <Helmet>
+        <title>{`${user.name} - Mi Perfil | IurisAcademy`}</title>
+        <meta name="description" content="Gestiona tu perfil, carrera judicial, estadísticas de aprendizaje y logros alcanzados en IurisAcademy." />
+      </Helmet>
+
       <div className="bg-white rounded-[2rem] p-6 md:p-10 border border-gray-100 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32"></div>
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 relative z-10">
@@ -363,12 +378,26 @@ const Profile: React.FC = () => {
                 />
               </div>
               <div className="flex gap-4 pt-4">
-                <button onClick={() => setActiveModal(null)} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-sm">Cancelar</button>
+                <button 
+                  onClick={() => setActiveModal(null)} 
+                  disabled={saving}
+                  className="flex-1 py-3 bg-gray-100 dark:bg-slate-800 dark:text-slate-300 rounded-xl font-bold text-sm hover:bg-gray-200 transition-all disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
                 <button
                   onClick={handleSaveProfile}
-                  className="flex-[2] py-3 bg-primary text-white rounded-xl font-black text-sm shadow-lg shadow-primary/20"
+                  disabled={saving}
+                  className="flex-[2] py-3 bg-primary text-white rounded-xl font-black text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Guardar Cambios
+                  {saving ? (
+                    <>
+                      <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    'Guardar Cambios'
+                  )}
                 </button>
               </div>
             </div>

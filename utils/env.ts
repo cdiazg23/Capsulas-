@@ -6,7 +6,6 @@
 interface EnvConfig {
     supabaseUrl: string;
     supabaseAnonKey: string;
-    geminiApiKey?: string;
     nodeEnv: string;
 }
 
@@ -36,7 +35,6 @@ if (typeof window !== 'undefined') {
 export const env: EnvConfig = {
     supabaseUrl: import.meta.env.VITE_SUPABASE_URL || '',
     supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-    geminiApiKey: import.meta.env.VITE_GEMINI_API_KEY,
     nodeEnv: import.meta.env.MODE || 'development'
 };
 

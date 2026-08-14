@@ -45,8 +45,8 @@ export const ConceptsProvider: React.FC<{ children: ReactNode }> = ({ children }
         } catch (err) {
             console.error('❌ Error cargando conceptos:', err);
             setError(err instanceof Error ? err : new Error('Failed to fetch concepts'));
-            // Set empty array on error so app doesn't crash
-            setConcepts([]);
+            // Preserve concepts in state/cache if already available; only default to empty array if nothing exists
+            setConcepts(prev => (prev.length > 0 ? prev : []));
         } finally {
             setLoading(false);
         }

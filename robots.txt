@@ -1,3 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /app/
+Disallow: /admin
+Disallow: /payment-status
+
 Sitemap: https://www.iurisacademy.cl/sitemap.xml

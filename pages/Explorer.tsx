@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useConcepts, useStats, useAuth } from '../contexts';
 
 const Explorer: React.FC = () => {
@@ -63,6 +64,11 @@ const Explorer: React.FC = () => {
 
   return (
     <div className="animate-in fade-in duration-500">
+      <Helmet>
+        <title>{`${activeCategory} | Explorador de Conceptos - IurisAcademy`}</title>
+        <meta name="description" content={`Explora los conceptos fundamentales, jurisprudencia y normativa de ${activeCategory} en el sistema legal chileno.`} />
+      </Helmet>
+
       <nav className="flex items-center gap-2 text-sm text-gray-400 dark:text-slate-500 font-medium mb-4">
         <span className="material-symbols-outlined text-lg">home</span>
         <button onClick={() => navigate('/app/dashboard')} className="hover:text-primary">Home</button>

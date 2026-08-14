@@ -61,8 +61,10 @@ const Quiz: React.FC<QuizProps> = ({ concept, onClose, onComplete }) => {
     const handleNext = () => {
         if (selectedOption === null) return;
 
+        let newScore = score;
         if (selectedOption === quizQuestions[currentQuestionIndex].correctAnswer) {
-            setScore(s => s + 1);
+            newScore = score + 1;
+            setScore(newScore);
         }
 
         if (currentQuestionIndex < quizQuestions.length - 1) {
@@ -74,9 +76,12 @@ const Quiz: React.FC<QuizProps> = ({ concept, onClose, onComplete }) => {
     };
 
     const handleFinish = () => {
-        const totalXp = Math.round((score / quizQuestions.length) * 100);
-        if (score === quizQuestions.length) {
-            onComplete(100); // Perfect score
+        if (score === 3) {
+            onComplete(100);
+        } else if (score === 2) {
+            onComplete(60);
+        } else if (score === 1) {
+            onComplete(30);
         } else {
             onClose();
         }
@@ -161,17 +166,19 @@ const Quiz: React.FC<QuizProps> = ({ concept, onClose, onComplete }) => {
                         <p className="text-gray-500 mb-8">
                             Has acertado <span className="text-slate-900 font-bold">{score} de 3</span> preguntas sobre {concept.concept}.
                         </p>
-                        {score === 3 && (
+                        {score > 0 && (
                             <div className="bg-primary/5 p-4 rounded-2xl mb-8 flex items-center justify-center gap-2">
                                 <span className="material-symbols-outlined text-primary">emoji_events</span>
-                                <span className="text-primary font-black">+100 XP Extra</span>
+                                <span className="text-primary font-black">
+                                    +{score === 3 ? '100' : score === 2 ? '60' : '30'} XP Ganados
+                                </span>
                             </div>
                         )}
                         <button
                             onClick={handleFinish}
                             className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-slate-800 transition-all shadow-xl"
                         >
-                            {score === 3 ? 'Reclamar Recompensa' : 'Cerrar y Reintentar'}
+                            {score > 0 ? 'Reclamar Recompensa' : 'Cerrar y Reintentar'}
                         </button>
                     </div>
                 )}

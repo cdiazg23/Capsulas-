@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const Pricing: React.FC = () => {
     const navigate = useNavigate();
@@ -52,6 +53,11 @@ const Pricing: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 py-20 px-6">
+            <Helmet>
+                <title>Planes y Precios | IurisAcademy</title>
+                <meta name="description" content="Comienza tu prueba gratuita de 3 días. Planes Trimestrales, Semestrales y Anuales para dominar tu examen de grado de Derecho." />
+            </Helmet>
+
             <div className="max-w-7xl mx-auto">
                 <button
                     onClick={() => navigate(-1)}

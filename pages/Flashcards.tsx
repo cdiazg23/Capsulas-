@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { useConcepts } from '../contexts';
+import { Helmet } from 'react-helmet-async';
+import { useConcepts, useStats } from '../contexts';
 import { useMastery } from '../hooks';
 
 const Flashcards: React.FC = () => {
     const { concepts } = useConcepts();
+    const { addXP, incrementLearnedConcepts } = useStats();
 
     const safeConcepts = concepts || [];
     const categories = useMemo(() =>
@@ -18,7 +20,7 @@ const Flashcards: React.FC = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
 
-    const { masteredConceptIds } = useMastery();
+    const { masteredConceptIds, toggleMastery, isMastered } = useMastery();
 
     const studySet = useMemo(() => {
         if (selectedCategories.length === 0) return [];
@@ -157,8 +159,8 @@ const Flashcards: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Navigation */}
-                <div className="flex items-center justify-between gap-4">
+                {/* Navigation and Mastery */}
+                <div className="flex flex-wrap items-center justify-between gap-4">
                     <button
                         onClick={prevCard}
                         disabled={currentIndex === 0}
@@ -168,11 +170,26 @@ const Flashcards: React.FC = () => {
                         <span>Anterior</span>
                     </button>
 
-                    <div className="text-center hidden lg:block">
-                        <p className="text-xs text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest">
-                            {selectedCategories.slice(0, 2).join(', ')} {selectedCategories.length > 2 ? '...' : ''}
-                        </p>
-                    </div>
+                    <button
+                        onClick={async () => {
+                            const wasMastered = isMastered(currentCard.id);
+                            await toggleMastery(currentCard.id);
+                            if (!wasMastered) {
+                                addXP(50);
+                                incrementLearnedConcepts();
+                            }
+                        }}
+                        className={`flex items-center gap-2 px-6 py-3.5 rounded-2xl text-xs font-black transition-all shadow-md ${
+                            isMastered(currentCard.id)
+                                ? 'bg-emerald-500 text-white shadow-emerald-500/20'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-600'
+                        }`}
+                    >
+                        <span className="material-symbols-outlined text-base">
+                            {isMastered(currentCard.id) ? 'verified' : 'check_circle'}
+                        </span>
+                        <span>{isMastered(currentCard.id) ? 'DOMINADO' : 'MARCAR COMO DOMINADO'}</span>
+                    </button>
 
                     <button
                         onClick={nextCard}
@@ -189,6 +206,11 @@ const Flashcards: React.FC = () => {
 
     return (
         <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
+            <Helmet>
+                <title>Flashcards de Repetición Espaciada | IurisAcademy</title>
+                <meta name="description" content="Memoriza y domina instituciones y conceptos clave del Derecho chileno con nuestro sistema de flashcards inteligentes." />
+            </Helmet>
+
             <div className="mb-10">
                 <h1 className="text-4xl font-black mb-2 dark:text-white tracking-tight">Flashcards</h1>
                 <p className="text-gray-500 dark:text-slate-400 text-lg">

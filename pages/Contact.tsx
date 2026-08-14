@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts';
 import { useNavigate } from 'react-router-dom';
@@ -41,11 +42,10 @@ const Contact: React.FC = () => {
 
             if (insertError) throw insertError;
 
-            // 2. Enviar Correo via EmailJS
-            const serviceId = 'service_0as58l3';
-            const templateId = 'template_se9bvu7';
-            // Llave corregida (l minúscula en Mlbm5n)
-            const publicKey = '5OtmNP2Cco-MIbm5n';
+            // 2. Enviar Correo via EmailJS con variables de entorno
+            const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_0as58l3';
+            const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_se9bvu7';
+            const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '5OtmNP2Cco-Mlbm5n';
 
             if (serviceId && templateId && publicKey) {
                 try {
@@ -81,6 +81,11 @@ const Contact: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in duration-500 pb-20">
+            <Helmet>
+                <title>Contacto y Soporte | IurisAcademy</title>
+                <meta name="description" content="¿Tienes dudas o sugerencias? Contáctate directamente con el equipo docente y técnico de IurisAcademy." />
+            </Helmet>
+
             <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="flex items-center gap-3">
                     <div className="size-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
@@ -183,6 +188,37 @@ const Contact: React.FC = () => {
                         </div>
                     </form>
                 )}
+            </div>
+
+            {/* Corporate Info Cards Legal Seis */}
+            <div className="grid md:grid-cols-3 gap-6 mt-8">
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                    <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4">
+                        <span className="material-symbols-outlined text-xl">location_on</span>
+                    </div>
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Sede Central</h3>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">Legal Seis · Edificio Amunátegui</p>
+                    <p className="text-xs text-slate-500 mt-1">Rosa Rodríguez 1375, Of. 511<br />Santiago Centro, Chile</p>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                    <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
+                        <span className="material-symbols-outlined text-xl">call</span>
+                    </div>
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Canales Directos</h3>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">Teléfono: <a href="tel:+56224229863" className="hover:text-primary">2 2422 9863</a></p>
+                    <p className="text-xs text-slate-500 mt-1">Email: <a href="mailto:contacto@legalseis.cl" className="text-primary hover:underline">contacto@legalseis.cl</a></p>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                    <div className="size-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center mb-4">
+                        <span className="material-symbols-outlined text-xl">hub</span>
+                    </div>
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Ecosistema Legaltech</h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                        Desarrollado por <strong className="text-slate-900 dark:text-white">Carlos Díaz</strong>. Conoce también <a href="https://www.codigosdechile.com" target="_blank" rel="noreferrer" className="text-primary hover:underline font-bold">Códigos de Chile</a> y <a href="https://www.legalseis.cl" target="_blank" rel="noreferrer" className="text-primary hover:underline font-bold">Legal Seis</a>.
+                    </p>
+                </div>
             </div>
         </div>
     );

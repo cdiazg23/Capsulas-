@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../contexts';
 import { supabase } from '../lib/supabase';
 
@@ -132,6 +133,11 @@ const Auth: React.FC = () => {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
+      <Helmet>
+        <title>{isSignUp ? 'Crear Cuenta | IurisAcademy' : 'Iniciar Sesión | IurisAcademy'}</title>
+        <meta name="description" content="Accede a tu cuenta de IurisAcademy para continuar con tu preparación jurídica." />
+      </Helmet>
+
       {/* Columna Izquierda: Decorativa */}
       <div className="relative hidden lg:flex items-center justify-center overflow-hidden bg-slate-900 dark:bg-slate-950 p-20 transition-colors duration-300">
         <div className="absolute inset-0 z-0 bg-cover bg-center opacity-30 mix-blend-overlay" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1200")' }}></div>
@@ -148,16 +154,26 @@ const Auth: React.FC = () => {
             <span className="text-primary italic">nuestra comunidad</span>
           </h1>
           <p className="text-white/70 text-lg font-medium leading-relaxed border-l-4 border-primary pl-6">
-            IurisAcademy es un proyecto independiente mantenido por estudiantes y abogados. Únete para potenciar tu estudio y ayudar a que la educación legal llegue a todos.
+            IurisAcademy es una plataforma creada y desarrollada por <strong>Carlos Díaz</strong> dentro del ecosistema <strong>Legal Seis</strong> junto a la comunidad de <strong>@capsulasdederecho</strong>.
           </p>
 
-          <div className="mt-12 flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-sm">
-            <div className="size-12 bg-primary/20 rounded-xl flex items-center justify-center overflow-hidden">
-              <span className="material-symbols-outlined text-primary text-2xl">brand_awareness</span>
+          <div className="mt-10 space-y-3">
+            <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-sm">
+              <div className="size-12 bg-primary/20 rounded-xl flex items-center justify-center overflow-hidden">
+                <span className="material-symbols-outlined text-primary text-2xl">brand_awareness</span>
+              </div>
+              <div>
+                <p className="text-white font-bold text-sm">@capsulasdederecho</p>
+                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest leading-none">Comunidad Jurídica (+14k)</p>
+              </div>
             </div>
-            <div>
-              <p className="text-white font-bold text-sm">@capsulasdederecho</p>
-              <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest leading-none">Creador del Proyecto</p>
+
+            <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 text-xs text-white/60">
+              <span>Producto de <strong>Legal Seis</strong></span>
+              <a href="https://www.codigosdechile.com" target="_blank" rel="noreferrer" className="text-primary hover:underline font-bold flex items-center gap-1">
+                <span>Códigos de Chile</span>
+                <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+              </a>
             </div>
           </div>
         </div>

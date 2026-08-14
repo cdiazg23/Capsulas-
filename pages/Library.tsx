@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useConcepts, useAuth } from '../contexts';
 import { supabase } from '../lib/supabase';
 
@@ -97,6 +98,11 @@ const Library: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
+      <Helmet>
+        <title>Mi Biblioteca | IurisAcademy</title>
+        <meta name="description" content="Colección personalizada de conceptos legales guardados para consulta rápida y preparación de grado." />
+      </Helmet>
+
       <div className="mb-10">
         <h1 className="text-4xl font-black mb-2 dark:text-white">Mi Biblioteca</h1>
         <p className="text-gray-500 dark:text-slate-400">

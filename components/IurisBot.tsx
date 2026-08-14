@@ -179,10 +179,10 @@ const IurisBot: React.FC<IurisBotProps> = ({ concepts, onSelectConcept }) => {
                         ))}
                         {isTyping && (
                             <div className="flex justify-start">
-                                <div className="bg-white border border-gray-100 p-4 rounded-2xl rounded-tl-none flex gap-1">
-                                    <div className="size-1.5 bg-gray-300 rounded-full animate-bounce"></div>
-                                    <div className="size-1.5 bg-gray-300 rounded-full animate-bounce delay-100"></div>
-                                    <div className="size-1.5 bg-gray-300 rounded-full animate-bounce delay-200"></div>
+                                <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 p-4 rounded-2xl rounded-tl-none flex gap-1">
+                                    <div className="size-1.5 bg-gray-300 dark:bg-slate-500 rounded-full animate-bounce"></div>
+                                    <div className="size-1.5 bg-gray-300 dark:bg-slate-500 rounded-full animate-bounce delay-100"></div>
+                                    <div className="size-1.5 bg-gray-300 dark:bg-slate-500 rounded-full animate-bounce delay-200"></div>
                                 </div>
                             </div>
                         )}
@@ -192,19 +192,20 @@ const IurisBot: React.FC<IurisBotProps> = ({ concepts, onSelectConcept }) => {
                     {/* Input */}
                     <form
                         onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                        className="p-4 bg-white border-t border-gray-50 flex gap-2"
+                        className="p-4 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 flex gap-2"
                     >
                         <input
                             type="text"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
-                            placeholder="Pregúntame algo..."
-                            className="flex-1 bg-gray-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all"
+                            placeholder="Pregúntame algo sobre Derecho..."
+                            className="flex-1 bg-gray-50 dark:bg-slate-800 border-transparent rounded-xl text-sm focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-primary/20 dark:text-white transition-all outline-none px-4 py-2"
                         />
                         <button
                             type="submit"
                             disabled={!inputValue.trim()}
-                            className="size-10 bg-primary text-white rounded-xl flex items-center justify-center disabled:opacity-50 hover:bg-primary-dark transition-colors"
+                            className="size-10 bg-primary text-white rounded-xl flex items-center justify-center disabled:opacity-50 hover:bg-primary-dark transition-colors shrink-0"
+                            aria-label="Enviar pregunta"
                         >
                             <span className="material-symbols-outlined text-xl">send</span>
                         </button>

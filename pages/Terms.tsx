@@ -51,7 +51,10 @@ const Terms: React.FC = () => {
                             <section>
                                 <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4">Información General</h2>
                                 <p>
-                                    El presente sitio web <a href="https://www.iurisacademy.cl" className="text-primary font-bold hover:underline">www.iurisacademy.cl</a> (en adelante, "la Plataforma") es operado por Cápsulas de Derecho (en adelante, "IurisAcademy", "nosotros" o "nuestro"). IurisAcademy es una plataforma SaaS educacional destinada a estudiantes de Derecho y profesionales jurídicos en Chile.
+                                    El presente sitio web <a href="https://www.iurisacademy.cl" className="text-primary font-bold hover:underline">www.iurisacademy.cl</a> (en adelante, "la Plataforma" o "IurisAcademy") es un producto desarrollado y operado por <strong>Legal Seis</strong> (iniciativa legaltech creada por <strong>Carlos Díaz</strong>), con domicilio en Edificio Amunátegui, Rosa Rodríguez 1375, Oficina 511, Santiago Centro, Región Metropolitana, Chile.
+                                </p>
+                                <p>
+                                    IurisAcademy forma parte del ecosistema de herramientas jurídicas de Legal Seis (junto a <a href="https://www.codigosdechile.com" target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline">www.codigosdechile.com</a> y <a href="https://www.legalseis.cl" target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline">www.legalseis.cl</a>), y constituye una plataforma SaaS educacional destinada a estudiantes de Derecho, egresados y profesionales jurídicos.
                                 </p>
                                 <p>
                                     Al visitar, registrarse o contratar cualquier plan de la Plataforma, el usuario acepta íntegramente los presentes Términos y Condiciones ("T&C").
@@ -137,7 +140,15 @@ const Terms: React.FC = () => {
                                 <ul className="list-none space-y-2 font-bold text-slate-900 dark:text-white">
                                     <li className="flex items-center gap-2">
                                         <span className="material-symbols-outlined text-primary">mail</span>
-                                        contacto@iurisacademy.cl
+                                        contacto@legalseis.cl / contacto@iurisacademy.cl
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary">call</span>
+                                        2 2422 9863
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary">location_on</span>
+                                        Rosa Rodríguez 1375, Oficina 511, Santiago Centro (Edificio Amunátegui)
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <span className="material-symbols-outlined text-primary">brand_awareness</span>
@@ -148,8 +159,11 @@ const Terms: React.FC = () => {
                         </div>
 
                         <div className="mt-16 text-center border-t border-slate-100 dark:border-slate-800 pt-8">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.3em]">
-                                © 2026 Cápsulas de Derecho / IurisAcademy
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mb-1">
+                                © 2026 Legal Seis / IurisAcademy
+                            </p>
+                            <p className="text-[11px] text-slate-500 font-medium">
+                                Desarrollado por Carlos Díaz.
                             </p>
                         </div>
                     </div>
@@ -158,11 +172,12 @@ const Terms: React.FC = () => {
 
             {/* Footer Minimalista */}
             <footer className="py-12 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-                <div className="max-w-7xl mx-auto px-6 text-center">
-                    <p className="text-sm text-slate-500 mb-4">IurisAcademy - Educación Legal Chile</p>
+                <div className="max-w-7xl mx-auto px-6 text-center space-y-2">
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">IurisAcademy · Producto de Legal Seis</p>
+                    <p className="text-xs text-slate-400">Ecosistema: <a href="https://www.codigosdechile.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">Códigos de Chile</a> · <a href="https://www.legalseis.cl" target="_blank" rel="noreferrer" className="text-primary hover:underline">Legal Seis</a></p>
                     <button
                         onClick={() => navigate('/')}
-                        className="text-primary font-bold text-sm hover:underline"
+                        className="text-primary font-bold text-sm hover:underline pt-2 block mx-auto"
                     >
                         Volver al Inicio
                     </button>
