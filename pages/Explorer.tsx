@@ -66,7 +66,7 @@ const Explorer: React.FC = () => {
     <div className="animate-in fade-in duration-500">
       <Helmet>
         <title>{`${activeCategory} | Explorador de Conceptos - IurisAcademy`}</title>
-        <meta name="description" content={`Explora los conceptos fundamentales, jurisprudencia y normativa de ${activeCategory} en el sistema legal chileno.`} />
+        <meta name="description" content={`Explora los conceptos fundamentales, normativa aplicada y doctrina de ${activeCategory} en el sistema legal chileno.`} />
       </Helmet>
 
       <nav className="flex items-center gap-2 text-sm text-gray-400 dark:text-slate-500 font-medium mb-4">
@@ -79,7 +79,7 @@ const Explorer: React.FC = () => {
       <div className="mb-10">
         <h1 className="text-4xl font-black mb-2 dark:text-white">{activeCategory}</h1>
         <p className="text-gray-500 dark:text-slate-400 max-w-2xl">
-          Explora los conceptos fundamentales, la jurisprudencia y normativa aplicable en el sistema jurídico chileno.
+          Explora los conceptos fundamentales, la normativa aplicada y doctrina en el sistema jurídico chileno.
         </p>
       </div>
 

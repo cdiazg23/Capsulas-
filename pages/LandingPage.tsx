@@ -103,7 +103,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-primary/10 selection:text-primary">
       <Helmet>
         <title>IurisAcademy | Domina el Derecho para tu Examen de Grado</title>
-        <meta name="description" content="La plataforma de estudio y preparación jurídica integral en Chile. 1,154 conceptos dogmáticos, flashcards interactivas, jurisprudencia y masterclasses." />
+        <meta name="description" content="La plataforma de estudio y preparación jurídica integral en Chile. 1,154 conceptos dogmáticos, flashcards interactivas, normativa aplicada y masterclasses." />
         <meta name="keywords" content="derecho chile, examen de grado derecho, glosario juridico, flashcards derecho, codigo civil chile, cpc chile, iurisacademy" />
       </Helmet>
 
@@ -193,7 +193,7 @@ const LandingPage: React.FC = () => {
                 </h1>
 
                 <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-xl">
-                  Accede a más de <strong>1,154 conceptos dogmáticos</strong> con artículos de los Códigos de Chile, flashcards con repetición espaciada, jurisprudencia analizada y clases magistrales de examen de grado.
+                  Accede a más de <strong>1,154 conceptos dogmáticos</strong> con artículos de los Códigos de Chile, flashcards con repetición espaciada, normativa aplicada y clases magistrales de examen de grado.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 mb-10">
@@ -323,7 +323,7 @@ const LandingPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs font-black">Base Dogmática Nacional</p>
-                    <p className="text-[10px] text-slate-500">Actualizada con normativa y fallos vigentes</p>
+                    <p className="text-[10px] text-slate-500">Actualizada con normativa y doctrina vigente</p>
                   </div>
                 </div>
               </div>
@@ -618,7 +618,7 @@ const LandingPage: React.FC = () => {
                   </div>
                   <h3 className="text-xl font-bold mb-2 text-white">IurisAcademy</h3>
                   <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                    Plataforma inteligente de conceptos jurídicos, flashcards de repetición espaciada, jurisprudencia y preparación integral de examen de grado.
+                    Plataforma inteligente de conceptos jurídicos, flashcards de repetición espaciada, normativa aplicada y preparación integral de examen de grado.
                   </p>
                 </div>
                 <div className="inline-flex items-center gap-2 text-xs font-black text-primary uppercase tracking-wider">
