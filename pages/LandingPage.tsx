@@ -15,8 +15,7 @@ const HERO_CONCEPT_PREVIEWS = [
       "Consentimiento exento de vicios",
       "Título translaticio de dominio (compraventa, permuta)",
       "Entrega real o ficta de la cosa"
-    ],
-    badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"
+    ]
   },
   {
     category: "Derecho Procesal",
@@ -29,8 +28,7 @@ const HERO_CONCEPT_PREVIEWS = [
       "Efectos: suspensivo y devolutivo",
       "Plazo general: 5 días hábiles (10 días sentencias definitivas)",
       "Debe contener fundamentos de hecho y de derecho"
-    ],
-    badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+    ]
   },
   {
     category: "Derecho Constitucional",
@@ -43,8 +41,46 @@ const HERO_CONCEPT_PREVIEWS = [
       "Competencia: Corte de Apelaciones respectiva",
       "Carácter cautelar de urgencia",
       "Protege garantías del art. 19 CPR"
-    ],
-    badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+    ]
+  }
+];
+
+const PLATFORM_MODULES = [
+  {
+    icon: "library_books",
+    title: "Glosario Dogmático",
+    badge: "1,154 Conceptos",
+    description: "Definiciones jurídicas precisas, artículos del Código y ejemplos prácticos clasificados en Civil, Procesal, Constitucional y más."
+  },
+  {
+    icon: "style",
+    title: "Flashcards con Repetición",
+    badge: "Memorización Activa",
+    description: "Tarjetas interactivas de anverso y reverso con marcado de conceptos dominados y asignación de experiencia (+50 XP)."
+  },
+  {
+    icon: "gavel",
+    title: "Jurisprudencia Revisada",
+    badge: "Tribunales Superiores",
+    description: "Análisis de fallos y sentencias relevantes de la Corte Suprema y Cortes de Apelaciones vinculados a cada materia de estudio."
+  },
+  {
+    icon: "school",
+    title: "Aula Iuris",
+    badge: "Masterclasses",
+    description: "Módulos y clases magistrales en video sobre los temas dogmáticos más exigentes del examen de grado."
+  },
+  {
+    icon: "quiz",
+    title: "Quizzes de Autoevaluación",
+    badge: "Evaluación Inmediata",
+    description: "Cuestionarios interactivos de alternativas con retroalimentación instantánea para medir tu retención real."
+  },
+  {
+    icon: "bookmark",
+    title: "Mi Biblioteca Personal",
+    badge: "Tu Cuaderno",
+    description: "Guarda tus conceptos favoritos y materias prioritarias para repasarlos rápidamente antes de tus interrogaciones."
   }
 ];
 
@@ -67,8 +103,8 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-primary/10 selection:text-primary">
       <Helmet>
         <title>IurisAcademy | Domina el Derecho para tu Examen de Grado</title>
-        <meta name="description" content="La plataforma de estudio y preparación jurídica integral para estudiantes y egresados de Derecho en Chile. Glosario dogmático, flashcards interactivas y jurisprudencia." />
-        <meta name="keywords" content="derecho chile, examen de grado, glosario juridico, flashcards derecho, codigo civil chile, cpc chile" />
+        <meta name="description" content="La plataforma de estudio y preparación jurídica integral en Chile. 1,154 conceptos dogmáticos, flashcards interactivas, jurisprudencia y masterclasses." />
+        <meta name="keywords" content="derecho chile, examen de grado derecho, glosario juridico, flashcards derecho, codigo civil chile, cpc chile, iurisacademy" />
       </Helmet>
 
       {/* Navigation */}
@@ -85,6 +121,9 @@ const LandingPage: React.FC = () => {
             </div>
 
             <div className="hidden md:flex items-center gap-8">
+              <a href="#modulos" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">
+                Módulos
+              </a>
               <a href="#buscador" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">
                 Glosario
               </a>
@@ -145,7 +184,7 @@ const LandingPage: React.FC = () => {
               <div className="lg:col-span-6">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/15 mb-6">
                   <span className="material-symbols-outlined text-sm text-primary">verified</span>
-                  <span className="text-[11px] font-black text-primary uppercase tracking-wider">Preparación Integral de Grado</span>
+                  <span className="text-[11px] font-black text-primary uppercase tracking-wider">Preparación Integral para el Grado</span>
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.08] mb-6 tracking-tight">
@@ -154,7 +193,7 @@ const LandingPage: React.FC = () => {
                 </h1>
 
                 <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-xl">
-                  Accede a más de <strong>1,154 conceptos dogmáticos</strong> con respaldo legal de los Códigos de Chile, flashcards con repetición espaciada, jurisprudencia analizada y cuestionarios de autoevaluación.
+                  Accede a más de <strong>1,154 conceptos dogmáticos</strong> con artículos de los Códigos de Chile, flashcards con repetición espaciada, jurisprudencia analizada y clases magistrales de examen de grado.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 mb-10">
@@ -289,6 +328,53 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
 
+            </div>
+          </div>
+        </section>
+
+        {/* Sección de los 6 Módulos Reales de la Plataforma */}
+        <section id="modulos" className="py-24 bg-slate-900 text-white relative overflow-hidden border-t border-slate-800">
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <span className="text-primary text-xs font-black uppercase tracking-[0.3em] block mb-3">Suite de Estudio Integral</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 tracking-tight">
+                Todo lo que necesitas para tu <span className="text-primary italic">Examen de Grado</span>
+              </h2>
+              <p className="text-slate-400 text-base md:text-lg leading-relaxed">
+                Herramientas diseñadas por abogados para estructurar tu estudio, optimizar tu retención y medir tu progreso en tiempo real.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {PLATFORM_MODULES.map((mod, idx) => (
+                <div
+                  key={idx}
+                  className="bg-slate-800/60 border border-slate-700/60 p-8 rounded-3xl hover:border-primary/50 transition-all group flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <span className="material-symbols-outlined text-3xl">{mod.icon}</span>
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-700">
+                        {mod.badge}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 text-white">{mod.title}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                      {mod.description}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => navigate('/login', { state: { mode: 'signup' } })}
+                    className="text-primary hover:text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1 pt-4 border-t border-slate-700/40"
+                  >
+                    <span>Explorar en la prueba gratis</span>
+                    <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -448,48 +534,12 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Sección de Beneficios Detallada */}
-        <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-            <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary rounded-full blur-[120px]"></div>
-          </div>
-
-          <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-            <h2 className="text-primary font-bold uppercase tracking-[0.2em] text-sm mb-6">Experiencia de Estudio Completa</h2>
-            <h3 className="text-4xl md:text-5xl font-black mb-16">Todo lo que necesitas en un solo lugar</h3>
-
-            <div className="grid md:grid-cols-3 gap-12">
-              <div>
-                <div className="text-primary text-5xl mb-6 flex justify-center">
-                  <span className="material-symbols-outlined text-6xl">library_books</span>
-                </div>
-                <h4 className="text-xl font-bold mb-4">Módulos Jurídicos</h4>
-                <p className="text-slate-400 leading-relaxed">Taxonomía jurídica ordenada por materias: Civil, Procesal, Constitucional y más.</p>
-              </div>
-              <div>
-                <div className="text-primary text-5xl mb-6 flex justify-center">
-                  <span className="material-symbols-outlined text-6xl">style</span>
-                </div>
-                <h4 className="text-xl font-bold mb-4">Flashcards Interactivas</h4>
-                <p className="text-slate-400 leading-relaxed">Memoriza conceptos clave con nuestro sistema de repetición espaciada inteligente.</p>
-              </div>
-              <div>
-                <div className="text-primary text-5xl mb-6 flex justify-center">
-                  <span className="material-symbols-outlined text-6xl">forum</span>
-                </div>
-                <h4 className="text-xl font-bold mb-4">Comunidad Exclusiva</h4>
-                <p className="text-slate-400 leading-relaxed">Resuelve dudas y conecta con otros estudiantes en un entorno académico moderado.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* CTA TikTok / Comunidad */}
-        <section id="comunidad" className="py-32 bg-white">
+        <section id="comunidad" className="py-32 bg-slate-50">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div className="order-2 lg:order-1">
-                <div className="bg-slate-50 p-8 rounded-[3rem] border border-slate-100">
+                <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
                   <div className="flex items-center gap-4 mb-8">
                     <div className="size-16 bg-slate-900 rounded-full flex items-center justify-center">
                       <span className="material-symbols-outlined text-white text-3xl">brand_awareness</span>
@@ -500,7 +550,7 @@ const LandingPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-6">
-                    <div className="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm">
+                    <div className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
                       <span className="font-bold text-slate-700">Seguidores TikTok</span>
                       <span className="text-primary font-black text-xl">14.2k</span>
                     </div>

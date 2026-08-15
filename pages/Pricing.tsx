@@ -11,13 +11,14 @@ const Pricing: React.FC = () => {
             name: 'Plan Trimestral',
             price: 24900,
             interval: 'cada 3 meses',
-            description: 'Ideal para quienes quieren probar un ciclo corto de estudio.',
+            description: 'Ideal para quienes preparan un ciclo específico o semestre.',
             features: [
-                'Acceso Ilimitado a Materias',
-                'Biblioteca Digital Completa',
-                'Flashcards Inteligentes',
-                'Aula Iuris & Masterclasses',
-                'Comunidad de Estudiantes'
+                '1,154 conceptos dogmáticos con artículos del Código',
+                'Flashcards con repetición espaciada y marcado de dominio',
+                'Jurisprudencia revisada de tribunales superiores',
+                'Aula Iuris: Masterclasses en video',
+                'Quizzes interactivos y cálculo de XP',
+                'Mi Biblioteca y seguimiento de progreso'
             ],
             recommended: false
         },
@@ -26,12 +27,12 @@ const Pricing: React.FC = () => {
             name: 'Plan Semestral',
             price: 49900,
             interval: 'cada 6 meses',
-            description: 'La opción más elegida para acompañar tu semestre académico.',
+            description: 'La opción más elegida para acompañar tu semestre y grado.',
             features: [
                 'Todo lo del Plan Trimestral',
-                'Ahorro del 15% vs mensual',
-                'Soporte prioritario',
-                'Descarga de materiales'
+                'Ahorro del 15% en tu ciclo de estudio',
+                'Comunidad y debate de casos con estudiantes',
+                'Soporte preferente de estudio'
             ],
             recommended: true
         },
@@ -40,12 +41,12 @@ const Pricing: React.FC = () => {
             name: 'Plan Anual',
             price: 90000,
             interval: 'cada 12 meses',
-            description: 'Dominio total para tu examen de grado y carrera.',
+            description: 'Preparación integral definitiva para tu examen de grado.',
             features: [
                 'Todo lo del Plan Semestral',
-                'Mejor precio garantizado',
-                'Acceso a todos los nuevos módulos',
-                'Certificado de membresía'
+                'Tarifa más conveniente ($7.500/mes)',
+                'Acceso a todas las futuras actualizaciones',
+                'Preparación intensiva y soporte prioritario'
             ],
             recommended: false
         }
