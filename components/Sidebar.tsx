@@ -169,8 +169,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, stats, user, selecte
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === '/app/revised-jurisprudence' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-900 focus:bg-primary/5 focus:text-primary'}`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[20px]">fact_check</span>
-                  <span>Jurisprudencia</span>
+                  <span className="material-symbols-outlined text-[20px]">gavel</span>
+                  <span>Normativa Aplicada</span>
                 </div>
               </button>
 

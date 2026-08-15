@@ -76,7 +76,7 @@ const Terms: React.FC = () => {
                                 <p>IurisAcademy ofrece planes de suscripción que incluyen:</p>
                                 <ul className="list-disc pl-6 space-y-4">
                                     <li><strong>Glosario Jurídico Ilimitado:</strong> Acceso total a la base de datos de conceptos con ejemplos y normativa.</li>
-                                    <li><strong>Jurisprudencia Revisada:</strong> Informes de análisis de fallos recientes de tribunales superiores.</li>
+                                    <li><strong>Normativa Aplicada y Casos Reales:</strong> Artículos del Código y situaciones prácticas de aplicación directa.</li>
                                     <li><strong>Quizzes Dinámicos:</strong> Herramientas de autoevaluación avanzada.</li>
                                     <li><strong>Comunidad Pro:</strong> Espacio de interacción y consultas entre usuarios activos.</li>
                                 </ul>

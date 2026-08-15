@@ -60,9 +60,9 @@ const PLATFORM_MODULES = [
   },
   {
     icon: "gavel",
-    title: "Jurisprudencia Revisada",
-    badge: "Tribunales Superiores",
-    description: "Análisis de fallos y sentencias relevantes de la Corte Suprema y Cortes de Apelaciones vinculados a cada materia de estudio."
+    title: "Normativa Aplicada",
+    badge: "Artículos y Códigos",
+    description: "Fundamentación legal directa con artículos de los Códigos de la República y resolución de casos de aplicación real en cada materia."
   },
   {
     icon: "school",

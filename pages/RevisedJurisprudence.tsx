@@ -1,271 +1,237 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { supabase } from '../lib/supabase';
 import { useConcepts, useAuth } from '../contexts';
 import { useNavigate } from 'react-router-dom';
-import { RevisedJurisprudence as RevisedJurisprudenceType } from '../types';
-
+import { LegalConcept } from '../types';
 
 const RevisedJurisprudence: React.FC = () => {
     const { concepts } = useConcepts();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [selectedReport, setSelectedReport] = useState<RevisedJurisprudenceType | null>(null);
-    const [isSaved, setIsSaved] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedConcept, setSelectedConcept] = useState<LegalConcept | null>(null);
 
     const isAuthorized = user?.role === 'admin' || user?.subscription_status === 'active' || user?.subscription_status === 'trialing';
 
+    // Get unique categories
+    const categories = ['all', ...Array.from(new Set(concepts.map(c => c.category).filter(Boolean)))];
 
-    const filteredConcepts = concepts.filter(c =>
-        c.concept.toLowerCase().includes(searchTerm.toLowerCase())
-    ).slice(0, 5);
+    const filteredConcepts = concepts.filter(c => {
+        const matchesSearch = c.concept.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (c.regulation && c.regulation.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (c.definitionSimple && c.definitionSimple.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesCategory = selectedCategory === 'all' || c.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
 
-    const handleSelectConcept = async (conceptId: string, conceptName: string) => {
-        setLoading(true);
-        setSearchTerm('');
-        try {
-            const { data, error } = await supabase
-                .from('revised_jurisprudence')
-                .select('*')
-                .eq('concept_id', conceptId)
-                .maybeSingle();
-
-            if (error) throw error;
-
-            if (data) {
-                setSelectedReport(data);
-                checkIfSaved(data.id);
-            } else {
-                // Fallback or "Not found" state
-                setSelectedReport({
-                    id: 'temp',
-                    concept_id: conceptId,
-                    concept_name: conceptName,
-                    report: 'El informe de jurisprudencia para este concepto está siendo procesado por nuestro equipo legal. Pronto estará disponible con un análisis detallado de fallos recientes.',
-                    analysis: 'Análisis pendiente. Nuestro motor de búsqueda está recopilando las sentencias más relevantes de la Corte Suprema y Cortes de Apelaciones para este concepto específico.',
-                    created_at: new Date().toISOString()
-                });
-                setIsSaved(false);
-            }
-        } catch (error) {
-            console.error('Error fetching revised jurisprudence:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const checkIfSaved = async (reportId: string) => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data } = await supabase
-            .from('saved_revised_jurisprudence')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('report_id', reportId)
-            .maybeSingle();
-
-        setIsSaved(!!data);
-    };
-
-    const toggleSave = async () => {
-        if (!selectedReport || selectedReport.id === 'temp') return;
-
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        try {
-            if (isSaved) {
-                await supabase
-                    .from('saved_revised_jurisprudence')
-                    .delete()
-                    .eq('user_id', user.id)
-                    .eq('report_id', selectedReport.id);
-                setIsSaved(false);
-            } else {
-                await supabase
-                    .from('saved_revised_jurisprudence')
-                    .insert({
-                        user_id: user.id,
-                        report_id: selectedReport.id
-                    });
-                setIsSaved(true);
-            }
-        } catch (error) {
-            console.error('Error toggling save:', error);
-        }
-    };
+    const activeConcept = selectedConcept || (filteredConcepts.length > 0 ? filteredConcepts[0] : null);
 
     return (
-        <div className="max-w-5xl mx-auto pb-20 animate-in fade-in duration-500">
+        <div className="max-w-6xl mx-auto pb-20 animate-in fade-in duration-500">
             <Helmet>
-                <title>Jurisprudencia Relevante | IurisAcademy</title>
-                <meta name="description" content="Informes y análisis de fallos relevantes y tendencias jurisprudenciales de la Corte Suprema y Cortes de Apelaciones." />
+                <title>Normativa Aplicada y Casos Reales | IurisAcademy</title>
+                <meta name="description" content="Fundamentación legal con artículos de los Códigos de Chile y casos de aplicación real para el examen de grado." />
             </Helmet>
 
-            <div className="mb-10">
+            {/* Header */}
+            <div className="mb-8">
                 <div className="flex items-center gap-3 mb-2">
-                    <div className="size-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
-                        <span className="material-symbols-outlined text-2xl">fact_check</span>
+                    <div className="size-11 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined text-2xl">gavel</span>
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight dark:text-white uppercase italic">Jurisprudencia Pro</h1>
+                    <div>
+                        <h1 className="text-3xl font-black tracking-tight dark:text-white uppercase italic">
+                            Normativa Aplicada <span className="text-primary not-italic">& Aplicación Real</span>
+                        </h1>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                            Fundamentación con artículos de los Códigos de la República y resolución de casos prácticos para el examen de grado.
+                        </p>
+                    </div>
                 </div>
-                <p className="text-gray-500 dark:text-slate-400 font-medium">Informes detallados y análisis de aplicación exclusivos para usuarios con membresía activa.</p>
             </div>
 
             {!isAuthorized ? (
                 <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-12 md:p-20 text-center shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800">
-                    <div className="size-24 rounded-[2rem] bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center mx-auto mb-10">
-                        <span className="material-symbols-outlined text-5xl fill-0">lock</span>
+                    <div className="size-20 rounded-3xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center mx-auto mb-8">
+                        <span className="material-symbols-outlined text-4xl">lock</span>
                     </div>
-                    <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">Acceso Exclusivo</h2>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-12 max-w-lg mx-auto">
-                        La Jurisprudencia Revisada es una herramienta avanzada para profundizar en la aplicación práctica de los conceptos. 
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Módulo Premium de Estudio</h2>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-8 max-w-lg mx-auto">
+                        La sección de Normativa Aplicada y Casos Reales te permite estudiar cada concepto con sus artículos legales y situaciones de la vida real.
                         Requiere una suscripción activa o encontrarte en tu periodo de prueba de 3 días.
                     </p>
                     <button
                         onClick={() => navigate('/pricing')}
-                        className="px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-lg hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
+                        className="px-8 py-4 bg-primary text-white rounded-2xl font-black text-base hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
                     >
                         Ver Planes de Acceso
                     </button>
                 </div>
             ) : (
-                <>
-                    <div className="relative mb-12">
-                        <div className="relative group">
-                            <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-amber-500 transition-colors">search</span>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Panel Izquierdo: Buscador y Lista de Conceptos */}
+                    <div className="lg:col-span-5 space-y-4">
+                        <div className="relative">
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
                             <input
                                 type="text"
-                                placeholder="Busca un concepto para ver su informe de jurisprudencia..."
-                                className="w-full pl-14 pr-6 py-5 bg-white dark:bg-slate-900 border-2 border-transparent focus:border-amber-500/30 rounded-[2rem] shadow-xl shadow-gray-200/50 dark:shadow-none text-lg font-bold dark:text-white transition-all outline-none"
+                                placeholder="Buscar por artículo o concepto..."
+                                className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-semibold dark:text-white outline-none focus:border-primary transition-all"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
 
-                        {searchTerm && (
-                            <div className="absolute top-full left-0 right-0 mt-3 p-4 bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-slate-800 z-50 animate-in slide-in-from-top-4 duration-300">
-                                <div className="space-y-2">
-                                    {filteredConcepts.map(c => (
-                                        <button
-                                            key={c.id}
-                                            onClick={() => handleSelectConcept(c.id, c.concept)}
-                                            className="w-full text-left p-4 hover:bg-amber-50 dark:hover:bg-amber-500/5 rounded-2xl transition-colors group flex items-center justify-between"
-                                        >
-                                            <div className="flex flex-col">
-                                                <span className="font-black text-slate-800 dark:text-slate-200 group-hover:text-amber-600 transition-colors">{c.concept}</span>
-                                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{c.category} • {c.subcategory}</span>
-                                            </div>
-                                            <span className="material-symbols-outlined text-gray-300 group-hover:text-amber-500 translate-x-2 group-hover:translate-x-0 transition-all opacity-0 group-hover:opacity-100">arrow_forward</span>
-                                        </button>
-                                    ))}
-                                    {filteredConcepts.length === 0 && (
-                                        <p className="p-4 text-center text-gray-400 text-sm italic">No se encontraron conceptos que coincidan.</p>
+                        {/* Filtros de Materia */}
+                        <div className="flex gap-1.5 overflow-x-auto pb-2 custom-scrollbar">
+                            {categories.map((cat, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={`px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+                                        selectedCategory === cat
+                                            ? 'bg-primary text-white shadow-sm'
+                                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800 hover:border-primary/30'
+                                    }`}
+                                >
+                                    {cat === 'all' ? 'Todas las Materias' : cat}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Lista de Conceptos Filtrados */}
+                        <div className="space-y-2 max-h-[580px] overflow-y-auto pr-1 custom-scrollbar">
+                            {filteredConcepts.map(concept => (
+                                <div
+                                    key={concept.id}
+                                    onClick={() => setSelectedConcept(concept)}
+                                    className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                                        activeConcept?.id === concept.id
+                                            ? 'bg-primary/5 dark:bg-primary/10 border-primary shadow-sm'
+                                            : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-slate-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+                                            {concept.category}
+                                        </span>
+                                        <span className="text-[10px] text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                                            {concept.id}
+                                        </span>
+                                    </div>
+                                    <h4 className="font-black text-slate-900 dark:text-white text-sm mb-1">
+                                        {concept.concept}
+                                    </h4>
+                                    {concept.regulation && (
+                                        <p className="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-xs">gavel</span>
+                                            <span className="truncate">{concept.regulation}</span>
+                                        </p>
                                     )}
                                 </div>
+                            ))}
+
+                            {filteredConcepts.length === 0 && (
+                                <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                    <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">search_off</span>
+                                    <p className="text-sm font-bold text-slate-500">No encontramos conceptos con ese criterio.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Panel Derecho: Detalle de Normativa Aplicada y Caso Real */}
+                    <div className="lg:col-span-7 space-y-6">
+                        {activeConcept ? (
+                            <>
+                                {/* Tarjeta de Normativa Legal */}
+                                <section className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
+                                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                                        <div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                {activeConcept.category} {activeConcept.subcategory ? `· ${activeConcept.subcategory}` : ''}
+                                            </span>
+                                            <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                                                {activeConcept.concept}
+                                            </h2>
+                                        </div>
+                                        <button
+                                            onClick={() => navigate(`/app/concept/${activeConcept.id}`)}
+                                            className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-3 rounded-2xl transition-all flex items-center gap-1 text-xs font-bold"
+                                            title="Ver Ficha Técnica Completa"
+                                        >
+                                            <span className="material-symbols-outlined text-base">visibility</span>
+                                            <span>Ficha Completa</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Regulación Legal */}
+                                    <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/20 mb-6">
+                                        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 text-xs font-black uppercase tracking-wider mb-2">
+                                            <span className="material-symbols-outlined text-base">gavel</span>
+                                            <span>Normativa Legal Vigente</span>
+                                        </div>
+                                        <p className="text-base font-bold text-slate-900 dark:text-white">
+                                            {activeConcept.regulation || 'Normativa general y doctrina aplicable.'}
+                                        </p>
+                                    </div>
+
+                                    {/* Definición Dogmática */}
+                                    <div className="mb-6">
+                                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-2">
+                                            Definición Dogmática
+                                        </h3>
+                                        <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed font-medium">
+                                            {activeConcept.definitionSimple}
+                                        </p>
+                                    </div>
+
+                                    {/* Aplicación Real / Caso Práctico */}
+                                    {activeConcept.realExample && (
+                                        <div className="p-6 rounded-2xl bg-blue-50/70 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-900/40">
+                                            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 text-xs font-black uppercase tracking-wider mb-3">
+                                                <span className="material-symbols-outlined text-base">lightbulb</span>
+                                                <span>Aplicación Real & Caso Práctico</span>
+                                            </div>
+                                            <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed italic">
+                                                "{activeConcept.realExample}"
+                                            </p>
+                                        </div>
+                                    )}
+                                </section>
+
+                                {/* Elementos Dogmáticos de Grado */}
+                                {activeConcept.keyPoints && activeConcept.keyPoints.length > 0 && (
+                                    <section className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
+                                        <div className="flex items-center gap-2.5 mb-5">
+                                            <span className="material-symbols-outlined text-primary text-xl">fact_check</span>
+                                            <h3 className="text-sm font-black uppercase tracking-wider">
+                                                Puntos y Requisitos Clave para el Examen
+                                            </h3>
+                                        </div>
+                                        <div className="grid sm:grid-cols-2 gap-2.5">
+                                            {activeConcept.keyPoints.map((pt, pIdx) => (
+                                                <div key={pIdx} className="flex items-start gap-2 text-xs text-slate-300 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                                    <span className="material-symbols-outlined text-emerald-400 text-sm shrink-0 mt-0.5">check_circle</span>
+                                                    <span>{pt}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                            </>
+                        ) : (
+                            <div className="bg-white dark:bg-slate-900 p-16 rounded-3xl border border-slate-100 dark:border-slate-800 text-center">
+                                <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">menu_book</span>
+                                <h3 className="text-xl font-bold dark:text-white mb-2">Selecciona un concepto</h3>
+                                <p className="text-sm text-slate-500">Selecciona un concepto de la lista izquierda para consultar su normativa y aplicación real.</p>
                             </div>
                         )}
                     </div>
-
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20 animate-pulse">
-                            <div className="size-16 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin mb-4"></div>
-                            <p className="text-amber-600 font-black uppercase tracking-widest text-xs">Generando Informe Pro...</p>
-                        </div>
-                    ) : selectedReport ? (
-                        <div className="grid lg:grid-cols-12 gap-8 animate-in zoom-in-95 duration-500">
-                            <div className="lg:col-span-8 space-y-8">
-                                <section className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-gray-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
-                                        <span className="material-symbols-outlined text-[120px] dark:text-white">description</span>
-                                    </div>
-
-                                    <div className="flex items-center justify-between gap-4 mb-8">
-                                        <div className="flex items-center gap-4">
-                                            <div className="size-12 rounded-2xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
-                                                <span className="material-symbols-outlined">gavel</span>
-                                            </div>
-                                            <div>
-                                                <h2 className="text-2xl font-black dark:text-white">{selectedReport.concept_name}</h2>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-amber-600">Informe de Jurisprudencia Revisada</p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={toggleSave}
-                                            disabled={selectedReport.id === 'temp'}
-                                            className={`p-4 rounded-2xl transition-all ${isSaved
-                                                ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
-                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-amber-500 disabled:opacity-50'}`}
-                                        >
-                                            <span className={`material-symbols-outlined ${isSaved ? 'fill-1' : ''}`}>bookmark</span>
-                                        </button>
-                                    </div>
-
-                                    <div className="prose dark:prose-invert max-w-none">
-                                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap text-lg">
-                                            {selectedReport.report}
-                                        </p>
-                                    </div>
-                                </section>
-                            </div>
-
-                            <div className="lg:col-span-4 space-y-6">
-                                <section className="bg-slate-900 dark:bg-slate-800 text-white p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
-                                    <div className="absolute -top-10 -right-10 size-40 bg-amber-500/20 rounded-full blur-3xl group-hover:bg-amber-500/30 transition-colors"></div>
-
-                                    <div className="flex items-center gap-3 mb-6 relative">
-                                        <div className="size-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-amber-500 text-2xl">insights</span>
-                                        </div>
-                                        <h2 className="text-lg font-black uppercase tracking-tight">Análisis de Aplicación</h2>
-                                    </div>
-
-                                    <div className="relative">
-                                        <p className="text-slate-300 leading-relaxed font-medium text-sm whitespace-pre-wrap">
-                                            {selectedReport.analysis}
-                                        </p>
-                                    </div>
-
-                                    <div className="mt-8 pt-6 border-t border-white/10 relative">
-                                        <div className="flex items-center gap-2 text-amber-500 mb-2">
-                                            <span className="material-symbols-outlined text-sm">auto_awesome</span>
-                                            <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Sugerencia Estratégica</p>
-                                        </div>
-                                        <p className="text-xs text-slate-400 italic">Este análisis considera las tendencias actuales de los tribunales superiores de justicia chilena.</p>
-                                    </div>
-                                </section>
-
-                                <div className="p-8 bg-amber-50 dark:bg-amber-500/5 rounded-[2.5rem] border-2 border-dashed border-amber-200 dark:border-amber-500/20 text-center">
-                                    <span className="material-symbols-outlined text-amber-500 text-4xl mb-4">library_add</span>
-                                    <h3 className="font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Guarda en Biblioteca</h3>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">Guarda este informe para tenerlo disponible sin conexión y acceder rápidamente desde tu perfil.</p>
-                                    <button
-                                        onClick={toggleSave}
-                                        disabled={selectedReport.id === 'temp'}
-                                        className="w-full py-4 bg-white dark:bg-slate-900 border-2 border-amber-500 text-amber-500 font-black text-xs rounded-2xl hover:bg-amber-500 hover:text-white transition-all shadow-lg shadow-amber-500/10 uppercase tracking-widest disabled:opacity-50"
-                                    >
-                                        {isSaved ? 'Ya en Biblioteca' : 'Agregar ahora'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center py-32 text-center">
-                            <div className="size-24 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center mb-6">
-                                <span className="material-symbols-outlined text-5xl text-slate-200 dark:text-slate-800">search_off</span>
-                            </div>
-                            <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-2">Selecciona un concepto</h2>
-                            <p className="text-slate-500 max-w-sm mx-auto">Comienza buscando cualquier concepto jurídico para visualizar su informe de jurisprudencia revisada.</p>
-                        </div>
-                    )}
-                </>
+                </div>
             )}
         </div>
-
-
     );
 };
 

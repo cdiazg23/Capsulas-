@@ -15,7 +15,7 @@ const Pricing: React.FC = () => {
             features: [
                 '1,154 conceptos dogmáticos con artículos del Código',
                 'Flashcards con repetición espaciada y marcado de dominio',
-                'Jurisprudencia revisada de tribunales superiores',
+                'Normativa aplicada y casos de aplicación real',
                 'Aula Iuris: Masterclasses en video',
                 'Quizzes interactivos y cálculo de XP',
                 'Mi Biblioteca y seguimiento de progreso'
