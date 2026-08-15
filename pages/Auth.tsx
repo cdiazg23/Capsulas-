@@ -140,7 +140,7 @@ const Auth: React.FC = () => {
 
       {/* Columna Izquierda: Decorativa */}
       <div className="relative hidden lg:flex items-center justify-center overflow-hidden bg-slate-900 dark:bg-slate-950 p-20 transition-colors duration-300">
-        <div className="absolute inset-0 z-0 bg-cover bg-center opacity-30 mix-blend-overlay" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1200")' }}></div>
+        <div className="absolute inset-0 z-0 bg-cover bg-center opacity-25 mix-blend-overlay" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200")' }}></div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px] -mr-32 -mt-32"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-gold/10 rounded-full blur-[100px] -ml-32 -mb-32"></div>
 

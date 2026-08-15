@@ -3,10 +3,54 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useConcepts } from '../contexts';
 
+const HERO_BOT_PREVIEWS = [
+  {
+    question: "¿Cuáles son los requisitos de la Tradición en el Derecho Civil chileno?",
+    regulation: "Art. 670 Código Civil",
+    answer: "La **Tradición** es un modo de adquirir el dominio derivativo a título singular o universal. Exige la concurrencia copulativa de 4 requisitos:",
+    keyPoints: [
+      "Tradente dueño con facultad de transferir",
+      "Adquirente con capacidad de goce y ejercicio",
+      "Consentimiento libre de vicios de ambas partes",
+      "Título translaticio de dominio válido (compraventa, donación)",
+      "Entrega material o ficta de la cosa"
+    ],
+    conceptId: "CIV-002",
+    conceptName: "Tradición"
+  },
+  {
+    question: "¿Cuál es la diferencia dogmática entre Dolo y Culpa?",
+    regulation: "Art. 44 Código Civil",
+    answer: "El **dolo** consiste en la intención positiva de inferir injuria o daño a la persona o propiedad de otro. La **culpa** es la falta de diligencia o cuidado debido sin propósito malicioso.",
+    keyPoints: [
+      "Dolo: intencionalidad dañosa (no se gradúa)",
+      "Culpa: negligencia (grave, leve, levísima)",
+      "El dolo debe probarse salvo norma expresa",
+      "La culpa contractual se presume"
+    ],
+    conceptId: "CIV-015",
+    conceptName: "Dolo vs Culpa"
+  },
+  {
+    question: "¿En qué consiste el Recurso de Apelación y sus plazos?",
+    regulation: "Art. 186 y 189 CPC",
+    answer: "Es un recurso ordinario interpuesto por la parte agraviada por una resolución judicial, con el objeto de que el tribunal superior jerárquico la enmiende conforme a derecho.",
+    keyPoints: [
+      "Plazo general: 5 días hábiles",
+      "Plazo sentencias definitivas: 10 días",
+      "Efectos: suspensivo y devolutivo",
+      "Debe contener fundamentos de hecho y derecho"
+    ],
+    conceptId: "PROC-004",
+    conceptName: "Recurso de Apelación"
+  }
+];
+
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeBotIndex, setActiveBotIndex] = useState(0);
   const { concepts } = useConcepts();
 
   useEffect(() => {
@@ -21,15 +65,15 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-primary/10 selection:text-primary">
       <Helmet>
         <title>IurisAcademy | Domina el Derecho con Inteligencia Artificial</title>
-        <meta name="description" content="La plataforma educativa definitiva para estudiantes de Derecho. Domina conceptos legales con gamificación, flashcards y resúmenes técnicos." />
-        <meta name="keywords" content="derecho, academia legal, estudio juridico, chile, iurisacademy, flashcards legales" />
+        <meta name="description" content="La plataforma educativa definitiva para estudiantes y egresados de Derecho en Chile. Glosario dogmático, IurisBot con IA, flashcards y preparación de examen de grado." />
+        <meta name="keywords" content="derecho, academia legal, examen de grado chile, iurisacademy, flashcards legales, iurisbot, codigo civil, cpc" />
       </Helmet>
 
       {/* Navigation */}
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'py-3' : 'py-6'} `}>
         <div className="max-w-7xl mx-auto px-6">
-          <nav className={`flex items-center justify-between px-6 py-3 rounded-2xl transition-all duration-300 ${scrolled ? 'glass shadow-lg border-slate-200' : 'bg-transparent border-transparent'} `}>
-            <div className="flex items-center gap-2 group cursor-pointer">
+          <nav className={`flex items-center justify-between px-6 py-3 rounded-2xl transition-all duration-300 ${scrolled ? 'glass shadow-lg border-slate-200 bg-white/90 backdrop-blur-md' : 'bg-transparent border-transparent'} `}>
+            <div className="flex items-center gap-2.5 group cursor-pointer" onClick={() => navigate('/')}>
               <div className="bg-primary text-white size-10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:rotate-12 transition-transform">
                 <span className="material-symbols-outlined text-2xl">balance</span>
               </div>
@@ -39,13 +83,17 @@ const LandingPage: React.FC = () => {
             </div>
 
             <div className="hidden md:flex items-center gap-8">
-              <button onClick={() => navigate('/pricing')} className="text-sm font-bold text-slate-600 hover:text-primary transition-colors flex items-center gap-2">
+              <a href="#iurisbot" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-primary text-base">smart_toy</span>
+                IurisBot IA
+              </a>
+              <button onClick={() => navigate('/pricing')} className="text-sm font-bold text-slate-600 hover:text-primary transition-colors flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-lg text-primary">credit_card</span>
-                Ver Planes
+                Planes
               </button>
+              <a href="#ecosistema" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">Ecosistema</a>
               <a href="#comunidad" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">Comunidad</a>
             </div>
-
 
             <div className="flex items-center gap-3">
               <button onClick={() => navigate('/login')} className="hidden sm:block text-sm font-bold text-slate-700 hover:bg-slate-100 px-5 py-2.5 rounded-xl transition-all">
@@ -75,92 +123,253 @@ const LandingPage: React.FC = () => {
                   </span>
                   <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
                     <span className="size-1.5 bg-primary rounded-full"></span>
-                    Academia Legal 2.0
+                    IurisBot IA Tutor Jurídico 24/7
                   </span>
                   <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
                     <span className="size-1.5 bg-emerald-500 rounded-full"></span>
-                    IA Hecha por Abogados para Estudiantes
+                    Ecosistema Legal Seis · Por Carlos Díaz
                   </span>
-
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Hero Section */}
-        <section className="relative pt-16 pb-24 overflow-hidden">
+        {/* Hero Section con IurisBot Showcase Interactivo */}
+        <section className="relative pt-14 pb-24 overflow-hidden bg-gradient-to-b from-white via-slate-50/50 to-white">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 mb-8">
-                  <span className="material-symbols-outlined text-sm text-primary">verified</span>
-                  <span className="text-[12px] font-bold text-primary uppercase tracking-wider">Acceso Premium Ilimitado</span>
+            <div className="grid lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+              
+              {/* Columna Izquierda: Mensaje Principal */}
+              <div className="lg:col-span-6">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/15 mb-6">
+                  <span className="material-symbols-outlined text-sm text-primary">auto_awesome</span>
+                  <span className="text-[11px] font-black text-primary uppercase tracking-wider">Tutor IA + 1,154 Conceptos Legales</span>
                 </div>
 
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.05] mb-8">
-                  Prueba IurisAcademy <br />
-                  <span className="text-primary italic">Gratis por 3 días</span>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.08] mb-6 tracking-tight">
+                  Domina tu Grado con <br />
+                  <span className="text-primary italic">Inteligencia Artificial</span>
                 </h1>
 
-                <p className="text-xl text-slate-600 leading-relaxed mb-10 max-w-xl">
-                  Accede sin límites a materias, biblioteca, flashcards, aula y comunidad en una sola plataforma diseñada para dominar el Derecho.
+                <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-xl">
+                  Accede a <strong>IurisBot</strong> (tu tutor jurídico 24/7), flashcards de repetición espaciada, jurisprudencia y cuestionarios diseñados para memorizar y razonar el Derecho en Chile.
                 </p>
 
-
-                <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
+                <div className="flex flex-col sm:flex-row items-center gap-4 mb-10">
                   <button
                     onClick={() => navigate('/login', { state: { mode: 'signup' } })}
-                    className="group relative bg-primary text-white px-10 py-5 rounded-[2rem] text-lg font-black shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-all overflow-hidden"
+                    className="w-full sm:w-auto bg-primary text-white px-9 py-4 rounded-2xl text-base font-black shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all text-center"
                   >
-                    Activar Prueba Gratis
+                    Activar Prueba Gratis (3 Días)
                   </button>
-                  <button onClick={() => navigate('/pricing')} className="w-full sm:w-auto flex items-center justify-center gap-3 border-2 border-slate-200 px-10 py-5 rounded-2xl text-lg font-bold text-slate-700 hover:bg-slate-50 transition-all group">
-                    <span className="material-symbols-outlined text-primary group-hover:scale-125 transition-transform">credit_card</span>
+                  <button
+                    onClick={() => navigate('/pricing')}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2.5 border-2 border-slate-200 px-8 py-4 rounded-2xl text-base font-bold text-slate-700 hover:bg-slate-50 transition-all group"
+                  >
+                    <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">credit_card</span>
                     Ver Planes
                   </button>
                 </div>
 
-
-                <div className="flex items-center gap-6 p-4 bg-white/60 rounded-2xl border border-white max-w-max">
+                <div className="flex items-center gap-6 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm max-w-max">
                   <div className="flex -space-x-3">
                     {[1, 2, 3].map(i => (
-                      <img key={i} src={`https://i.pravatar.cc/100?img=${i + 20}`} className="size-10 rounded-full border-2 border-white" alt="User" />
+                      <img key={i} src={`https://i.pravatar.cc/100?img=${i + 25}`} className="size-10 rounded-full border-2 border-white" alt="User" />
                     ))}
-                  </div >
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">100% de los módulos abiertos</p>
-                    <p className="text-xs text-slate-500">Únete a cientos de estudiantes premium</p>
                   </div>
-                </div >
-
-              </div >
-
-              <div className="relative">
-                <div className="bg-white p-4 rounded-[3rem] shadow-2xl border border-white rotate-2 animate-float">
-                  <img
-                    src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=800"
-                    className="rounded-[2.5rem] w-full object-cover h-[500px]"
-                    alt="Law Student"
-                  />
-
-                  {/* Floating Message */}
-                  <div className="absolute top-10 -right-6 glass p-5 rounded-3xl shadow-xl border border-white max-w-[220px]">
-                    <div className="flex gap-3">
-                      <div className="size-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0">
-                        <span className="material-symbols-outlined text-xl">chat</span>
-                      </div>
-                      <p className="text-xs font-medium text-slate-700 leading-tight">
-                        "El Glosario me salvó en el examen de Civil, ¡lo recomiendo 100%!"
-                      </p>
-
-                    </div>
+                  <div>
+                    <p className="text-xs font-black text-slate-900">Más de 14.000 estudiantes</p>
+                    <p className="text-[11px] text-slate-500 font-medium">Comunidad activa de @capsulasdederecho</p>
                   </div>
                 </div>
               </div>
-            </div >
-          </div >
-        </section >
+
+              {/* Columna Derecha: Mockup Interactivo de IurisBot */}
+              <div className="lg:col-span-6 relative">
+                <div className="bg-slate-900 rounded-[2.5rem] p-6 md:p-8 shadow-2xl border border-slate-800 text-white relative overflow-hidden">
+                  {/* Glow Effects */}
+                  <div className="absolute -top-20 -right-20 size-56 bg-primary/25 rounded-full blur-[80px] pointer-events-none"></div>
+                  <div className="absolute -bottom-20 -left-20 size-56 bg-accent-gold/15 rounded-full blur-[80px] pointer-events-none"></div>
+
+                  {/* Header de IurisBot */}
+                  <div className="flex items-center justify-between pb-5 mb-5 border-b border-slate-800 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="size-11 bg-primary/20 rounded-2xl flex items-center justify-center text-primary border border-primary/40 shadow-lg shadow-primary/20">
+                        <span className="material-symbols-outlined text-2xl">smart_toy</span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-white text-base tracking-tight">IurisBot PRO</span>
+                          <span className="bg-primary/30 text-primary-light text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider border border-primary/40">TUTOR IA</span>
+                        </div>
+                        <p className="text-[11px] text-emerald-400 font-medium flex items-center gap-1.5 mt-0.5">
+                          <span className="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                          Base dogmática chilena indexada
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-800/90 px-3 py-1 rounded-xl">Demo en Vivo</span>
+                  </div>
+
+                  {/* Selector de Consultas de Ejemplo */}
+                  <div className="mb-5 relative z-10">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5">Haz clic para probar una consulta:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {HERO_BOT_PREVIEWS.map((item, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setActiveBotIndex(idx)}
+                          className={`text-xs px-3.5 py-1.5 rounded-xl font-bold transition-all ${
+                            activeBotIndex === idx
+                              ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-102'
+                              : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/50'
+                          }`}
+                        >
+                          {item.conceptName}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Conversación Simulada */}
+                  <div className="space-y-4 relative z-10">
+                    {/* Pregunta del Usuario */}
+                    <div className="flex justify-end">
+                      <div className="bg-primary text-white text-xs md:text-sm font-semibold p-3.5 rounded-2xl rounded-tr-none max-w-[88%] shadow-md">
+                        {HERO_BOT_PREVIEWS[activeBotIndex].question}
+                      </div>
+                    </div>
+
+                    {/* Respuesta de IurisBot */}
+                    <div className="flex justify-start">
+                      <div className="bg-slate-800/95 border border-slate-700/80 text-slate-200 text-xs md:text-sm p-4 rounded-2xl rounded-tl-none max-w-[96%] space-y-2.5 shadow-xl backdrop-blur-sm">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-accent-gold border-b border-slate-700/60 pb-2">
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-sm">menu_book</span>
+                            {HERO_BOT_PREVIEWS[activeBotIndex].regulation}
+                          </span>
+                          <span className="text-slate-400 text-[10px]">Derecho Chileno</span>
+                        </div>
+
+                        <p className="leading-relaxed text-slate-300">
+                          {HERO_BOT_PREVIEWS[activeBotIndex].answer}
+                        </p>
+
+                        <div className="pt-2 border-t border-slate-700/40">
+                          <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Requisitos / Elementos de Grado:</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                            {HERO_BOT_PREVIEWS[activeBotIndex].keyPoints.map((pt, pIdx) => (
+                              <div key={pIdx} className="flex items-center gap-1.5 text-[11px] text-slate-300">
+                                <span className="material-symbols-outlined text-emerald-400 text-xs shrink-0">check_circle</span>
+                                <span className="truncate">{pt}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer de la Tarjeta */}
+                  <div className="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between text-xs relative z-10">
+                    <span className="text-slate-400 text-[11px]">¿Tienes dudas de tus ramos?</span>
+                    <button
+                      onClick={() => navigate('/login', { state: { mode: 'signup' } })}
+                      className="text-primary-light hover:text-white font-bold inline-flex items-center gap-1 text-[11px] uppercase tracking-wider hover:underline"
+                    >
+                      <span>Preguntarle a IurisBot</span>
+                      <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Badge flotante inferior */}
+                <div className="hidden sm:flex absolute -bottom-4 -left-4 bg-white text-slate-900 p-3.5 rounded-2xl shadow-xl border border-slate-100 items-center gap-3">
+                  <div className="size-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-lg">psychology</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-black">RAG Jurídico Especializado</p>
+                    <p className="text-[10px] text-slate-500">Respuestas fundamentadas con artículos</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* Sección Especial: IurisBot PRO Tutor con IA */}
+        <section id="iurisbot" className="py-24 bg-slate-950 text-white relative overflow-hidden border-t border-slate-800">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[140px] pointer-events-none"></div>
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary-light text-xs font-black uppercase tracking-widest mb-4">
+                <span className="material-symbols-outlined text-sm">smart_toy</span>
+                Inteligencia Artificial Especializada
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 tracking-tight">
+                Conoce a <span className="text-primary italic">IurisBot PRO</span>
+              </h2>
+              <p className="text-slate-400 text-base md:text-lg leading-relaxed">
+                Tu tutor jurídico disponible las 24 horas del día. Diseñado específicamente para resolver dudas dogmáticas, fundamentar con artículos del Código y prepararte para tus interrogaciones.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              <div className="bg-slate-900/80 border border-slate-800 p-8 rounded-3xl hover:border-primary/50 transition-all group">
+                <div className="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">psychology</span>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-white">Explicación Dogmática</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Desglosa instituciones complejas de Derecho Civil, Procesal y Constitucional en explicaciones claras y pedagógicas.
+                </p>
+              </div>
+
+              <div className="bg-slate-900/80 border border-slate-800 p-8 rounded-3xl hover:border-primary/50 transition-all group">
+                <div className="size-14 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">menu_book</span>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-white">Contexto Normativo</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Cita y conecta cada respuesta con los artículos vigentes de los Códigos de la República y la doctrina más respetada.
+                </p>
+              </div>
+
+              <div className="bg-slate-900/80 border border-slate-800 p-8 rounded-3xl hover:border-primary/50 transition-all group">
+                <div className="size-14 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">touch_app</span>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-white">Fichas en 1 Clic</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Genera accesos directos automáticos a las fichas completas, flashcards y resúmenes de cada concepto mencionado.
+                </p>
+              </div>
+
+              <div className="bg-slate-900/80 border border-slate-800 p-8 rounded-3xl hover:border-primary/50 transition-all group">
+                <div className="size-14 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">record_voice_over</span>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-white">Simulador de Grado</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Pídele que te interrogue o te plantee casos prácticos para medir tu dominio antes de rendir tu examen final.
+                </p>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <button
+                onClick={() => navigate('/login', { state: { mode: 'signup' } })}
+                className="bg-primary text-white px-10 py-4 rounded-2xl font-black text-base shadow-xl shadow-primary/25 hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-2"
+              >
+                <span>Probar IurisBot en la Prueba Gratuita</span>
+                <span className="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </section>
 
         {/* Public Search Section */}
         <section className="py-24 bg-slate-50 relative overflow-hidden">
@@ -168,7 +377,7 @@ const LandingPage: React.FC = () => {
             <div className="text-center mb-16">
               <h2 className="text-primary font-bold uppercase tracking-[0.2em] text-sm mb-4">Glosario Jurídico Chile</h2>
               <p className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Busca conceptos ahora</p>
-              <p className="text-slate-500 max-w-2xl mx-auto">Prueba nuestro buscador gratuito. Accede a definiciones técnicas de más de 1,100 conceptos clave para tu carrera.</p>
+              <p className="text-slate-500 max-w-2xl mx-auto">Prueba nuestro buscador gratuito. Accede a definiciones técnicas de más de 1,154 conceptos clave para tu carrera.</p>
             </div>
 
             <div className="max-w-3xl mx-auto mb-12">
@@ -176,7 +385,7 @@ const LandingPage: React.FC = () => {
                 <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary size-6 transition-colors flex items-center justify-center font-black">search</span>
                 <input
                   type="text"
-                  placeholder="Ej: Recurso de Casación, Dominio, Femicidio..."
+                  placeholder="Ej: Recurso de Casación, Dominio, Femicidio, Tradición..."
                   className="w-full h-18 pl-14 pr-6 bg-white border-2 border-slate-100 rounded-[2rem] focus:border-primary focus:ring-4 focus:ring-primary/10 text-lg shadow-xl shadow-slate-200/50 transition-all outline-none"
                   onChange={(e) => setSearchTerm(e.target.value)}
                   value={searchTerm}
@@ -247,7 +456,7 @@ const LandingPage: React.FC = () => {
                   No es solo una lista de términos. Es un ecosistema completo con niveles, XP, y seguimiento de progreso diseñado por abogados para el ritmo de estudio actual.
                 </p>
                 <ul className="space-y-4 mb-10">
-                  {['Gamificación competitiva', 'Estadísticas de estudio personalizadas', 'Flashcards interactivas', 'Acceso a Masterclasses exclusivas'].map((item, i) => (
+                  {['Tutor Jurídico IurisBot 24/7', 'Gamificación competitiva y rachas', 'Estadísticas de estudio personalizadas', 'Flashcards con repetición espaciada'].map((item, i) => (
                     <li key={i} className="flex items-center gap-3 text-slate-700 font-bold">
                       <span className="material-symbols-outlined text-primary">check_circle</span>
                       {item}
@@ -289,8 +498,8 @@ const LandingPage: React.FC = () => {
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Actividad Reciente</p>
                       {[
                         { icon: 'task_alt', title: 'Concepto Dominado', detail: 'Recurso de Queja' },
-                        { icon: 'quiz', title: 'Quiz Completado', detail: 'Derecho Civil +50 XP' },
-                        { icon: 'grade', title: 'Nueva Insignia', detail: 'Constitucionalista Jr.' },
+                        { icon: 'smart_toy', title: 'IurisBot Consultado', detail: 'Tradición y Título' },
+                        { icon: 'quiz', title: 'Quiz Completado', detail: 'Derecho Civil +60 XP' },
                       ].map((item, i) => (
                         <div key={i} className="flex items-center gap-3 p-3 bg-white border border-slate-50 rounded-xl shadow-sm">
                           <div className="size-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
@@ -318,7 +527,7 @@ const LandingPage: React.FC = () => {
         </section>
 
         {/* Sección de Beneficios Detallada */}
-        < section className="py-24 bg-slate-900 text-white relative overflow-hidden" >
+        <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
             <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary rounded-full blur-[120px]"></div>
           </div>
@@ -351,11 +560,10 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </section >
-
+        </section>
 
         {/* CTA TikTok / Comunidad */}
-        < section id="comunidad" className="py-32 bg-white" >
+        <section id="comunidad" className="py-32 bg-white">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div className="order-2 lg:order-1">
@@ -390,14 +598,13 @@ const LandingPage: React.FC = () => {
                   <button onClick={() => navigate('/login', { state: { mode: 'signup' } })} className="bg-primary text-white px-8 py-4 rounded-2xl font-bold text-center shadow-lg shadow-primary/20 hover:scale-105 transition-all">Empezar Prueba Gratis</button>
                   <button onClick={() => navigate('/login')} className="text-slate-900 px-8 py-4 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all text-center">Acceso Miembros</button>
                 </div>
-
               </div>
             </div>
           </div>
-        </section >
+        </section>
 
         {/* Ecosistema Legal Seis */}
-        <section className="py-20 bg-slate-900 text-white border-t border-slate-800">
+        <section id="ecosistema" className="py-20 bg-slate-900 text-white border-t border-slate-800">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <span className="text-primary text-xs font-black uppercase tracking-[0.3em] block mb-3">Suite LegalTech Chile</span>
