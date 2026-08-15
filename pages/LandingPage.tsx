@@ -582,7 +582,7 @@ const LandingPage: React.FC = () => {
               <span className="text-primary text-xs font-black uppercase tracking-[0.3em] block mb-3">Suite LegalTech Chile</span>
               <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">El Ecosistema Legal Seis</h2>
               <p className="text-slate-400 text-base leading-relaxed">
-                Herramientas creadas por <strong className="text-white">Carlos Díaz</strong> y diseñadas con la máxima rigurosidad jurídica para optimizar la consulta normativa y el estudio del Derecho.
+                Herramientas creadas por <strong className="text-white">Legal Seis</strong> y diseñadas con la máxima rigurosidad jurídica para optimizar la consulta normativa y el estudio del Derecho.
               </p>
             </div>
 
