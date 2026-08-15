@@ -13,7 +13,7 @@ const Pricing: React.FC = () => {
             interval: 'cada 3 meses',
             description: 'Ideal para quienes preparan un ciclo específico o semestre.',
             features: [
-                '1,154 conceptos dogmáticos con artículos del Código',
+                '1,154 conceptos jurídicos con artículos del Código',
                 'Flashcards con repetición espaciada y marcado de dominio',
                 'Normativa aplicada y casos de aplicación real',
                 'Aula Iuris: Masterclasses en video',

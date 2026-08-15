@@ -48,7 +48,7 @@ const HERO_CONCEPT_PREVIEWS = [
 const PLATFORM_MODULES = [
   {
     icon: "library_books",
-    title: "Glosario Dogmático",
+    title: "Glosario Jurídico",
     badge: "1,154 Conceptos",
     description: "Definiciones jurídicas precisas, artículos del Código y ejemplos prácticos clasificados en Civil, Procesal, Constitucional y más."
   },
@@ -68,7 +68,7 @@ const PLATFORM_MODULES = [
     icon: "school",
     title: "Aula Iuris",
     badge: "Masterclasses",
-    description: "Módulos y clases magistrales en video sobre los temas dogmáticos más exigentes del examen de grado."
+    description: "Módulos y clases magistrales en video sobre materias jurídicas clave del examen de grado."
   },
   {
     icon: "quiz",
@@ -103,7 +103,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-primary/10 selection:text-primary">
       <Helmet>
         <title>IurisAcademy | Domina el Derecho para tu Examen de Grado</title>
-        <meta name="description" content="La plataforma de estudio y preparación jurídica integral en Chile. 1,154 conceptos dogmáticos, flashcards interactivas, normativa aplicada y masterclasses." />
+        <meta name="description" content="La plataforma de estudio y preparación jurídica integral en Chile. 1,154 conceptos jurídicos, flashcards interactivas, normativa aplicada y masterclasses." />
         <meta name="keywords" content="derecho chile, examen de grado derecho, glosario juridico, flashcards derecho, codigo civil chile, cpc chile, iurisacademy" />
       </Helmet>
 
@@ -163,7 +163,7 @@ const LandingPage: React.FC = () => {
                   </span>
                   <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
                     <span className="size-1.5 bg-primary rounded-full"></span>
-                    1,154 Conceptos Dogmáticos Indexados
+                    1,154 Conceptos Jurídicos Indexados
                   </span>
                   <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
                     <span className="size-1.5 bg-emerald-500 rounded-full"></span>
@@ -193,7 +193,7 @@ const LandingPage: React.FC = () => {
                 </h1>
 
                 <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-xl">
-                  Accede a más de <strong>1,154 conceptos dogmáticos</strong> con artículos de los Códigos de Chile, flashcards con repetición espaciada, normativa aplicada y clases magistrales de examen de grado.
+                  Accede a más de <strong>1,154 conceptos jurídicos</strong> con artículos de los Códigos de Chile, flashcards con repetición espaciada, normativa aplicada y clases magistrales de examen de grado.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 mb-10">
@@ -322,8 +322,8 @@ const LandingPage: React.FC = () => {
                     <span className="material-symbols-outlined text-lg">school</span>
                   </div>
                   <div>
-                    <p className="text-xs font-black">Base Dogmática Nacional</p>
-                    <p className="text-[10px] text-slate-500">Actualizada con normativa y doctrina vigente</p>
+                    <p className="text-xs font-black">Base Jurídica Nacional</p>
+                    <p className="text-[10px] text-slate-500">Con artículos de los Códigos de Chile y ejemplos reales</p>
                   </div>
                 </div>
               </div>
@@ -464,7 +464,7 @@ const LandingPage: React.FC = () => {
                   No es solo una lista de términos. Es un ecosistema completo con niveles, XP, y seguimiento de progreso diseñado por abogados para el ritmo de estudio actual.
                 </p>
                 <ul className="space-y-4 mb-10">
-                  {['1,154 conceptos dogmáticos con artículos del Código', 'Gamificación competitiva y rachas diarias', 'Estadísticas de estudio personalizadas', 'Flashcards con repetición espaciada y marcado de dominio'].map((item, i) => (
+                  {['1,154 conceptos jurídicos con artículos del Código', 'Gamificación competitiva y rachas diarias', 'Estadísticas de estudio personalizadas', 'Flashcards con repetición espaciada y marcado de dominio'].map((item, i) => (
                     <li key={i} className="flex items-center gap-3 text-slate-700 font-bold">
                       <span className="material-symbols-outlined text-primary">check_circle</span>
                       {item}

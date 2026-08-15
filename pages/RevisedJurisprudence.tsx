@@ -173,14 +173,14 @@ const RevisedJurisprudence: React.FC = () => {
                                             <span>Normativa Legal Vigente</span>
                                         </div>
                                         <p className="text-base font-bold text-slate-900 dark:text-white">
-                                            {activeConcept.regulation || 'Normativa general y doctrina aplicable.'}
+                                            {activeConcept.regulation || 'Normativa general y código aplicable.'}
                                         </p>
                                     </div>
 
-                                    {/* Definición Dogmática */}
+                                    {/* Definición Jurídica */}
                                     <div className="mb-6">
                                         <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-2">
-                                            Definición Dogmática
+                                            Definición Jurídica
                                         </h3>
                                         <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed font-medium">
                                             {activeConcept.definitionSimple}
@@ -201,7 +201,7 @@ const RevisedJurisprudence: React.FC = () => {
                                     )}
                                 </section>
 
-                                {/* Elementos Dogmáticos de Grado */}
+                                {/* Elementos Clave de Grado */}
                                 {activeConcept.keyPoints && activeConcept.keyPoints.length > 0 && (
                                     <section className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
                                         <div className="flex items-center gap-2.5 mb-5">
